@@ -1,0 +1,14 @@
+/project_root
+├── /config
+│   └── conn.php
+├── /layout
+│   ├── header.php
+│   ├── navbar.php
+│   ├── menubar.php
+│   └── footer.php
+├── /pages
+│   └── admin_dashboard.php
+├── /styles
+│   └── admin_dashboard.css
+├── index.php
+└── login.php

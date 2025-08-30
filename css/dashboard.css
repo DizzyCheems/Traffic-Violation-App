@@ -1,0 +1,43 @@
+.table-responsive {
+    margin-bottom: 20px;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.table-primary {
+    background-color: #e7f1ff;
+}
+
+h2, h3 {
+    color: #333;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.modal-content {
+    border-radius: 8px;
+}
+
+.form-select, .form-control {
+    border-radius: 4px;
+}
+
+.breadcrumb {
+    font-weight: bold;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
