@@ -315,86 +315,37 @@ try {
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
+        <!-- Toggle button for offcanvas sidebar (mobile only) -->
+        <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+            <i class="fas fa-bars"></i> Menu
+        </button>
         <div class="row">
-            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <!-- Sidebar (visible on desktop, offcanvas on mobile) -->
+            <nav class="col-lg-2 d-none d-lg-block bg-light sidebar">
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="../pages/admin_dashboard.php">
+                            <a class="nav-link active" href="../pages/officer_dashboard.php">
                                 <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
+                                Officer Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/issue_violation.php">
+                                <i class="fas fa-ticket-alt me-2"></i>
+                                Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_violations.php">
+                                <i class="fas fa-list-alt me-2"></i>
+                                Manage Violations
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/manage_users.php">
                                 <i class="fas fa-users me-2"></i>
                                 Manage Users
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/issue_violation.php">
-                                <i class="fas fa-exclamation-circle me-2"></i>
-                                Issue Violation
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/monitor_violations.php">
-                                <i class="fas fa-list me-2"></i>
-                                Monitor Violations
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/violation_report.php">
-                                <i class="fas fa-chart-bar me-2"></i>
-                                Violation Reports
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/violation_heatmap.php">
-                                <i class="fas fa-map-marked-alt me-2"></i>
-                                Violation Heatmap
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/set_fines.php">
-                                <i class="fas fa-dollar-sign me-2"></i>
-                                Set Fines
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_concerns.php">
-                                <i class="fas fa-comment-dots me-2"></i>
-                                Manage Complaints
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/officer_performance.php">
-                                <i class="fas fa-star me-2"></i>
-                                Officer Performance
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/audit_log.php">
-                                <i class="fas fa-file-alt me-2"></i>
-                                Audit Log
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/holiday_rules.php">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Holiday Rules
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/appeal_workflow.php">
-                                <i class="fas fa-gavel me-2"></i>
-                                Appeal Workflow
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/database_backup.php">
-                                <i class="fas fa-database me-2"></i>
-                                Database Backup
                             </a>
                         </li>
                         <li class="nav-item">
@@ -412,7 +363,54 @@ try {
                     </ul>
                 </div>
             </nav>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="offcanvas offcanvas-start sidebar d-lg-none" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/officer_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Officer Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/issue_violation.php">
+                                <i class="fas fa-ticket-alt me-2"></i>
+                                Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_violations.php">
+                                <i class="fas fa-list-alt me-2"></i>
+                                Manage Violations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_users.php">
+                                <i class="fas fa-users me-2"></i>
+                                Manage Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Main content -->
+            <main class="col-12 col-md-9 col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Officer Dashboard - <?php echo htmlspecialchars($officer['full_name']); ?></h1>
                     <div>
@@ -534,499 +532,451 @@ try {
                                     <div class="mb-3">
                                         <a href="#" class="text-decoration-none link-primary">Add Details & Photos</a>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">🚔 Submit Electronic Citation</button>
-                                </form>
+                                        <button type="submit" class="btn btn-primary">🚔 Submit Electronic Citation</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Patrol Map</h5>
+                                    <p class="card-text"><a href="#" class="text-decoration-none link-primary">🗺️ View Active Patrol Zone</a></p>
+                                    <p class="card-text">📍 Your location is being tracked</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">Patrol Map</h5>
-                                <p class="card-text"><a href="#" class="text-decoration-none link-primary">🗺️ View Active Patrol Zone</a></p>
-                                <p class="card-text">📍 Your location is being tracked</p>
+
+                    <!-- Urgent Items -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0">Urgent Items</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <?php if (empty($urgent_items)): ?>
+                                    <li class="text-muted">No urgent items found</li>
+                                <?php else: ?>
+                                    <?php foreach ($urgent_items as $item): ?>
+                                        <li>
+                                            #<?php echo htmlspecialchars($item['type'][0] . '-' . $item['id']); ?> - 
+                                            <?php echo htmlspecialchars($item['title']); ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Violation Types Section -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0">Violation Types</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Urgent Items -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Urgent Items</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled">
-                            <?php if (empty($urgent_items)): ?>
-                                <li class="text-muted">No urgent items found</li>
-                            <?php else: ?>
-                                <?php foreach ($urgent_items as $item): ?>
-                                    <li>
-                                        #<?php echo htmlspecialchars($item['type'][0] . '-' . $item['id']); ?> - 
-                                        <?php echo htmlspecialchars($item['title']); ?>
-                                    </li>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Violation Types Section -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Violation Types</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Violation Type</th>
-                                        <th>Fine Amount</th>
-                                        <th>Description</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($types)): ?>
-                                        <tr><td colspan="5" class="text-center text-muted">No violation types found</td></tr>
-                                    <?php else: ?>
-                                        <?php foreach ($types as $type): ?>
-                                            <tr class="table-row-hover">
-                                                <td><?php echo htmlspecialchars($type['id']); ?></td>
-                                                <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
-                                                <td><?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
-                                                <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
-                                                    <form method="POST" style="display:inline;" class="delete-violation-type-form" data-id="<?php echo $type['id']; ?>" data-violation-type="<?php echo htmlspecialchars($type['violation_type']); ?>">
-                                                        <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
-                                                        <button type="submit" name="delete_violation_type" class="btn btn-sm btn-danger">Delete</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                            <!-- Edit Violation Type Modal -->
-                                            <div class="modal fade" id="editViolationTypeModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="editViolationTypeModalLabel<?php echo $type['id']; ?>" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="editViolationTypeModalLabel<?php echo $type['id']; ?>">Edit Violation Type: <?php echo htmlspecialchars($type['violation_type']); ?></h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form method="POST" class="form-outline edit-violation-type-form">
-                                                                <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
-                                                                <div class="mb-3">
-                                                                    <input type="text" class="form-control" name="violation_type" id="violation_type_<?php echo $type['id']; ?>" required value="<?php echo htmlspecialchars($type['violation_type']); ?>" maxlength="100" />
-                                                                    <label class="form-label" for="violation_type_<?php echo $type['id']; ?>">Violation Type (max 100 characters)</label>
-                                                                    <div class="invalid-feedback">Please enter a valid violation type (1-100 characters).</div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount_<?php echo $type['id']; ?>" required value="<?php echo htmlspecialchars($type['fine_amount']); ?>" />
-                                                                    <label class="form-label" for="fine_amount_<?php echo $type['id']; ?>">Fine Amount</label>
-                                                                    <div class="invalid-feedback">Please enter a valid non-negative number.</div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <textarea class="form-control" name="description" id="description_<?php echo $type['id']; ?>" rows="4"><?php echo htmlspecialchars($type['description'] ?: ''); ?></textarea>
-                                                                    <label class="form-label" for="description_<?php echo $type['id']; ?>">Description</label>
-                                                                </div>
-                                                                <button type="submit" name="edit_violation_type" class="btn btn-primary">Update Violation Type</button>
-                                                            </form>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Violation Type</th>
+                                            <th>Fine Amount</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (empty($types)): ?>
+                                            <tr><td colspan="5" class="text-center text-muted">No violation types found</td></tr>
+                                        <?php else: ?>
+                                            <?php foreach ($types as $type): ?>
+                                                <tr class="table-row-hover">
+                                                    <td><?php echo htmlspecialchars($type['id']); ?></td>
+                                                    <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
+                                                    <td><?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
+                                                    <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
+                                                        <form method="POST" style="display:inline;" class="delete-violation-type-form" data-id="<?php echo $type['id']; ?>" data-violation-type="<?php echo htmlspecialchars($type['violation_type']); ?>">
+                                                            <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
+                                                            <button type="submit" name="delete_violation_type" class="btn btn-sm btn-danger">Delete</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                <!-- Edit Violation Type Modal -->
+                                                <div class="modal fade" id="editViolationTypeModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="editViolationTypeModalLabel<?php echo $type['id']; ?>" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="editViolationTypeModalLabel<?php echo $type['id']; ?>">Edit Violation Type: <?php echo htmlspecialchars($type['violation_type']); ?></h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form method="POST" class="form-outline edit-violation-type-form">
+                                                                    <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
+                                                                    <div class="mb-3">
+                                                                        <input type="text" class="form-control" name="violation_type" id="violation_type_<?php echo $type['id']; ?>" required value="<?php echo htmlspecialchars($type['violation_type']); ?>" maxlength="100" />
+                                                                        <label class="form-label" for="violation_type_<?php echo $type['id']; ?>">Violation Type (max 100 characters)</label>
+                                                                        <div class="invalid-feedback">Please enter a valid violation type (1-100 characters).</div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount_<?php echo $type['id']; ?>" required value="<?php echo htmlspecialchars($type['fine_amount']); ?>" />
+                                                                        <label class="form-label" for="fine_amount_<?php echo $type['id']; ?>">Fine Amount</label>
+                                                                        <div class="invalid-feedback">Please enter a valid non-negative number.</div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <textarea class="form-control" name="description" id="description_<?php echo $type['id']; ?>" rows="4"><?php echo htmlspecialchars($type['description'] ?: ''); ?></textarea>
+                                                                        <label class="form-label" for="description_<?php echo $type['id']; ?>">Description</label>
+                                                                    </div>
+                                                                    <button type="submit" name="edit_violation_type" class="btn btn-primary">Update Violation Type</button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Users with Violations Section -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Users with Violations</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerUserModal">Register New User</button>
-                            <button class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#issueViolationModal">Issue Violation</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Username</th>
-                                        <th>Full Name</th>
-                                        <th>Violation Count</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($users)): ?>
-                                        <tr><td colspan="5" class="text-center text-muted">No users found</td></tr>
-                                    <?php else: ?>
-                                        <?php foreach ($users as $user): ?>
-                                            <tr class="table-row-hover">
-                                                <td><?php echo htmlspecialchars($user['id']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['violation_count']); ?></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#issueViolationModal<?php echo $user['id']; ?>">Issue Violation</button>
-                                                </td>
-                                            </tr>
-                                            <!-- Per-User Issue Violation Modal -->
-                                            <div class="modal fade" id="issueViolationModal<?php echo $user['id']; ?>" tabindex="-1" aria-labelledby="issueViolationModalLabel<?php echo $user['id']; ?>" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="issueViolationModalLabel<?php echo $user['id']; ?>">Issue Violation for <?php echo htmlspecialchars($user['full_name']); ?></h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form method="POST" class="form-outline issue-violation-form">
-                                                                <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                                                <div class="mb-3">
-                                                                    <input type="text" class="form-control" name="violator_name" id="violator_name_<?php echo $user['id']; ?>" required value="<?php echo htmlspecialchars($user['full_name']); ?>" />
-                                                                    <label class="form-label" for="violator_name_<?php echo $user['id']; ?>">Violator Name</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="text" class="form-control" name="plate_number" id="plate_number_<?php echo $user['id']; ?>" required />
-                                                                    <label class="form-label" for="plate_number_<?php echo $user['id']; ?>">Plate Number</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="text" class="form-control" name="reason" id="reason_<?php echo $user['id']; ?>" required />
-                                                                    <label class="form-label" for="reason_<?php echo $user['id']; ?>">Reason</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <select class="form-select" name="violation_type_id" id="violation_type_id_<?php echo $user['id']; ?>" required>
-                                                                        <option value="">Select Violation Type</option>
-                                                                        <?php if (empty($types)): ?>
-                                                                            <option value="">No violation types available</option>
-                                                                        <?php else: ?>
-                                                                            <?php foreach ($types as $type): ?>
-                                                                                <option value="<?php echo $type['id']; ?>"><?php echo htmlspecialchars($type['violation_type']); ?></option>
-                                                                            <?php endforeach; ?>
-                                                                        <?php endif; ?>
-                                                                    </select>
-                                                                    <label class="form-label" for="violation_type_id_<?php echo $user['id']; ?>">Violation Type</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <div class="form-check">
-                                                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license_<?php echo $user['id']; ?>" />
-                                                                        <label class="form-check-label" for="has_license_<?php echo $user['id']; ?>">Has License</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="text" class="form-control" name="license_number" id="license_number_<?php echo $user['id']; ?>" />
-                                                                    <label class="form-label" for="license_number_<?php echo $user['id']; ?>">License Number</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <div class="form-check">
-                                                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded_<?php echo $user['id']; ?>" />
-                                                                        <label class="form-check-label" for="is_impounded_<?php echo $user['id']; ?>">Is Impounded</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <div class="form-check">
-                                                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid_<?php echo $user['id']; ?>" />
-                                                                        <label class="form-check-label" for="is_paid_<?php echo $user['id']; ?>">Is Paid</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="text" class="form-control" name="or_number" id="or_number_<?php echo $user['id']; ?>" />
-                                                                    <label class="form-label" for="or_number_<?php echo $user['id']; ?>">OR Number</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date_<?php echo $user['id']; ?>" value="<?php echo date('Y-m-d\TH:i'); ?>" />
-                                                                    <label class="form-label" for="issued_date_<?php echo $user['id']; ?>">Issued Date</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <select class="form-select" name="status" id="status_<?php echo $user['id']; ?>">
-                                                                        <option value="Pending" selected>Pending</option>
-                                                                        <option value="Resolved">Resolved</option>
-                                                                        <option value="Disputed">Disputed</option>
-                                                                    </select>
-                                                                    <label class="form-label" for="status_<?php echo $user['id']; ?>">Status</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <textarea class="form-control" name="notes" id="notes_<?php echo $user['id']; ?>" rows="4"></textarea>
-                                                                    <label class="form-label" for="notes_<?php echo $user['id']; ?>">Notes</label>
-                                                                </div>
-                                                                <button type="submit" name="issue_violation" class="btn btn-primary">Issue Violation</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Register User Modal -->
-                <div class="modal fade" id="registerUserModal" tabindex="-1" aria-labelledby="registerUserModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="registerUserModalLabel">Register New User</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" class="form-outline" id="registerUserForm">
-                                    <input type="hidden" name="register_user" value="1">
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="username" id="username" required />
-                                        <label class="form-label" for="username">Username</label>
-                                        <div class="invalid-feedback">Please enter a valid username.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="full_name" id="full_name" required />
-                                        <label class="form-label" for="full_name">Full Name</label>
-                                        <div class="invalid-feedback">Please enter a valid full name.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="password" class="form-control" name="password" id="password" required />
-                                        <label class="form-label" for="password">Password</label>
-                                        <div class="invalid-feedback">Please enter a password.</div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Register User</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- General Issue Violation Modal -->
-                <div class="modal fade" id="issueViolationModal" tabindex="-1" aria-labelledby="issueViolationModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="issueViolationModalLabel">Issue New Violation</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" class="form-outline issue-violation-form">
-                                    <div class="mb-3">
-                                        <select class="form-select" name="user_id" id="user_id" required>
-                                            <option value="">Select User</option>
-                                            <?php foreach ($users as $user): ?>
-                                                <option value="<?php echo $user['id']; ?>"><?php echo htmlspecialchars($user['full_name']); ?> (<?php echo htmlspecialchars($user['username']); ?>)</option>
                                             <?php endforeach; ?>
-                                        </select>
-                                        <label class="form-label" for="user_id">User</label>
-                                        <div class="invalid-feedback">Please select a user.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="violator_name" id="violator_name" required />
-                                        <label class="form-label" for="violator_name">Violator Name</label>
-                                        <div class="invalid-feedback">Please enter a violator name.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="plate_number" id="plate_number" required />
-                                        <label class="form-label" for="plate_number">Plate Number</label>
-                                        <div class="invalid-feedback">Please enter a plate number.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="reason" id="reason" required />
-                                        <label class="form-label" for="reason">Reason</label>
-                                        <div class="invalid-feedback">Please enter a reason.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <select class="form-select" name="violation_type_id" id="violation_type_id" required>
-                                            <option value="">Select Violation Type</option>
-                                            <?php if (empty($types)): ?>
-                                                <option value="">No violation types available</option>
-                                            <?php else: ?>
-                                                <?php foreach ($types as $type): ?>
-                                                    <option value="<?php echo $type['id']; ?>"><?php echo htmlspecialchars($type['violation_type']); ?></option>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users with Violations Section -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0">Users with Violations</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerUserModal">Register New User</button>
+                                <button class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#issueViolationModal">Issue Violation</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Full Name</th>
+                                            <th>Violation Count</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (empty($users)): ?>
+                                            <tr><td colspan="5" class="text-center text-muted">No users found</td></tr>
+                                        <?php else: ?>
+                                            <?php foreach ($users as $user): ?>
+                                                <tr class="table-row-hover">
+                                                    <td><?php echo htmlspecialchars($user['id']); ?></td>
+                                                    <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                                    <td><?php echo htmlspecialchars($user['full_name']); ?></td>
+                                                    <td><?php echo htmlspecialchars($user['violation_count']); ?></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#issueViolationModal<?php echo $user['id']; ?>">Issue Violation</button>
+                                                    </td>
+                                                </tr>
+                                                <!-- Per-User Issue Violation Modal -->
+                                                <div class="modal fade" id="issueViolationModal<?php echo $user['id']; ?>" tabindex="-1" aria-labelledby="issueViolationModalLabel<?php echo $user['id']; ?>" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="issueViolationModalLabel<?php echo $user['id']; ?>">Issue Violation for <?php echo htmlspecialchars($user['full_name']); ?></h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form method="POST" class="form-outline issue-violation-form">
+                                                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                                                    <div class="mb-3">
+                                                                        <input type="text" class="form-control" name="violator_name" id="violator_name_<?php echo $user['id']; ?>" required value="<?php echo htmlspecialchars($user['full_name']); ?>" />
+                                                                        <label class="form-label" for="violator_name_<?php echo $user['id']; ?>">Violator Name</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <input type="text" class="form-control" name="plate_number" id="plate_number_<?php echo $user['id']; ?>" required />
+                                                                        <label class="form-label" for="plate_number_<?php echo $user['id']; ?>">Plate Number</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <input type="text" class="form-control" name="reason" id="reason_<?php echo $user['id']; ?>" required />
+                                                                        <label class="form-label" for="reason_<?php echo $user['id']; ?>">Reason</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <select class="form-select" name="violation_type_id" id="violation_type_id_<?php echo $user['id']; ?>" required>
+                                                                            <option value="">Select Violation Type</option>
+                                                                            <?php if (empty($types)): ?>
+                                                                                <option value="">No violation types available</option>
+                                                                            <?php else: ?>
+                                                                                <?php foreach ($types as $type): ?>
+                                                                                    <option value="<?php echo $type['id']; ?>"><?php echo htmlspecialchars($type['violation_type']); ?></option>
+                                                                                <?php endforeach; ?>
+                                                                            <?php endif; ?>
+                                                                        </select>
+                                                                        <label class="form-label" for="violation_type_id_<?php echo $user['id']; ?>">Violation Type</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox" class="form-check-input" name="has_license" id="has_license_<?php echo $user['id']; ?>" />
+                                                                            <label class="form-check-label" for="has_license_<?php echo $user['id']; ?>">Has License</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <input type="text" class="form-control" name="license_number" id="license_number_<?php echo $user['id']; ?>" />
+                                                                        <label class="form-label" for="license_number_<?php echo $user['id']; ?>">License Number</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded_<?php echo $user['id']; ?>" />
+                                                                            <label class="form-check-label" for="is_impounded_<?php echo $user['id']; ?>">Is Impounded</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <div class="form-check">
+                                                                            <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid_<?php echo $user['id']; ?>" />
+                                                                            <label class="form-check-label" for="is_paid_<?php echo $user['id']; ?>">Is Paid</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <input type="text" class="form-control" name="or_number" id="or_number_<?php echo $user['id']; ?>" />
+                                                                        <label class="form-label" for="or_number_<?php echo $user['id']; ?>">OR Number</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <input type="datetime-local" class="form-control" name="issued_date" id="issued_date_<?php echo $user['id']; ?>" value="<?php echo date('Y-m-d\TH:i'); ?>" />
+                                                                        <label class="form-label" for="issued_date_<?php echo $user['id']; ?>">Issued Date</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <select class="form-select" name="status" id="status_<?php echo $user['id']; ?>">
+                                                                            <option value="Pending" selected>Pending</option>
+                                                                            <option value="Resolved">Resolved</option>
+                                                                            <option value="Disputed">Disputed</option>
+                                                                        </select>
+                                                                        <label class="form-label" for="status_<?php echo $user['id']; ?>">Status</label>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <textarea class="form-control" name="notes" id="notes_<?php echo $user['id']; ?>" rows="4"></textarea>
+                                                                        <label class="form-label" for="notes_<?php echo $user['id']; ?>">Notes</label>
+                                                                    </div>
+                                                                    <button type="submit" name="issue_violation" class="btn btn-primary">Issue Violation</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Register User Modal -->
+                    <div class="modal fade" id="registerUserModal" tabindex="-1" aria-labelledby="registerUserModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="registerUserModalLabel">Register New User</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST" class="form-outline" id="registerUserForm">
+                                        <input type="hidden" name="register_user" value="1">
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="username" id="username" required />
+                                            <label class="form-label" for="username">Username</label>
+                                            <div class="invalid-feedback">Please enter a valid username.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="full_name" id="full_name" required />
+                                            <label class="form-label" for="full_name">Full Name</label>
+                                            <div class="invalid-feedback">Please enter a valid full name.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="password" class="form-control" name="password" id="password" required />
+                                            <label class="form-label" for="password">Password</label>
+                                            <div class="invalid-feedback">Please enter a password.</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Register User</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General Issue Violation Modal -->
+                    <div class="modal fade" id="issueViolationModal" tabindex="-1" aria-labelledby="issueViolationModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="issueViolationModalLabel">Issue New Violation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST" class="form-outline issue-violation-form">
+                                        <div class="mb-3">
+                                            <select class="form-select" name="user_id" id="user_id" required>
+                                                <option value="">Select User</option>
+                                                <?php foreach ($users as $user): ?>
+                                                    <option value="<?php echo $user['id']; ?>"><?php echo htmlspecialchars($user['full_name']); ?> (<?php echo htmlspecialchars($user['username']); ?>)</option>
                                                 <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                        <label class="form-label" for="violation_type_id">Violation Type</label>
-                                        <div class="invalid-feedback">Please select a violation type.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" name="has_license" id="has_license" />
-                                            <label class="form-check-label" for="has_license">Has License</label>
+                                            </select>
+                                            <label class="form-label" for="user_id">User</label>
+                                            <div class="invalid-feedback">Please select a user.</div>
                                         </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="license_number" id="license_number" />
-                                        <label class="form-label" for="license_number">License Number</label>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded" />
-                                            <label class="form-check-label" for="is_impounded">Is Impounded</label>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="violator_name" id="violator_name" required />
+                                            <label class="form-label" for="violator_name">Violator Name</label>
+                                            <div class="invalid-feedback">Please enter a violator name.</div>
                                         </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid" />
-                                            <label class="form-check-label" for="is_paid">Is Paid</label>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="plate_number" id="plate_number" required />
+                                            <label class="form-label" for="plate_number">Plate Number</label>
+                                            <div class="invalid-feedback">Please enter a plate number.</div>
                                         </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="or_number" id="or_number" />
-                                        <label class="form-label" for="or_number">OR Number</label>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>" />
-                                        <label class="form-label" for="issued_date">Issued Date</label>
-                                    </div>
-                                    <div class="mb-3">
-                                        <select class="form-select" name="status" id="status">
-                                            <option value="Pending" selected>Pending</option>
-                                            <option value="Resolved">Resolved</option>
-                                            <option value="Disputed">Disputed</option>
-                                        </select>
-                                        <label class="form-label" for="status">Status</label>
-                                    </div>
-                                    <div class="mb-3">
-                                        <textarea class="form-control" name="notes" id="notes" rows="4"></textarea>
-                                        <label class="form-label" for="notes">Notes</label>
-                                    </div>
-                                    <button type="submit" name="issue_violation" class="btn btn-primary">Issue Violation</button>
-                                </form>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="reason" id="reason" required />
+                                            <label class="form-label" for="reason">Reason</label>
+                                            <div class="invalid-feedback">Please enter a reason.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <select class="form-select" name="violation_type_id" id="violation_type_id" required>
+                                                <option value="">Select Violation Type</option>
+                                                <?php if (empty($types)): ?>
+                                                    <option value="">No violation types available</option>
+                                                <?php else: ?>
+                                                    <?php foreach ($types as $type): ?>
+                                                        <option value="<?php echo $type['id']; ?>"><?php echo htmlspecialchars($type['violation_type']); ?></option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                            <label class="form-label" for="violation_type_id">Violation Type</label>
+                                            <div class="invalid-feedback">Please select a violation type.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" name="has_license" id="has_license" />
+                                                <label class="form-check-label" for="has_license">Has License</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="license_number" id="license_number" />
+                                            <label class="form-label" for="license_number">License Number</label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded" />
+                                                <label class="form-check-label" for="is_impounded">Is Impounded</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid" />
+                                                <label class="form-check-label" for="is_paid">Is Paid</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="or_number" id="or_number" />
+                                            <label class="form-label" for="or_number">OR Number</label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>" />
+                                            <label class="form-label" for="issued_date">Issued Date</label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <select class="form-select" name="status" id="status">
+                                                <option value="Pending" selected>Pending</option>
+                                                <option value="Resolved">Resolved</option>
+                                                <option value="Disputed">Disputed</option>
+                                            </select>
+                                            <label class="form-label" for="status">Status</label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <textarea class="form-control" name="notes" id="notes" rows="4"></textarea>
+                                            <label class="form-label" for="notes">Notes</label>
+                                        </div>
+                                        <button type="submit" name="issue_violation" class="btn btn-primary">Issue Violation</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Create Violation Type Modal -->
-                <div class="modal fade" id="createViolationTypeModal" tabindex="-1" aria-labelledby="createViolationTypeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createViolationTypeModalLabel">Create New Violation Type</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" class="form-outline" id="createViolationTypeForm">
-                                    <input type="hidden" name="create_violation_type" value="1">
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control" name="violation_type" id="violation_type" required maxlength="100" />
-                                        <label class="form-label" for="violation_type">Violation Type (max 100 characters)</label>
-                                        <div class="invalid-feedback">Please enter a valid violation type (1-100 characters).</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount" required />
-                                        <label class="form-label" for="fine_amount">Fine Amount</label>
-                                        <div class="invalid-feedback">Please enter a valid non-negative number.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <textarea class="form-control" name="description" id="description" rows="4"></textarea>
-                                        <label class="form-label" for="description">Description</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Create Violation Type</button>
-                                </form>
+                    <!-- Create Violation Type Modal -->
+                    <div class="modal fade" id="createViolationTypeModal" tabindex="-1" aria-labelledby="createViolationTypeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="createViolationTypeModalLabel">Create New Violation Type</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST" class="form-outline" id="createViolationTypeForm">
+                                        <input type="hidden" name="create_violation_type" value="1">
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" name="violation_type" id="violation_type" required maxlength="100" />
+                                            <label class="form-label" for="violation_type">Violation Type (max 100 characters)</label>
+                                            <div class="invalid-feedback">Please enter a valid violation type (1-100 characters).</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount" required />
+                                            <label class="form-label" for="fine_amount">Fine Amount</label>
+                                            <div class="invalid-feedback">Please enter a valid non-negative number.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <textarea class="form-control" name="description" id="description" rows="4"></textarea>
+                                            <label class="form-label" for="description">Description</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Create Violation Type</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
-    </div>
-    <?php include '../layout/footer.php'; ?>
-    <script>
-        // Initialize Toastr
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            positionClass: 'toast-top-right',
-            timeOut: 5000
-        };
+        <?php include '../layout/footer.php'; ?>
+        <script>
+            // Initialize Toastr
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: 'toast-top-right',
+                timeOut: 5000
+            };
 
-        // Display Toastr messages
-        <?php foreach ($toastr_messages as $msg): ?>
-            <?php echo $msg; ?>
-        <?php endforeach; ?>
+            // Display Toastr messages
+            <?php foreach ($toastr_messages as $msg): ?>
+                <?php echo $msg; ?>
+            <?php endforeach; ?>
 
-        // Client-side validation for Create Violation Type Form
-        document.getElementById('createViolationTypeForm').addEventListener('submit', function(e) {
-            console.log('Create violation type form submission attempted');
-            const violationType = document.getElementById('violation_type').value.trim();
-            const fineAmount = document.getElementById('fine_amount').value.trim();
-
-            let isValid = true;
-
-            // Reset validation states
-            document.getElementById('violation_type').classList.remove('is-invalid');
-            document.getElementById('fine_amount').classList.remove('is-invalid');
-
-            if (!violationType || violationType.length > 100) {
-                document.getElementById('violation_type').classList.add('is-invalid');
-                isValid = false;
-            }
-
-            if (!fineAmount || isNaN(fineAmount) || parseFloat(fineAmount) < 0) {
-                document.getElementById('fine_amount').classList.add('is-invalid');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                console.log('Client-side validation failed for create violation type');
-                e.preventDefault();
-                return;
-            }
-
-            // SweetAlert2 confirmation
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to create this violation type?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, create it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Create violation type form submission confirmed');
-                    this.submit();
-                } else {
-                    console.log('Create violation type form submission canceled');
-                }
-            });
-        });
-
-        // Client-side validation for Edit Violation Type Forms
-        document.querySelectorAll('.edit-violation-type-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Edit violation type form submission attempted');
-                const violationType = this.querySelector('input[name="violation_type"]').value.trim();
-                const fineAmount = this.querySelector('input[name="fine_amount"]').value.trim();
+            // Client-side validation for Create Violation Type Form
+            document.getElementById('createViolationTypeForm').addEventListener('submit', function(e) {
+                console.log('Create violation type form submission attempted');
+                const violationType = document.getElementById('violation_type').value.trim();
+                const fineAmount = document.getElementById('fine_amount').value.trim();
 
                 let isValid = true;
 
                 // Reset validation states
-                this.querySelector('input[name="violation_type"]').classList.remove('is-invalid');
-                this.querySelector('input[name="fine_amount"]').classList.remove('is-invalid');
+                document.getElementById('violation_type').classList.remove('is-invalid');
+                document.getElementById('fine_amount').classList.remove('is-invalid');
 
                 if (!violationType || violationType.length > 100) {
-                    this.querySelector('input[name="violation_type"]').classList.add('is-invalid');
+                    document.getElementById('violation_type').classList.add('is-invalid');
                     isValid = false;
                 }
 
                 if (!fineAmount || isNaN(fineAmount) || parseFloat(fineAmount) < 0) {
-                    this.querySelector('input[name="fine_amount"]').classList.add('is-invalid');
+                    document.getElementById('fine_amount').classList.add('is-invalid');
                     isValid = false;
                 }
 
                 if (!isValid) {
-                    console.log('Client-side validation failed for edit violation type');
+                    console.log('Client-side validation failed for create violation type');
                     e.preventDefault();
                     return;
                 }
@@ -1035,91 +985,139 @@ try {
                 e.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you want to update this violation type?',
+                    text: 'Do you want to create this violation type?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, update it!',
+                    confirmButtonText: 'Yes, create it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        console.log('Edit violation type form submission confirmed');
+                        console.log('Create violation type form submission confirmed');
                         this.submit();
                     } else {
-                        console.log('Edit violation type form submission canceled');
+                        console.log('Create violation type form submission canceled');
                     }
                 });
             });
-        });
 
-        // SweetAlert2 for Delete Violation Type Forms
-        document.querySelectorAll('.delete-violation-type-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const violationType = this.getAttribute('data-violation-type');
-                console.log(`Delete violation type form submission attempted for ID: ${this.getAttribute('data-id')}, Violation Type: ${violationType}`);
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: `Do you want to delete the violation type "${violationType}"? This action cannot be undone.`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        console.log(`Delete confirmed for violation type: ${violationType}`);
-                        this.submit();
-                    } else {
-                        console.log(`Delete canceled for violation type: ${violationType}`);
+            // Client-side validation for Edit Violation Type Forms
+            document.querySelectorAll('.edit-violation-type-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    console.log('Edit violation type form submission attempted');
+                    const violationType = this.querySelector('input[name="violation_type"]').value.trim();
+                    const fineAmount = this.querySelector('input[name="fine_amount"]').value.trim();
+
+                    let isValid = true;
+
+                    // Reset validation states
+                    this.querySelector('input[name="violation_type"]').classList.remove('is-invalid');
+                    this.querySelector('input[name="fine_amount"]').classList.remove('is-invalid');
+
+                    if (!violationType || violationType.length > 100) {
+                        this.querySelector('input[name="violation_type"]').classList.add('is-invalid');
+                        isValid = false;
                     }
+
+                    if (!fineAmount || isNaN(fineAmount) || parseFloat(fineAmount) < 0) {
+                        this.querySelector('input[name="fine_amount"]').classList.add('is-invalid');
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        console.log('Client-side validation failed for edit violation type');
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // SweetAlert2 confirmation
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'Do you want to update this violation type?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, update it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Edit violation type form submission confirmed');
+                            this.submit();
+                        } else {
+                            console.log('Edit violation type form submission canceled');
+                        }
+                    });
                 });
             });
-        });
 
-        // SweetAlert2 for Register User Form
-        document.getElementById('registerUserForm').addEventListener('submit', function(e) {
-            console.log('Register user form submission attempted');
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to register this user?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, register!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Register user form submission confirmed');
-                    this.submit();
-                } else {
-                    console.log('Register user form submission canceled');
-                }
+            // SweetAlert2 for Delete Violation Type Forms
+            document.querySelectorAll('.delete-violation-type-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const violationType = this.getAttribute('data-violation-type');
+                    console.log(`Delete violation type form submission attempted for ID: ${this.getAttribute('data-id')}, Violation Type: ${violationType}`);
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `Do you want to delete the violation type "${violationType}"? This action cannot be undone.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log(`Delete confirmed for violation type: ${violationType}`);
+                            this.submit();
+                        } else {
+                            console.log(`Delete canceled for violation type: ${violationType}`);
+                        }
+                    });
+                });
             });
-        });
 
-        // SweetAlert2 for Issue Violation Forms
-        document.querySelectorAll('.issue-violation-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Issue violation form submission attempted');
+            // SweetAlert2 for Register User Form
+            document.getElementById('registerUserForm').addEventListener('submit', function(e) {
+                console.log('Register user form submission attempted');
                 e.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you want to issue this violation?',
+                    text: 'Do you want to register this user?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, issue it!',
+                    confirmButtonText: 'Yes, register!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        console.log('Issue violation form submission confirmed');
+                        console.log('Register user form submission confirmed');
                         this.submit();
                     } else {
-                        console.log('Issue violation form submission canceled');
+                        console.log('Register user form submission canceled');
                     }
                 });
             });
-        });
-    </script>
-</body>
-</html>
+
+            // SweetAlert2 for Issue Violation Forms
+            document.querySelectorAll('.issue-violation-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    console.log('Issue violation form submission attempted');
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'Do you want to issue this violation?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, issue it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Issue violation form submission confirmed');
+                            this.submit();
+                        } else {
+                            console.log('Issue violation form submission canceled');
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+    </html>

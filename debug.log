@@ -2011,3 +2011,269 @@ Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown col
 Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
 Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
 Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-01 00:06:25
+Login.php accessed: 2025-09-01 00:13:33
+Login.php accessed: 2025-09-01 00:13:47
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:16:04
+Login.php accessed: 2025-09-01 00:16:09
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-01 00:16:43
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:17:33
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:17:53
+Login.php accessed: 2025-09-01 00:17:58
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Login.php accessed: 2025-09-01 00:18:30
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:20:16
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Login.php accessed: 2025-09-01 00:20:36
+Login.php accessed: 2025-09-01 00:20:36
+Login.php accessed: 2025-09-01 00:20:42
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:23:36
+Login.php accessed: 2025-09-01 00:24:32
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:24:42
+Login.php accessed: 2025-09-01 00:24:46
+Login successful for user_id: 1, role: admin

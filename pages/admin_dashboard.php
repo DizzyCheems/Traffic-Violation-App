@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+error_reporting(0);
+ini_set('display_errors', 0);
+
 // Initialize toastr messages
 $toastr_messages = [];
 
@@ -241,9 +244,210 @@ try {
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
+        <!-- Toggle button for offcanvas sidebar (mobile only) -->
+        <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+            <i class="fas fa-bars"></i> Menu
+        </button>
         <div class="row">
-            <?php include '../layout/menubar.php'; ?>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <!-- Sidebar (visible on desktop, offcanvas on mobile) -->
+            <nav class="col-lg-2 d-none d-lg-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/admin_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_users.php">
+                                <i class="fas fa-users me-2"></i>
+                                Manage Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/issue_violation.php">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/monitor_violations.php">
+                                <i class="fas fa-list me-2"></i>
+                                Monitor Violations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/violation_report.php">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Violation Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/violation_heatmap.php">
+                                <i class="fas fa-map-marked-alt me-2"></i>
+                                Violation Heatmap
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/set_fines.php">
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                Set Fines
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_concerns.php">
+                                <i class="fas fa-comment-dots me-2"></i>
+                                Manage Complaints
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/officer_performance.php">
+                                <i class="fas fa-star me-2"></i>
+                                Officer Performance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/audit_log.php">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Audit Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/holiday_rules.php">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Holiday Rules
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/appeal_workflow.php">
+                                <i class="fas fa-gavel me-2"></i>
+                                Appeal Workflow
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/database_backup.php">
+                                <i class="fas fa-database me-2"></i>
+                                Database Backup
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="offcanvas offcanvas-start sidebar d-lg-none" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/admin_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_users.php">
+                                <i class="fas fa-users me-2"></i>
+                                Manage Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/issue_violation.php">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/monitor_violations.php">
+                                <i class="fas fa-list me-2"></i>
+                                Monitor Violations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/violation_report.php">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Violation Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/violation_heatmap.php">
+                                <i class="fas fa-map-marked-alt me-2"></i>
+                                Violation Heatmap
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/set_fines.php">
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                Set Fines
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_concerns.php">
+                                <i class="fas fa-comment-dots me-2"></i>
+                                Manage Complaints
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/officer_performance.php">
+                                <i class="fas fa-star me-2"></i>
+                                Officer Performance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/audit_log.php">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Audit Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/holiday_rules.php">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Holiday Rules
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/appeal_workflow.php">
+                                <i class="fas fa-gavel me-2"></i>
+                                Appeal Workflow
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/database_backup.php">
+                                <i class="fas fa-database me-2"></i>
+                                Database Backup
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Main content -->
+            <main class="col-12 col-md-9 col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Admin Dashboard</h1>
                     <div>
@@ -265,7 +469,7 @@ try {
                     <div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
-                                <h5 class="card-title text-primary">Total Revenue</h5>
+                                <h5 class="card-title text-primary">Violation Collection</h5>
                                 <p class="card-text">MTD: <?php echo htmlspecialchars($total_revenue); ?></p>
                             </div>
                         </div>
@@ -294,7 +498,7 @@ try {
                     <div class="col-md-6">
                         <div class="card shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title text-primary">Revenue Analytics</h5>
+                                <h5 class="card-title text-primary">Revenue Collection Analytics</h5>
                                 <div class="progress mb-3" style="height: 20px;">
                                     <div class="progress-bar bg-primary" role="progressbar" style="width: <?php echo htmlspecialchars($top_violation_data['percentage'] ?? 0); ?>%;" aria-valuenow="<?php echo htmlspecialchars($top_violation_data['percentage'] ?? 0); ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>

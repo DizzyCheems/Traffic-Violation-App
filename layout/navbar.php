@@ -27,11 +27,11 @@ $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'guest';
                 <?php endif; ?>
                 <?php if ($role !== 'guest'): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="../login.php">Logout</a>
+                        <a class="nav-link" href="../pages/logout.php">Logout</a>
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="../login.php">Login</a>
+                        <a class="nav-link" href="../pages/login.php">Login</a>
                     </li>
                 <?php endif; ?>
             </ul>
