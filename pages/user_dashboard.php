@@ -149,8 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
+        <!-- Toggle button for offcanvas sidebar (mobile only) -->
+        <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+            <i class="fas fa-bars"></i> Menu
+        </button>
         <div class="row">
-            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <!-- Sidebar (visible on desktop, offcanvas on mobile) -->
+            <nav class="col-lg-2 d-none d-lg-block bg-light sidebar">
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -198,7 +203,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                     </ul>
                 </div>
             </nav>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="offcanvas offcanvas-start sidebar d-lg-none" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/user_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/pay_violation.php">
+                                <i class="fas fa-credit-card me-2"></i>
+                                Pay Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#reportConcernModal">
+                                <i class="fas fa-bug me-2"></i>
+                                Report Concern
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#applyAppealModal">
+                                <i class="fas fa-gavel me-2"></i>
+                                Apply for Appeal
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/license_status.php">
+                                <i class="fas fa-id-card me-2"></i>
+                                License Status
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Main content -->
+            <main class="col-12 col-md-9 col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Welcome, <?php echo htmlspecialchars($user['full_name']); ?></h1>
                     <div>
