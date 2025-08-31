@@ -146,51 +146,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
 <!DOCTYPE html>
 <html lang="en">
 <?php include '../layout/header.php'; ?>
-<style>
-    body {
-        padding-top: 56px; /* Adjust for fixed navbar height */
-    }
-    .sidebar {
-        position: fixed;
-        top: 56px; /* Start below navbar */
-        bottom: 0;
-        left: 0;
-        z-index: 100;
-        padding: 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-        overflow-y: auto;
-    }
-    .sidebar-sticky {
-        position: relative;
-        top: 0;
-        height: calc(100vh - 56px); /* Full height minus navbar */
-        padding-top: .5rem;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-    @media (max-width: 767.98px) {
-        .sidebar {
-            position: static;
-            height: auto;
-            padding: 0;
-        }
-        .main-content {
-            padding-top: 0;
-        }
-    }
-</style>
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
         <div class="row">
-            <?php include '../layout/user_menubar.php'; ?>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/user_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/pay_violation.php">
+                                <i class="fas fa-credit-card me-2"></i>
+                                Pay Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#reportConcernModal">
+                                <i class="fas fa-bug me-2"></i>
+                                Report Concern
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#applyAppealModal">
+                                <i class="fas fa-gavel me-2"></i>
+                                Apply for Appeal
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/license_status.php">
+                                <i class="fas fa-id-card me-2"></i>
+                                License Status
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Welcome, <?php echo htmlspecialchars($user['full_name']); ?></h1>
                     <div>
-                        <button class="btn btn-primary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                            <i class="fas fa-bars"></i>
-                        </button>
                         <a href="../index.php" class="btn btn-outline-primary">Back to Home</a>
                     </div>
                 </div>

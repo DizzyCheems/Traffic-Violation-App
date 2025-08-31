@@ -312,110 +312,111 @@ try {
 <!DOCTYPE html>
 <html lang="en">
 <?php include '../layout/header.php'; ?>
-<style>
-    body {
-        padding-top: 56px; /* Adjust for fixed navbar height */
-        transition: padding-left 0.3s ease;
-    }
-    .navbar {
-        z-index: 1030; /* Ensure navbar is above sidebar */
-    }
-    .sidebar {
-        position: fixed;
-        top: 56px; /* Start immediately below navbar */
-        bottom: 0;
-        left: 0;
-        z-index: 1020; /* Below navbar, above content */
-        width: 250px;
-        background-color: #f8f9fa;
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
-        transition: width 0.3s ease, transform 0.3s ease;
-        overflow-y: auto;
-    }
-    .sidebar.minimized {
-        width: 60px;
-    }
-    .sidebar .nav-link {
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        overflow: hidden;
-        padding: 10px 15px;
-        color: #333;
-    }
-    .sidebar .nav-link i {
-        min-width: 24px;
-        margin-right: 10px;
-    }
-    .sidebar.minimized .nav-link span {
-        display: none;
-    }
-    .sidebar-toggle {
-        position: fixed;
-        top: 65px; /* Adjusted to align below navbar */
-        left: 10px;
-        z-index: 1030; /* Same as navbar to ensure visibility */
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-    .main-content {
-        margin-left: 250px;
-        transition: margin-left 0.3s ease;
-        padding-bottom: 20px;
-    }
-    .minimized ~ .main-content {
-        margin-left: 60px;
-    }
-    @media (max-width: 767.98px) {
-        .sidebar {
-            width: 250px;
-            transform: translateX(-100%);
-        }
-        .sidebar.active {
-            transform: translateX(0);
-        }
-        .main-content {
-            margin-left: 0 !important;
-        }
-        .sidebar-toggle {
-            display: block !important;
-        }
-        .sidebar.minimized {
-            width: 250px;
-        }
-        .sidebar.minimized .nav-link span {
-            display: inline;
-        }
-    }
-    .sidebar-sticky {
-        position: relative;
-        top: 0;
-        height: calc(100vh - 56px); /* Full height minus navbar */
-        padding-top: 0.5rem;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-</style>
 <body>
     <?php include '../layout/navbar.php'; ?>
-    <button class="sidebar-toggle d-md-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
     <div class="container-fluid">
         <div class="row">
-            <?php include '../layout/menubar.php'; ?>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 main-content">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/admin_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_users.php">
+                                <i class="fas fa-users me-2"></i>
+                                Manage Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/issue_violation.php">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/monitor_violations.php">
+                                <i class="fas fa-list me-2"></i>
+                                Monitor Violations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/violation_report.php">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Violation Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/violation_heatmap.php">
+                                <i class="fas fa-map-marked-alt me-2"></i>
+                                Violation Heatmap
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/set_fines.php">
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                Set Fines
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_concerns.php">
+                                <i class="fas fa-comment-dots me-2"></i>
+                                Manage Complaints
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/officer_performance.php">
+                                <i class="fas fa-star me-2"></i>
+                                Officer Performance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/audit_log.php">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Audit Log
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/holiday_rules.php">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Holiday Rules
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/appeal_workflow.php">
+                                <i class="fas fa-gavel me-2"></i>
+                                Appeal Workflow
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/database_backup.php">
+                                <i class="fas fa-database me-2"></i>
+                                Database Backup
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Officer Dashboard - <?php echo htmlspecialchars($officer['full_name']); ?></h1>
                     <div>
-                        <button class="btn btn-primary d-none d-md-block" id="desktopSidebarToggle"><i class="fas fa-chevron-left"></i></button>
-                        <a href="../index.php" class="btn btn-outline-primary ms-2">Back to Home</a>
+                        <a href="../index.php" class="btn btn-outline-primary">Back to Home</a>
                     </div>
                 </div>
 
@@ -953,42 +954,6 @@ try {
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
-
-        // Sidebar toggle functionality
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
-
-        // Load sidebar state from localStorage
-        if (localStorage.getItem('sidebarMinimized') === 'true') {
-            sidebar.classList.add('minimized');
-            mainContent.classList.add('minimized');
-            desktopSidebarToggle.querySelector('i').classList.replace('fa-chevron-left', 'fa-chevron-right');
-        }
-
-        // Desktop toggle
-        desktopSidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('minimized');
-            mainContent.classList.toggle('minimized');
-            const isMinimized = sidebar.classList.contains('minimized');
-            desktopSidebarToggle.querySelector('i').classList.toggle('fa-chevron-left', !isMinimized);
-            desktopSidebarToggle.querySelector('i').classList.toggle('fa-chevron-right', isMinimized);
-            localStorage.setItem('sidebarMinimized', isMinimized);
-        });
-
-        // Mobile toggle
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            sidebar.classList.remove('minimized'); // Ensure full view when opened on mobile
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 767.98 && sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
-                sidebar.classList.remove('active');
-            }
-        });
 
         // Client-side validation for Create Violation Type Form
         document.getElementById('createViolationTypeForm').addEventListener('submit', function(e) {

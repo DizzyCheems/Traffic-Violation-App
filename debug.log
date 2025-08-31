@@ -1883,3 +1883,58 @@ Session Data: Array
     [role] => officer
 )
 
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [last_activity] => 1756616324
+    [User] => hr_admin
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-08-31 09:58:43
+Login.php accessed: 2025-08-31 09:58:44
+Login.php accessed: 2025-08-31 09:58:46
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
