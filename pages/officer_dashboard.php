@@ -315,38 +315,98 @@ try {
 <style>
     body {
         padding-top: 56px; /* Adjust for fixed navbar height */
+        transition: padding-left 0.3s ease;
+    }
+    .navbar {
+        z-index: 1030; /* Ensure navbar is above sidebar */
     }
     .sidebar {
         position: fixed;
-        top: 56px; /* Start below navbar */
+        top: 56px; /* Start immediately below navbar */
         bottom: 0;
         left: 0;
-        z-index: 100;
-        padding: 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        z-index: 1020; /* Below navbar, above content */
+        width: 250px;
+        background-color: #f8f9fa;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        transition: width 0.3s ease, transform 0.3s ease;
         overflow-y: auto;
+    }
+    .sidebar.minimized {
+        width: 60px;
+    }
+    .sidebar .nav-link {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 10px 15px;
+        color: #333;
+    }
+    .sidebar .nav-link i {
+        min-width: 24px;
+        margin-right: 10px;
+    }
+    .sidebar.minimized .nav-link span {
+        display: none;
+    }
+    .sidebar-toggle {
+        position: fixed;
+        top: 65px; /* Adjusted to align below navbar */
+        left: 10px;
+        z-index: 1030; /* Same as navbar to ensure visibility */
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .main-content {
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+        padding-bottom: 20px;
+    }
+    .minimized ~ .main-content {
+        margin-left: 60px;
+    }
+    @media (max-width: 767.98px) {
+        .sidebar {
+            width: 250px;
+            transform: translateX(-100%);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .main-content {
+            margin-left: 0 !important;
+        }
+        .sidebar-toggle {
+            display: block !important;
+        }
+        .sidebar.minimized {
+            width: 250px;
+        }
+        .sidebar.minimized .nav-link span {
+            display: inline;
+        }
     }
     .sidebar-sticky {
         position: relative;
         top: 0;
         height: calc(100vh - 56px); /* Full height minus navbar */
-        padding-top: .5rem;
+        padding-top: 0.5rem;
         overflow-x: hidden;
         overflow-y: auto;
-    }
-    @media (max-width: 767.98px) {
-        .sidebar {
-            position: static;
-            height: auto;
-            padding: 0;
-        }
-        .main-content {
-            padding-top: 0;
-        }
     }
 </style>
 <body>
     <?php include '../layout/navbar.php'; ?>
+    <button class="sidebar-toggle d-md-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
     <div class="container-fluid">
         <div class="row">
             <?php include '../layout/menubar.php'; ?>
@@ -354,10 +414,8 @@ try {
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Officer Dashboard - <?php echo htmlspecialchars($officer['full_name']); ?></h1>
                     <div>
-                        <button class="btn btn-primary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                        <a href="../index.php" class="btn btn-outline-primary">Back to Home</a>
+                        <button class="btn btn-primary d-none d-md-block" id="desktopSidebarToggle"><i class="fas fa-chevron-left"></i></button>
+                        <a href="../index.php" class="btn btn-outline-primary ms-2">Back to Home</a>
                     </div>
                 </div>
 
@@ -846,6 +904,38 @@ try {
                         </div>
                     </div>
                 </div>
+
+                <!-- Create Violation Type Modal -->
+                <div class="modal fade" id="createViolationTypeModal" tabindex="-1" aria-labelledby="createViolationTypeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createViolationTypeModalLabel">Create New Violation Type</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST" class="form-outline" id="createViolationTypeForm">
+                                    <input type="hidden" name="create_violation_type" value="1">
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control" name="violation_type" id="violation_type" required maxlength="100" />
+                                        <label class="form-label" for="violation_type">Violation Type (max 100 characters)</label>
+                                        <div class="invalid-feedback">Please enter a valid violation type (1-100 characters).</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount" required />
+                                        <label class="form-label" for="fine_amount">Fine Amount</label>
+                                        <div class="invalid-feedback">Please enter a valid non-negative number.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" name="description" id="description" rows="4"></textarea>
+                                        <label class="form-label" for="description">Description</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Create Violation Type</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -863,6 +953,42 @@ try {
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
+
+        // Sidebar toggle functionality
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
+
+        // Load sidebar state from localStorage
+        if (localStorage.getItem('sidebarMinimized') === 'true') {
+            sidebar.classList.add('minimized');
+            mainContent.classList.add('minimized');
+            desktopSidebarToggle.querySelector('i').classList.replace('fa-chevron-left', 'fa-chevron-right');
+        }
+
+        // Desktop toggle
+        desktopSidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('minimized');
+            mainContent.classList.toggle('minimized');
+            const isMinimized = sidebar.classList.contains('minimized');
+            desktopSidebarToggle.querySelector('i').classList.toggle('fa-chevron-left', !isMinimized);
+            desktopSidebarToggle.querySelector('i').classList.toggle('fa-chevron-right', isMinimized);
+            localStorage.setItem('sidebarMinimized', isMinimized);
+        });
+
+        // Mobile toggle
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebar.classList.remove('minimized'); // Ensure full view when opened on mobile
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 767.98 && sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+                sidebar.classList.remove('active');
+            }
+        });
 
         // Client-side validation for Create Violation Type Form
         document.getElementById('createViolationTypeForm').addEventListener('submit', function(e) {
