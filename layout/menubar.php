@@ -13,8 +13,8 @@
                     Users
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#violation-types">
+            <li class="nav-item">   
+                <a class="nav-link" href="manage_violation_types.php">                    
                     <i class="fas fa-exclamation-circle me-2"></i>
                     Violation Types
                 </a>

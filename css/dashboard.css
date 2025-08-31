@@ -12,6 +12,8 @@
 
 h2, h3 {
     color: #333;
+    font-weight: 600;
+    font-size: 1.8rem;
 }
 
 .btn-primary {
@@ -24,12 +26,39 @@ h2, h3 {
     border-color: #004085;
 }
 
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+
+.btn-info:hover {
+    background-color: #117a8b;
+    border-color: #0d5e6e;
+}
+
 .modal-content {
     border-radius: 8px;
 }
 
 .form-select, .form-control {
     border-radius: 4px;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.form-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #212529;
+}
+
+.alert-danger {
+    font-size: 1.1rem;
+    font-weight: 500;
+    background-color: #f8d7da;
+    color: #721c24;
 }
 
 .breadcrumb {
@@ -40,4 +69,79 @@ h2, h3 {
     position: fixed;
     bottom: 0;
     width: 100%;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #212529;
+}
+
+.bg-image-vertical {
+    position: relative;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: auto 100%;
+}
+
+@media (min-width: 1025px) {
+    .h-custom-2 {
+        height: 100%;
+    }
+}
+
+.form-outline {
+    position: relative;
+}
+
+.form-outline .form-control {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.form-outline .form-label {
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    transition: all 0.2s;
+    color: #212529;
+    pointer-events: none;
+    font-weight: 500;
+}
+
+.form-outline .form-control:focus ~ .form-label,
+.form-outline .form-control:not(:placeholder-shown) ~ .form-label {
+    transform: translateY(-1.5rem) scale(0.8);
+    background-color: #fff;
+    padding: 0 0.2rem;
+    color: #212529;
+}
+
+.text-black {
+    color: #212529 !important;
+}
+
+.h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.text-muted {
+    color: #495057 !important;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.link-info {
+    color: #17a2b8 !important;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.link-info:hover {
+    color: #117a8b !important;
+}
+
+.login-image {
+    object-fit: cover;
+    object-position: center;
 }
