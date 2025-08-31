@@ -2277,3 +2277,20 @@ Session Data: Array
 Login.php accessed: 2025-09-01 00:24:42
 Login.php accessed: 2025-09-01 00:24:46
 Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-01 00:40:32
+Login.php accessed: 2025-09-01 00:43:11
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-01 00:43:17
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+

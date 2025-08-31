@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                                             <tr class="table-row-hover">
                                                 <td>#V-<?php echo htmlspecialchars($violation['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
-                                                <td>$<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
+                                                <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars(date('d M Y', strtotime($violation['issued_date']))); ?></td>
                                                 <td>
                                                     <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">

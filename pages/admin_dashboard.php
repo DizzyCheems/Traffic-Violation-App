@@ -189,10 +189,10 @@ try {
     $stmt = $pdo->prepare("SELECT total_revenue FROM revenue_metrics WHERE month_year = ?");
     $stmt->execute([$current_month]);
     $revenue = $stmt->fetch(PDO::FETCH_ASSOC);
-    $total_revenue = $revenue['total_revenue'] ? '$' . number_format($revenue['total_revenue'], 2) : '$0.00';
+    $total_revenue = $revenue['total_revenue'] ? '₱' . number_format($revenue['total_revenue'], 2) : '₱0.00';
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching revenue: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-    $total_revenue = '$0.00';
+    $total_revenue = '₱0.00';
 }
 
 // Fetch open concerns
@@ -589,7 +589,7 @@ try {
                                                 <td><?php echo htmlspecialchars($violation['plate_number']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['reason']); ?></td>
-                                                <td><?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
+                                                <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['issued_date']); ?></td>
                                                 <td>
                                                     <span class="badge <?php echo $violation['has_license'] ? 'bg-success' : 'bg-danger'; ?>">
@@ -681,7 +681,7 @@ try {
                                             <tr class="table-row-hover">
                                                 <td><?php echo htmlspecialchars($type['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
-                                                <td><?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
+                                                <td>₱<?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
@@ -710,7 +710,7 @@ try {
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount_<?php echo $type['id']; ?>" required value="<?php echo htmlspecialchars($type['fine_amount']); ?>" />
-                                                                    <label class="form-label" for="fine_amount_<?php echo $type['id']; ?>">Fine Amount</label>
+                                                                    <label class="form-label" for="fine_amount_<?php echo $type['id']; ?>">Fine Amount (₱)</label>
                                                                     <div class="invalid-feedback">Please enter a valid non-negative number.</div>
                                                                 </div>
                                                                 <div class="mb-3">
@@ -749,7 +749,7 @@ try {
                                     </div>
                                     <div class="mb-3">
                                         <input type="number" step="0.01" min="0" class="form-control" name="fine_amount" id="fine_amount" required />
-                                        <label class="form-label" for="fine_amount">Fine Amount</label>
+                                        <label class="form-label" for="fine_amount">Fine Amount (₱)</label>
                                         <div class="invalid-feedback">Please enter a valid non-negative number.</div>
                                     </div>
                                     <div class="mb-3">
