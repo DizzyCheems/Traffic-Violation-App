@@ -312,15 +312,51 @@ try {
 <!DOCTYPE html>
 <html lang="en">
 <?php include '../layout/header.php'; ?>
+<style>
+    body {
+        padding-top: 56px; /* Adjust for fixed navbar height */
+    }
+    .sidebar {
+        position: fixed;
+        top: 56px; /* Start below navbar */
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        overflow-y: auto;
+    }
+    .sidebar-sticky {
+        position: relative;
+        top: 0;
+        height: calc(100vh - 56px); /* Full height minus navbar */
+        padding-top: .5rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    @media (max-width: 767.98px) {
+        .sidebar {
+            position: static;
+            height: auto;
+            padding: 0;
+        }
+        .main-content {
+            padding-top: 0;
+        }
+    }
+</style>
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
         <div class="row">
             <?php include '../layout/menubar.php'; ?>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 main-content">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Officer Dashboard - <?php echo htmlspecialchars($officer['full_name']); ?></h1>
                     <div>
+                        <button class="btn btn-primary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="fas fa-bars"></i>
+                        </button>
                         <a href="../index.php" class="btn btn-outline-primary">Back to Home</a>
                     </div>
                 </div>
