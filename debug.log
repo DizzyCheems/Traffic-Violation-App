@@ -2294,3 +2294,13 @@ Session Data: Array
     [role] => officer
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 00:46:23
+Login.php accessed: 2025-09-01 00:46:28
+Login successful for user_id: 1, role: admin
+Update Fine Input: id='9', fine_amount='120.00'
