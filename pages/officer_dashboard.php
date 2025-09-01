@@ -308,6 +308,41 @@ try {
     file_put_contents('../debug.log', "Fetch Users Error: " . $e->getMessage() . "\n", FILE_APPEND);
     $users = [];
 }
+
+// Fetch assigned patrol zones
+try {
+    $stmt = $pdo->prepare("SELECT zone_name, urgency, assigned_date FROM patrol_zones WHERE officer_id = ? ORDER BY assigned_date DESC");
+    $stmt->execute([$officer_id]);
+    $patrol_zones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $toastr_messages[] = "toastr.error('Error fetching patrol zones: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Patrol Zones Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $patrol_zones = [];
+}
+
+// Fetch all violations issued by the officer
+try {
+    $stmt = $pdo->prepare("
+        SELECT v.id, v.user_id as officer_id, v.violator_name, v.plate_number, v.reason, v.issued_date, v.status, t.violation_type, t.fine_amount 
+        FROM violations v 
+        JOIN types t ON v.violation_type_id = t.id 
+        WHERE v.user_id = ? 
+        ORDER BY v.issued_date DESC
+    ");
+    $stmt->execute([$officer_id]);
+    $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $toastr_messages[] = "toastr.error('Error fetching violations: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Violations Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $violations = [];
+}
+
+// Group violations by month
+$violations_by_month = [];
+foreach ($violations as $violation) {
+    $month_year = date('F Y', strtotime($violation['issued_date']));
+    $violations_by_month[$month_year][] = $violation;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -334,6 +369,12 @@ try {
                             <a class="nav-link" href="../pages/issue_violation.php">
                                 <i class="fas fa-ticket-alt me-2"></i>
                                 Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/all_violations.php">
+                                <i class="fas fa-list me-2"></i>
+                                All Violations
                             </a>
                         </li>
                         <li class="nav-item">
@@ -380,6 +421,12 @@ try {
                             <a class="nav-link" href="../pages/issue_violation.php">
                                 <i class="fas fa-ticket-alt me-2"></i>
                                 Issue Violation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/all_violations.php">
+                                <i class="fas fa-list me-2"></i>
+                                All Violations
                             </a>
                         </li>
                         <li class="nav-item">
@@ -454,9 +501,60 @@ try {
                     </div>
                 </div>
 
-                <!-- Issue Violation and Patrol Map -->
+                <!-- Violations and Issue Violation -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-8">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="mb-0">Recent Violations</h3>
+                            </div>
+                            <div class="card-body">
+                                <?php if (empty($violations_by_month)): ?>
+                                    <p class="text-center text-muted">No violations found</p>
+                                <?php else: ?>
+                                    <?php foreach ($violations_by_month as $month_year => $month_violations): ?>
+                                        <span class="d-block mb-3 fw-bold text-primary"><?php echo htmlspecialchars($month_year); ?></span>
+                                        <div class="table-responsive mb-4">
+                                            <table class="table table-hover align-middle">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Officer ID</th>
+                                                        <th>Violator</th>
+                                                        <th>Plate</th>
+                                                        <th>Type</th>
+                                                        <th>Fine</th>
+                                                        <th>Date</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($month_violations as $violation): ?>
+                                                        <tr class="table-row-hover">
+                                                            <td><?php echo htmlspecialchars($violation['id']); ?></td>
+                                                            <td><?php echo htmlspecialchars($violation['officer_id']); ?></td>
+                                                            <td><?php echo htmlspecialchars($violation['violator_name']); ?></td>
+                                                            <td><?php echo htmlspecialchars($violation['plate_number']); ?></td>
+                                                            <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
+                                                            <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
+                                                            <td><?php echo htmlspecialchars(date('Y-m-d', strtotime($violation['issued_date']))); ?></td>
+                                                            <td>
+                                                                <span class="badge <?php echo $violation['status'] === 'Pending' ? 'bg-warning text-dark' : ($violation['status'] === 'Resolved' ? 'bg-success' : 'bg-danger'); ?>">
+                                                                    <?php echo htmlspecialchars($violation['status']); ?>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <p class="card-text"><a href="../pages/all_violations.php" class="text-decoration-none link-primary">View All Violations</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="card shadow-sm">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Issue Violation (Quick)</h3>
@@ -540,10 +638,25 @@ try {
                     <div class="col-md-4">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
-                                <h5 class="card-title text-primary">Patrol Map</h5>
-                                <p class="card-text"><a href="../pages/violation_heatmap.php" class="text-decoration-none link-primary">🗺️ View Active Patrol Zone</a></p>
+                                <h5 class="card-title text-primary">Patrol Zones</h5>
+                                <?php if (empty($patrol_zones)): ?>
+                                    <p class="card-text text-muted">No patrol zones assigned.</p>
+                                <?php else: ?>
+                                    <ul class="list-group list-group-flush mb-3">
+                                        <?php foreach ($patrol_zones as $zone): ?>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <?php echo htmlspecialchars($zone['zone_name']); ?>
+                                                <span class="badge <?php echo $zone['urgency'] === 'High' ? 'bg-danger' : ($zone['urgency'] === 'Medium' ? 'bg-warning text-dark' : 'bg-success'); ?>">
+                                                    <?php echo htmlspecialchars($zone['urgency']); ?>
+                                                </span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+                                <p class="card-text">
+                                    <a href="../pages/patrol_zone_details.php" class="text-decoration-none link-primary">🗺️ View Active Patrol Zone</a>
+                                </p>
                                 <p class="card-text">📍 Your location is being tracked</p>
-                                <p class="card-text">High violation areas highlighted for efficient patrolling.</p>
                             </div>
                         </div>
                     </div>
