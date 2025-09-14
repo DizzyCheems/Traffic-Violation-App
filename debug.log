@@ -3497,3 +3497,99 @@ Login.php accessed: 2025-09-14 05:20:05
 Login.php accessed: 2025-09-14 05:20:09
 Login successful for user_id: 1, role: admin
 Delete Violation Type Input: id='16'
+Delete Violation Type Input: id='15'
+Delete Violation Type Input: id='107'
+Login.php accessed: 2025-09-14 05:30:06
+Login.php accessed: 2025-09-14 05:30:07
+Login.php accessed: 2025-09-14 05:30:11
+Login.php accessed: 2025-09-14 05:30:14
+Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Delete User Input: id='129'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Create Violation Type Input: violation_type='test', fine_amount='123', description='qe'
+Create Violation Type Query Params: Array
+(
+    [0] => test
+    [1] => 123
+    [2] => qe
+)
+
+Delete Violation Type Input: id='109'
+Delete Violation Type Input: id='109'
+Delete Violation Type Failed: No rows affected.
+Delete Violation Type Input: id='108'
+Delete Violation Type Input: id='108'
+Delete Violation Type Failed: No rows affected.
+Create Violation Type Input: violation_type='123', fine_amount='123', description='dfwdf'
+Create Violation Type Query Params: Array
+(
+    [0] => 123
+    [1] => 123
+    [2] => dfwdf
+)
+
+Create Violation Type Input: violation_type='wer', fine_amount='123', description='d'
+Create Violation Type Query Params: Array
+(
+    [0] => wer
+    [1] => 123
+    [2] => d
+)
+
+Login.php accessed: 2025-09-14 05:39:00
+Login.php accessed: 2025-09-14 05:39:04
+Login successful for user_id: 1, role: admin
+Delete User Input: id='6'
+Create User Input: username='1', full_name='sdf', role='admin'
+Delete User Input: id='130'
+Delete User Input: id='130'
+Create User Input: username='dfg', full_name='qe', role='user'
+Create User Input: username='fwfwe', full_name='gfdg', role='admin'
+Delete User Input: id='131'
+Delete User Input: id='132'
+Create User Input: username='eg', full_name='sdf', role='admin'
+Delete User Input: id='133'
+Create User Input: username='wef', full_name='123', role='admin'
+Delete User Input: id='134'
+Delete User Input: id='134'
+Delete User Input: id='134'
+Login.php accessed: 2025-09-14 05:54:03
+Login.php accessed: 2025-09-14 05:54:03
+Login.php accessed: 2025-09-14 05:54:04
+Login.php accessed: 2025-09-14 05:54:04
+Login.php accessed: 2025-09-14 05:54:07
+Login successful for user_id: 1, role: admin
+Create Violation Type Input: violation_type='sft4t', fine_amount='1', description='gd'
+Create Violation Type Query Params: Array
+(
+    [0] => sft4t
+    [1] => 1
+    [2] => gd
+)
+
+Create Violation Type Input: violation_type='werewv', fine_amount='1', description='fee'
+Create Violation Type Query Params: Array
+(
+    [0] => werewv
+    [1] => 1
+    [2] => fee
+)
+
+Create Violation Type Input: violation_type='wrdgd', fine_amount='1', description='dgd'
+Create Violation Type Query Params: Array
+(
+    [0] => wrdgd
+    [1] => 1
+    [2] => dgd
+)
+
+Delete Violation Type Input: id='114'
+Delete Violation Type Input: id='114'
+Delete Violation Type Failed: No rows affected.
+Delete Violation Type Input: id='113'
+Delete Violation Type Input: id='113'
+Delete Violation Type Failed: No rows affected.
+Delete Violation Type Input: id='111'
+Delete Violation Type Input: id='111'
+Delete Violation Type Failed: No rows affected.

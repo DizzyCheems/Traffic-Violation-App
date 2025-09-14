@@ -122,8 +122,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation_type
         } else {
             $stmt = $pdo->prepare("DELETE FROM types WHERE id = ?");
             $success = $stmt->execute([$id]);
-            if ($success) {
-                $toastr_messages[] = "toastr.success('Violation type deleted successfully.');";
+            if ($success && $stmt->rowCount() > 0) {
+                $toastr_messages[] = "Swal.fire({
+                    title: 'Success!',
+                    text: 'Violation type deleted successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => { window.location.reload(); });";
             } else {
                 $toastr_messages[] = "toastr.error('Failed to delete violation type. No rows affected.');";
                 file_put_contents('../debug.log', "Delete Violation Type Failed: No rows affected.\n", FILE_APPEND);
@@ -685,10 +690,10 @@ try {
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
-                                                    <form method="POST" style="display: inline;" class="delete-violation-type-form">
+                                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteViolationTypeModal<?php echo $type['id']; ?>">Delete</button>
+                                                    <form method="POST" style="display: none;" class="delete-violation-type-form" id="deleteViolationTypeForm<?php echo $type['id']; ?>">
                                                         <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
                                                         <input type="hidden" name="delete_violation_type" value="1">
-                                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                                     </form>
                                                 </td>
                                             </tr>
@@ -719,6 +724,24 @@ try {
                                                                 </div>
                                                                 <button type="submit" name="edit_violation_type" class="btn btn-primary">Update Violation Type</button>
                                                             </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Delete Violation Type Modal -->
+                                            <div class="modal fade" id="deleteViolationTypeModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="deleteViolationTypeModalLabel<?php echo $type['id']; ?>" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteViolationTypeModalLabel<?php echo $type['id']; ?>">Confirm Delete: <?php echo htmlspecialchars($type['violation_type']); ?></h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to delete the violation type "<strong><?php echo htmlspecialchars($type['violation_type']); ?></strong>"? This action cannot be undone.</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="button" class="btn btn-danger" onclick="document.getElementById('deleteViolationTypeForm<?php echo $type['id']; ?>').submit();">Delete</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -871,29 +894,6 @@ try {
                         this.submit();
                     } else {
                         console.log('Edit violation type form submission canceled');
-                    }
-                });
-            });
-        });
-
-        // Client-side validation and confirmation for Delete Violation Type Forms
-        document.querySelectorAll('.delete-violation-type-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Delete violation type form submission attempted');
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'Do you want to delete this violation type? This action cannot be undone.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        console.log('Delete violation type form submission confirmed');
-                        this.submit();
-                    } else {
-                        console.log('Delete violation type form submission canceled');
                     }
                 });
             });

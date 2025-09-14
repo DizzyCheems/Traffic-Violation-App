@@ -111,7 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $success = $stmt->execute([$id]);
             if ($success) {
-                $toastr_messages[] = "toastr.success('User deleted successfully.');";
+                $toastr_messages[] = "Swal.fire({
+                    title: 'Deleted!',
+                    text: 'User has been deleted successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });";
             } else {
                 $toastr_messages[] = "toastr.error('Failed to delete user.');";
                 file_put_contents('../debug.log', "Delete User Failed: No rows affected.\n", FILE_APPEND);
@@ -400,26 +405,29 @@ try {
             });
         });
 
-        document.querySelectorAll('.delete-user-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Delete user form submission attempted');
+        // Use event delegation for delete forms
+        document.addEventListener('submit', function(e) {
+            if (e.target && e.target.matches('.delete-user-form')) {
                 e.preventDefault();
+                const form = e.target;
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'Do you want to delete this user? This action cannot be undone.',
+                    title: 'Delete User?',
+                    text: 'Are you sure you want to delete this user? This action cannot be undone.',
                     icon: 'warning',
                     showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel'
+                    cancelButtonText: 'No, cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         console.log('Delete user form submission confirmed');
-                        this.submit();
+                        form.submit();
                     } else {
                         console.log('Delete user form submission canceled');
                     }
                 });
-            });
+            }
         });
     </script>
 </body>
