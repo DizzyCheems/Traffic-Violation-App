@@ -630,7 +630,7 @@ foreach ($violations as $violation) {
                                     <div class="mb-3">
                                         <a href="../pages/issue_violation.php" class="text-decoration-none link-primary">Add Details & Photos</a>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">🚔 Submit Electronic Citation</button>
+                                    <!--<button type="submit" class="btn btn-primary">🚔 Submit Electronic Citation</button>-->
                                 </form>
                             </div>
                         </div>
@@ -656,7 +656,7 @@ foreach ($violations as $violation) {
                                 <p class="card-text">
                                     <a href="../pages/patrol_zone_details.php" class="text-decoration-none link-primary">🗺️ View Active Patrol Zone</a>
                                 </p>
-                                <p class="card-text">📍 Your location is being tracked</p>
+                                <p style="display:none;" class="card-text">📍 Your location is being tracked</p>
                             </div>
                         </div>
                     </div>

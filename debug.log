@@ -3002,3 +3002,498 @@ Session Data: Array
 )
 
 Fetch Patrol Zones Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetch Patrol Zones Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Login.php accessed: 2025-09-01 12:12:13
+Login.php accessed: 2025-09-01 12:12:15
+Login successful for user_id: 1, role: admin
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Fetch Patrol Zones Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Create Patrol Zone Input: officer_id='31', zone_name='d', urgency='High'
+Create Patrol Zone Query Params: Array
+(
+    [0] => 31
+    [1] => d
+    [2] => Lat: 40.7128, Lng: -74.0060
+    [3] => Lat: 40.7125, Lng: -74.0065
+    [4] => High
+    [5] => 2025-09-01T12:14
+    [6] => 2025-09-01 12:15:32
+)
+
+Create Patrol Zone Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Fetch Patrol Zones Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Create Patrol Zone Input: officer_id='31', zone_name='d', urgency='High'
+Create Patrol Zone Query Params: Array
+(
+    [0] => 31
+    [1] => d
+    [2] => Lat: 40.7128, Lng: -74.0060
+    [3] => Lat: 40.7125, Lng: -74.0065
+    [4] => High
+    [5] => 2025-09-01T12:14
+    [6] => 2025-09-01 12:15:34
+)
+
+Create Patrol Zone Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Fetch Patrol Zones Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.patrol_zones' doesn't exist
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Create Patrol Zone Input: officer_id='31', zone_name='d', urgency='High'
+Create Patrol Zone Query Params: Array
+(
+    [0] => 31
+    [1] => d
+    [2] => Lat: 40.7128, Lng: -74.0060
+    [3] => Lat: 40.7125, Lng: -74.0065
+    [4] => High
+    [5] => 2025-09-01T12:14
+    [6] => 2025-09-01 12:19:53
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Edit Patrol Zone Input: id='2', officer_id='31', zone_name='Test', urgency='High'
+Edit Patrol Zone Query Params: Array
+(
+    [0] => 31
+    [1] => Test
+    [2] => Lat: 40.7128, Lng: -74.0060
+    [3] => Lat: 40.7125, Lng: -74.0065
+    [4] => High
+    [5] => 2025-09-01T12:14
+    [6] => 2
+)
+
+Login.php accessed: 2025-09-01 12:35:52
+Login.php accessed: 2025-09-01 12:35:57
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-01 12:48:26
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 13:43:59
+Login.php accessed: 2025-09-13 13:44:08
+Login.php accessed: 2025-09-13 13:44:15
+Login.php accessed: 2025-09-13 13:44:18
+Login successful for user_id: 1, role: admin
+Fetch Officer Performance Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.violation_id' in 'on clause'
+Database Backup Initiated: backup_20250913_134541.sql
+Login.php accessed: 2025-09-13 13:45:57
+Login.php accessed: 2025-09-13 13:46:04
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Type Input: id='9'
+Delete Violation Type Query Params: Array
+(
+    [0] => 9
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Type Input: id='12'
+Delete Violation Type Query Params: Array
+(
+    [0] => 12
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Type Input: violation_type='Overtaking Yellow Line', fine_amount='10', description='123'
+Create Violation Type Query Params: Array
+(
+    [0] => Overtaking Yellow Line
+    [1] => 10
+    [2] => 123
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Edit Violation Type Input: id='107', violation_type='Overtaking Yellow Line', fine_amount='30.00', description='123'
+Edit Violation Type Query Params: Array
+(
+    [0] => Overtaking Yellow Line
+    [1] => 30
+    [2] => 123
+    [3] => 107
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 13:50:23
+Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Officer Performance Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.violation_id' in 'on clause'
+Login.php accessed: 2025-09-13 13:54:43
+Login.php accessed: 2025-09-13 13:54:49
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 15:03:04
+Login.php accessed: 2025-09-13 15:05:06
+Login successful for user_id: 1, role: admin
+Create User Input: username='Pedro', full_name='Pedro Gonzaga', role='officer'
+Edit User Input: id='129', username='Pedro', full_name='Pedro Gonzaga', role='user'
+Edit User Input: id='129', username='Pedro', full_name='Pedro Gonzaga', role='officer'
+Delete User Input: id='8'
+Delete User Input: id='7'
+Login.php accessed: 2025-09-13 15:09:58
+Login.php accessed: 2025-09-13 15:10:03
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Type Input: violation_type='Overboarding Motorcycle', fine_amount='2000', description='Bawal'
+Create Violation Type Query Params: Array
+(
+    [0] => Overboarding Motorcycle
+    [1] => 2000
+    [2] => Bawal
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Edit Violation Type Input: id='108', violation_type='Overboarding Motorcycle', fine_amount='100.00', description='Bawal'
+Edit Violation Type Query Params: Array
+(
+    [0] => Overboarding Motorcycle
+    [1] => 100
+    [2] => Bawal
+    [3] => 108
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Type Input: id='11'
+Delete Violation Type Query Params: Array
+(
+    [0] => 11
+)
+
+Login.php accessed: 2025-09-13 15:12:39
+Login.php accessed: 2025-09-13 15:12:43
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-13 15:14:25
+Login.php accessed: 2025-09-13 15:14:31
+Login.php accessed: 2025-09-13 15:14:35
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Issue Violation Input: violation_type_id='13', violator_name='Eddie', plate_number='GED23', reason='Dasig Dasig gid!', has_license='1', is_impounded='0'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 15:16:14
+Login.php accessed: 2025-09-13 15:16:20
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-13 15:16:28
+Login.php accessed: 2025-09-13 15:16:35
+Login.php accessed: 2025-09-13 15:16:38
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 15:20:24
+Login.php accessed: 2025-09-13 15:20:28
+Login successful for user_id: 1, role: admin
+Fetch Officer Performance Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.violation_id' in 'on clause'
+Login.php accessed: 2025-09-13 15:35:25
+Login.php accessed: 2025-09-13 15:35:28
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-13 15:36:20
+Login.php accessed: 2025-09-13 15:36:24
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 15:36:50
+Login.php accessed: 2025-09-13 15:36:52
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: concern_text='Broken Road'
+Report Concern Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: concern_text='Overspeeding'
+Report Concern Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-13 15:37:29
+Login.php accessed: 2025-09-13 15:37:33
+Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Login.php accessed: 2025-09-13 15:41:07
+Login.php accessed: 2025-09-13 15:41:11
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-13 15:41:14
+Login.php accessed: 2025-09-13 15:41:17
+Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Officer Performance Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.violation_id' in 'on clause'
+Login.php accessed: 2025-09-13 15:45:01
+Login.php accessed: 2025-09-13 15:45:03
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: concern_text='road block'
+Report Concern Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-13 15:49:05
+Login.php accessed: 2025-09-14 05:20:05
+Login.php accessed: 2025-09-14 05:20:09
+Login successful for user_id: 1, role: admin
+Delete Violation Type Input: id='16'

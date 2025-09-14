@@ -2,10 +2,10 @@
 session_start();
 include '../config/conn.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin' || $_SESSION['role'] !== 'officer') {
-    header("Location: ../login.php");
-    exit;
-}
+//if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin' || $_SESSION['role'] !== 'officer') {
+//    header("Location: ../login.php");
+ //   exit;
+//}
 
 // Initialize toastr messages
 $toastr_messages = [];
