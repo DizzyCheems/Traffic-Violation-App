@@ -2,13 +2,28 @@
 session_start();
 include '../config/conn.php';
 
-//if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin' || $_SESSION['role'] !== 'officer') {
-//    header("Location: ../login.php");
- //   exit;
-//}
-
 // Initialize toastr messages
 $toastr_messages = [];
+
+// Check for success messages in session
+if (isset($_SESSION['create_success']) && $_SESSION['create_success']) {
+    $toastr_messages[] = "Swal.fire({
+        title: 'Created!',
+        text: 'User has been created successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });";
+    unset($_SESSION['create_success']); // Clear the session variable
+}
+if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
+    $toastr_messages[] = "Swal.fire({
+        title: 'Deleted!',
+        text: 'User has been deleted successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });";
+    unset($_SESSION['delete_success']); // Clear the session variable
+}
 
 // Function to check if username exists (case-insensitive)
 function usernameExists($pdo, $username, $exclude_id = null) {
@@ -41,7 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
             $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, ?)");
             $success = $stmt->execute([htmlspecialchars($username), $password, htmlspecialchars($full_name), $role]);
             if ($success) {
-                $toastr_messages[] = "toastr.success('User created successfully.');";
+                $_SESSION['create_success'] = true; // Set session variable for success message
+                header("Location: manage_users.php"); // Redirect to clear POST data
+                exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create user.');";
                 file_put_contents('../debug.log', "Create User Failed: No rows affected.\n", FILE_APPEND);
@@ -111,12 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $success = $stmt->execute([$id]);
             if ($success) {
-                $toastr_messages[] = "Swal.fire({
-                    title: 'Deleted!',
-                    text: 'User has been deleted successfully.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                });";
+                $_SESSION['delete_success'] = true; // Set session variable for success message
+                header("Location: manage_users.php"); // Redirect to clear POST data
+                exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to delete user.');";
                 file_put_contents('../debug.log', "Delete User Failed: No rows affected.\n", FILE_APPEND);
@@ -289,16 +303,59 @@ try {
     </div>
     <?php include '../layout/footer.php'; ?>
     <script>
+        // Initialize toastr options
         toastr.options = {
             closeButton: true,
             progressBar: true,
             positionClass: 'toast-top-right',
             timeOut: 5000
         };
+
+        // Output any toastr or SweetAlert messages from PHP
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
 
+        // Function to attach delete form event listeners
+        function attachDeleteFormListeners() {
+            console.log('Attaching delete form listeners');
+            document.removeEventListener('submit', handleDeleteFormSubmit); // Remove existing listener to prevent duplicates
+            document.addEventListener('submit', handleDeleteFormSubmit);
+        }
+
+        // Handler for delete form submissions
+        function handleDeleteFormSubmit(e) {
+            if (e.target && e.target.matches('.delete-user-form')) {
+                e.preventDefault();
+                const form = e.target;
+                console.log('Delete form submission intercepted for user ID:', form.querySelector('input[name="id"]').value);
+                Swal.fire({
+                    title: 'Delete User?',
+                    text: 'Are you sure you want to delete this user? This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log('Delete user form submission confirmed');
+                        form.submit();
+                    } else {
+                        console.log('Delete user form submission canceled');
+                    }
+                });
+            }
+        }
+
+        // Attach listeners on page load
+        window.addEventListener('load', function() {
+            console.log('Page loaded, initializing delete form listeners');
+            attachDeleteFormListeners();
+        });
+
+        // Create user form submission
         document.getElementById('createUserForm').addEventListener('submit', function(e) {
             console.log('Create user form submission attempted');
             const username = document.getElementById('username').value.trim();
@@ -354,6 +411,7 @@ try {
             });
         });
 
+        // Edit user form submission
         document.querySelectorAll('.edit-user-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 console.log('Edit user form submission attempted');
@@ -403,31 +461,6 @@ try {
                     }
                 });
             });
-        });
-
-        // Use event delegation for delete forms
-        document.addEventListener('submit', function(e) {
-            if (e.target && e.target.matches('.delete-user-form')) {
-                e.preventDefault();
-                const form = e.target;
-                Swal.fire({
-                    title: 'Delete User?',
-                    text: 'Are you sure you want to delete this user? This action cannot be undone.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No, cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        console.log('Delete user form submission confirmed');
-                        form.submit();
-                    } else {
-                        console.log('Delete user form submission canceled');
-                    }
-                });
-            }
         });
     </script>
 </body>
