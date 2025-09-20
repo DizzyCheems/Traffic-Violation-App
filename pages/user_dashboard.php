@@ -41,7 +41,7 @@ try {
 
 // Fetch pending appeals count
 try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM concerns WHERE user_id = ? AND status IN ('OPEN', 'PENDING')");
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM appeals WHERE user_id = ? AND status = 'PENDING'");
     $stmt->execute([$user_id]);
     $pending_appeals = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 } catch (PDOException $e) {
@@ -103,6 +103,17 @@ try {
     $concerns = [];
 }
 
+// Fetch all appeals
+try {
+    $stmt = $pdo->prepare("SELECT id, violation_id, appeal_reason, status, created_at FROM appeals WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$user_id]);
+    $appeals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $toastr_messages[] = "toastr.error('Error fetching appeals: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Appeals Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $appeals = [];
+}
+
 // Handle report concern
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_concern'])) {
     try {
@@ -137,27 +148,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_concern'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
     try {
         $violation_id = trim($_POST['violation_id'] ?? '');
-        $appeal_text = trim($_POST['appeal_text'] ?? '');
-        file_put_contents('../debug.log', "Apply Appeal Input: user_id='$user_id', violation_id='$violation_id', appeal_text='$appeal_text'\n", FILE_APPEND);
+        $appeal_reason = trim($_POST['appeal_reason'] ?? '');
+        file_put_contents('../debug.log', "Apply Appeal Input: user_id='$user_id', violation_id='$violation_id', appeal_reason='$appeal_reason'\n", FILE_APPEND);
 
-        if (empty($violation_id) || empty($appeal_text)) {
-            $toastr_messages[] = "toastr.error('Violation ID and appeal description are required.');";
+        if (empty($violation_id) || empty($appeal_reason)) {
+            $toastr_messages[] = "toastr.error('Violation ID and appeal reason are required.');";
+        } elseif (strlen($appeal_reason) > 65535) { // TEXT column limit
+            $toastr_messages[] = "toastr.error('Appeal reason is too long.');";
         } else {
             // Check if violation belongs to user
             $stmt = $pdo->prepare("SELECT id FROM violations WHERE id = ? AND user_id = ?");
             $stmt->execute([$violation_id, $user_id]);
             if ($stmt->fetch()) {
-                $stmt = $pdo->prepare("INSERT INTO concerns (user_id, description, status, created_at) VALUES (?, ?, 'PENDING', NOW())");
-                $success = $stmt->execute([$user_id, htmlspecialchars("Appeal for Violation #$violation_id: $appeal_text")]);
+                $stmt = $pdo->prepare("INSERT INTO appeals (violation_id, user_id, appeal_reason, status, created_at, updated_at) VALUES (?, ?, ?, 'PENDING', NOW(), NOW())");
+                $success = $stmt->execute([$violation_id, $user_id, htmlspecialchars($appeal_reason)]);
                 if ($success) {
                     $toastr_messages[] = "Swal.fire({ title: 'Success!', text: 'Appeal submitted successfully.', icon: 'success', confirmButtonText: 'OK' });";
-                    // Refresh concerns list
-                    $stmt = $pdo->prepare("SELECT id, description, status, created_at FROM concerns WHERE user_id = ? ORDER BY created_at DESC");
+                    // Refresh appeals list
+                    $stmt = $pdo->prepare("SELECT id, violation_id, appeal_reason, status, created_at FROM appeals WHERE user_id = ? ORDER BY created_at DESC");
                     $stmt->execute([$user_id]);
-                    $concerns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $appeals = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 } else {
                     $toastr_messages[] = "toastr.error('Failed to submit appeal.');";
-                    file_put_contents('../debug.log', "Apply Appeal Failed: No rows affected for user_id='$user_id'.\n", FILE_APPEND);
+                    file_put_contents('../debug.log', "Apply Appeal Failed: No rows affected for user_id='$user_id', violation_id='$violation_id'.\n", FILE_APPEND);
                 }
             } else {
                 $toastr_messages[] = "toastr.error('Invalid or unauthorized violation ID.');";
@@ -297,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                             <div class="card-body">
                                 <h5 class="card-title text-primary">My Overview</h5>
                                 <p class="card-text">Unpaid Violations: <?php echo htmlspecialchars($unpaid_violations); ?> <a href="#violations" class="text-decoration-none link-primary">[View]</a></p>
-                                <p class="card-text">Pending Appeals: <?php echo htmlspecialchars($pending_appeals); ?> <a href="#concerns" class="text-decoration-none link-primary">[View]</a></p>
+                                <p class="card-text">Pending Appeals: <?php echo htmlspecialchars($pending_appeals); ?> <a href="#appeals" class="text-decoration-none link-primary">[View]</a></p>
                                 <p class="card-text">Open Concerns: <?php echo htmlspecialchars($open_concerns); ?> <a href="#concerns" class="text-decoration-none link-primary">[View]</a></p>
                             </div>
                         </div>
@@ -367,6 +380,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                     <?php endif; ?>
                 </div>
 
+                <!-- My Appeals -->
+                <div class="mb-4" id="appeals">
+                    <h3 class="text-primary mb-3">My Appeals</h3>
+                    <?php if (empty($appeals)): ?>
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <p class="text-center text-muted">No appeals found</p>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0">Appeals</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Appeal ID</th>
+                                                <th>Violation ID</th>
+                                                <th>Appeal Reason</th>
+                                                <th>Status</th>
+                                                <th>Submitted</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($appeals as $appeal): ?>
+                                                <tr class="table-row-hover">
+                                                    <td>#A-<?php echo htmlspecialchars($appeal['id']); ?></td>
+                                                    <td>#V-<?php echo htmlspecialchars($appeal['violation_id']); ?></td>
+                                                    <td><?php echo htmlspecialchars($appeal['appeal_reason'] ?: 'N/A'); ?></td>
+                                                    <td>
+                                                        <span class="badge <?php echo $appeal['status'] === 'PENDING' ? 'bg-warning text-dark' : ($appeal['status'] === 'APPROVED' ? 'bg-success' : 'bg-danger'); ?>">
+                                                            <?php echo htmlspecialchars($appeal['status']); ?>
+                                                            <?php echo $appeal['status'] === 'APPROVED' ? '✅' : ($appeal['status'] === 'PENDING' ? '🟡' : '❌'); ?>
+                                                        </span>
+                                                    </td>
+                                                    <td><?php echo htmlspecialchars(date('d M Y', strtotime($appeal['created_at']))); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
                 <!-- All Concerns -->
                 <div class="card mb-4 shadow-sm" id="concerns">
                     <div class="card-header bg-primary text-white">
@@ -392,9 +454,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                                                 <td>#C-<?php echo htmlspecialchars($concern['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($concern['description'] ?: 'N/A'); ?></td>
                                                 <td>
-                                                    <span class="badge <?php echo $concern['status'] === 'OPEN' ? 'bg-warning text-dark' : ($concern['status'] === 'PENDING' ? 'bg-info text-dark' : 'bg-success'); ?>">
+                                                    <span class="badge <?php echo $concern['status'] === 'OPEN' ? 'bg-warning text-dark' : ($concern['status'] === 'IN_PROGRESS' ? 'bg-info text-dark' : 'bg-success'); ?>">
                                                         <?php echo htmlspecialchars($concern['status']); ?> 
-                                                        <?php echo $concern['status'] === 'RESOLVED' ? '✅' : ($concern['status'] === 'PENDING' ? '🟡' : ''); ?>
+                                                        <?php echo $concern['status'] === 'RESOLVED' ? '✅' : ($concern['status'] === 'IN_PROGRESS' ? '🟡' : ''); ?>
                                                     </span>
                                                 </td>
                                                 <td><?php echo htmlspecialchars(date('d M Y', strtotime($concern['created_at']))); ?></td>
@@ -454,8 +516,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                                         <div class="invalid-feedback">Please select a violation.</div>
                                     </div>
                                     <div class="mb-3">
-                                        <textarea class="form-control" name="appeal_text" id="appeal_text" required rows="4"></textarea>
-                                        <label class="form-label" for="appeal_text">Appeal Reason</label>
+                                        <textarea class="form-control" name="appeal_reason" id="appeal_reason" required rows="4"></textarea>
+                                        <label class="form-label" for="appeal_reason">Appeal Reason</label>
                                         <div class="invalid-feedback">Please enter an appeal reason.</div>
                                     </div>
                                     <button type="submit" name="apply_appeal" class="btn btn-primary">Submit Appeal</button>
@@ -511,19 +573,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
         document.getElementById('applyAppealForm').addEventListener('submit', function(e) {
             console.log('Apply appeal form submission attempted');
             const violationId = document.getElementById('violation_id').value;
-            const appealText = document.getElementById('appeal_text').value.trim();
+            const appealReason = document.getElementById('appeal_reason').value.trim();
 
             let isValid = true;
 
             document.getElementById('violation_id').classList.remove('is-invalid');
-            document.getElementById('appeal_text').classList.remove('is-invalid');
+            document.getElementById('appeal_reason').classList.remove('is-invalid');
 
             if (!violationId) {
                 document.getElementById('violation_id').classList.add('is-invalid');
                 isValid = false;
             }
-            if (!appealText) {
-                document.getElementById('appeal_text').classList.add('is-invalid');
+            if (!appealReason) {
+                document.getElementById('appeal_reason').classList.add('is-invalid');
                 isValid = false;
             }
 

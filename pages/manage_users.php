@@ -8,6 +8,12 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || !in_array($_SES
     exit;
 }
 
+// Redirect users to their dashboard
+if ($_SESSION['role'] === 'user') {
+    header("Location: ../pages/user_dashboard.php");
+    exit;
+}
+
 // Initialize toastr messages
 $toastr_messages = [];
 
@@ -97,7 +103,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
 
         file_put_contents('../debug.log', "Edit User Input: id='$id', username='$username', full_name='$full_name', role='$role', officer_id='$officer_id'\n", FILE_APPEND);
 
-        if (empty($id) || empty($username) || empty($full_name) || empty($role)) {
+        // Verify user exists and officer has permission
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ? AND (? = 'admin' OR officer_id = ? OR id = ?)");
+        $stmt->execute([$id, $_SESSION['role'], $_SESSION['user_id'], $_SESSION['user_id']]);
+        if (!$stmt->fetch()) {
+            $toastr_messages[] = "toastr.error('Invalid user or you lack permission to edit.');";
+            file_put_contents('../debug.log', "Edit User Failed: No permission for id='$id', user_id='{$_SESSION['user_id']}', role='{$_SESSION['role']}'\n", FILE_APPEND);
+        } elseif (empty($id) || empty($username) || empty($full_name) || empty($role)) {
             $toastr_messages[] = "toastr.error('ID, Username, Full Name, and Role are required.');";
         } elseif (strlen($username) > 50 || strlen($full_name) > 100) {
             $toastr_messages[] = "toastr.error('Username or Full Name exceeds maximum length.');";
@@ -112,8 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
                 $sql .= ", password = ?";
                 $params[] = password_hash($password, PASSWORD_DEFAULT);
             }
-            $sql .= " WHERE id = ?";
+            $sql .= " WHERE id = ? AND (? = 'admin' OR officer_id = ? OR id = ?)";
             $params[] = $id;
+            $params[] = $_SESSION['role'];
+            $params[] = $_SESSION['user_id'];
+            $params[] = $_SESSION['user_id'];
             $stmt = $pdo->prepare($sql);
             $success = $stmt->execute($params);
             if ($success) {
@@ -121,8 +136,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
                 header("Location: manage_users.php");
                 exit;
             } else {
-                $toastr_messages[] = "toastr.error('Failed to update user.');";
-                file_put_contents('../debug.log', "Edit User Failed: No rows affected.\n", FILE_APPEND);
+                $toastr_messages[] = "toastr.error('Failed to update user or you lack permission.');";
+                file_put_contents('../debug.log', "Edit User Failed: No rows affected or permission denied.\n", FILE_APPEND);
             }
         }
     } catch (PDOException $e) {
@@ -143,15 +158,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
         } elseif ($id == $_SESSION['user_id']) {
             $toastr_messages[] = "toastr.error('Cannot delete your own account.');";
         } else {
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND (officer_id = ? OR officer_id IS NULL OR ? = 'admin')");
-            $success = $stmt->execute([$id, $_SESSION['user_id'], $_SESSION['role']]);
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND (? = 'admin' OR officer_id = ? OR id = ?)");
+            $success = $stmt->execute([$id, $_SESSION['role'], $_SESSION['user_id'], $_SESSION['user_id']]);
             if ($success) {
                 $_SESSION['delete_success'] = true;
                 header("Location: manage_users.php");
                 exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to delete user or you lack permission.');";
-                file_put_contents('../debug.log', "Delete User Failed: No rows affected or permission denied.\n", FILE_APPEND);
+                file_put_contents('../debug.log', "Delete User Failed: No rows affected or permission denied for id='$id'.\n", FILE_APPEND);
             }
         }
     } catch (PDOException $e) {
@@ -224,7 +239,7 @@ try {
                                                 <td><?php echo htmlspecialchars($user['username']); ?></td>
                                                 <td><?php echo htmlspecialchars($user['full_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($user['role']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                                                <td><?php echo htmlspecialchars(date('d M Y', strtotime($user['created_at']))); ?></td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editUserModal<?php echo $user['id']; ?>">Edit</button>
                                                     <form method="POST" style="display: inline;" class="delete-user-form">

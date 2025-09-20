@@ -2,7 +2,7 @@
 session_start();
 include '../config/conn.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
+if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['user', 'officer', 'admin'])) {
     header("Location: ../login.php");
     exit;
 }
@@ -10,15 +10,44 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 // Initialize toastr messages
 $toastr_messages = [];
 
-// Fetch unpaid violations
+// Fetch user details
 $user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'];
 try {
-    $stmt = $pdo->prepare("SELECT v.id, t.violation_type, t.fine_amount, v.issued_date 
-                          FROM violations v 
-                          JOIN types t ON v.violation_type_id = t.id 
-                          WHERE v.user_id = ? AND v.is_paid = 0 
-                          ORDER BY v.issued_date DESC");
+    $stmt = $pdo->prepare("SELECT username, full_name FROM users WHERE id = ?");
     $stmt->execute([$user_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$user) {
+        $toastr_messages[] = "toastr.error('User not found.');";
+        file_put_contents('../debug.log', "User not found: ID=$user_id\n", FILE_APPEND);
+        header("Location: ../logout.php");
+        exit;
+    }
+} catch (PDOException $e) {
+    $toastr_messages[] = "toastr.error('Error fetching user details: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch User Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $user = ['username' => 'Unknown', 'full_name' => 'Unknown'];
+}
+
+// Fetch unpaid violations based on role
+try {
+    $query = "SELECT v.id, t.violation_type, t.fine_amount, v.issued_date 
+              FROM violations v 
+              JOIN types t ON v.violation_type_id = t.id 
+              WHERE v.is_paid = 0";
+    $params = [];
+
+    if ($role === 'user') {
+        $query .= " AND v.user_id = ?";
+        $params[] = $user_id;
+    } elseif ($role === 'officer') {
+        $query .= " AND v.officer_id = ?";
+        $params[] = $user_id;
+    } // Admin sees all, no additional WHERE clause
+
+    $query .= " ORDER BY v.issued_date DESC";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
     $unpaid_violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching unpaid violations: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
@@ -30,24 +59,51 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_violation'])) {
     try {
         $violation_id = trim($_POST['violation_id'] ?? '');
-        file_put_contents('../debug.log', "Pay Violation Input: violation_id='$violation_id'\n", FILE_APPEND);
+        file_put_contents('../debug.log', "Pay Violation Input: violation_id='$violation_id', user_id='$user_id', role='$role'\n", FILE_APPEND);
 
         if (empty($violation_id)) {
             $toastr_messages[] = "toastr.error('Violation ID is required.');";
         } else {
-            // Verify violation belongs to user
-            $stmt = $pdo->prepare("SELECT id FROM violations WHERE id = ? AND user_id = ? AND is_paid = 0");
-            $stmt->execute([$violation_id, $user_id]);
+            // Verify violation based on role
+            $query = "SELECT id FROM violations WHERE id = ? AND is_paid = 0";
+            $params = [$violation_id];
+            if ($role === 'user') {
+                $query .= " AND user_id = ?";
+                $params[] = $user_id;
+            } elseif ($role === 'officer') {
+                $query .= " AND officer_id = ?";
+                $params[] = $user_id;
+            } // Admin can pay any violation
+
+            $stmt = $pdo->prepare($query);
+            $stmt->execute($params);
             if ($stmt->fetch()) {
                 // Placeholder: Update is_paid (in production, integrate with payment gateway)
                 $stmt = $pdo->prepare("UPDATE violations SET is_paid = 1, or_number = ? WHERE id = ?");
                 $or_number = 'OR' . time(); // Simulated OR number
                 $success = $stmt->execute([$or_number, $violation_id]);
                 if ($success) {
-                    $toastr_messages[] = "toastr.success('Violation paid successfully (OR: $or_number).');";
+                    $toastr_messages[] = "Swal.fire({ title: 'Success!', text: 'Violation paid successfully (OR: $or_number).', icon: 'success', confirmButtonText: 'OK' });";
+                    // Refresh violations list
+                    $query = "SELECT v.id, t.violation_type, t.fine_amount, v.issued_date 
+                              FROM violations v 
+                              JOIN types t ON v.violation_type_id = t.id 
+                              WHERE v.is_paid = 0";
+                    $params = [];
+                    if ($role === 'user') {
+                        $query .= " AND v.user_id = ?";
+                        $params[] = $user_id;
+                    } elseif ($role === 'officer') {
+                        $query .= " AND v.officer_id = ?";
+                        $params[] = $user_id;
+                    }
+                    $query .= " ORDER BY v.issued_date DESC";
+                    $stmt = $pdo->prepare($query);
+                    $stmt->execute($params);
+                    $unpaid_violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 } else {
                     $toastr_messages[] = "toastr.error('Failed to process payment.');";
-                    file_put_contents('../debug.log', "Pay Violation Failed: No rows affected.\n", FILE_APPEND);
+                    file_put_contents('../debug.log', "Pay Violation Failed: No rows affected for violation_id='$violation_id'.\n", FILE_APPEND);
                 }
             } else {
                 $toastr_messages[] = "toastr.error('Invalid or already paid violation.');";
@@ -98,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_violation'])) {
                                             <tr class="table-row-hover">
                                                 <td>#V-<?php echo htmlspecialchars($violation['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
-                                                <td>$<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
+                                                <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars(date('d M Y', strtotime($violation['issued_date']))); ?></td>
                                                 <td>
                                                     <form method="POST" class="form-outline pay-violation-form" style="display: inline;">
