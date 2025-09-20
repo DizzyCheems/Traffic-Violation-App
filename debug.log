@@ -4147,3 +4147,839 @@ Session Data: Array
     [delete_success] => 1
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='90'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='sdfsd', user_id='', plate_number='ewfwe', reason='wefe', violation_type_id='17'
+Created new user: username='sdfsd', user_id='157'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Delete Violation Input: id='91'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', plate_number='ertert23', reason='ertergeg', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', plate_number='ertert23', reason='ertergeg', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', plate_number='ertert23', reason='ertergeg', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Delete Violation Input: id='95'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='94'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='93'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='sdfsd', user_id='157', plate_number='sdf', reason='wefew', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='96'
+Delete Violation Success: Redirecting to manage_violations.php?action=delete
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='dfgdfgerger', user_id='156', plate_number='ererger', reason='ergerg', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='dfgdfgerger', user_id='156', plate_number='ererger', reason='ergerg', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='dfgdfgerger', user_id='156', plate_number='ererger', reason='ergerg', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation POST: id='97'
+Delete Violation Query: Array
+(
+    [0] => 97
+    [1] => 5
+)
+
+Delete Violation Success: Redirecting to manage_violations.php?action=delete
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation POST: id='98'
+Delete Violation Query: Array
+(
+    [0] => 98
+    [1] => 5
+)
+
+Delete Violation Success: Redirecting to manage_violations.php?action=delete
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation POST: id='99'
+Delete Violation Query: Array
+(
+    [0] => 99
+    [1] => 5
+)
+
+Delete Violation Success: Redirecting to manage_violations.php?action=delete
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation POST: Array
+(
+    [create_violation] => 1
+    [user_id] => 153
+    [violator_name] => fwef
+    [plate_number] => dfgdfg
+    [violation_type_id] => 14
+    [reason] => ergre
+    [license_number] => gerge
+    [or_number] => erger
+    [issued_date] => 2025-09-20T10:22
+    [status] => Resolved
+    [notes] => erg
+)
+
+Create Violation Query: Array
+(
+    [0] => 5
+    [1] => 153
+    [2] => fwef
+    [3] => dfgdfg
+    [4] => ergre
+    [5] => 14
+    [6] => 0
+    [7] => gerge
+    [8] => 0
+    [9] => 0
+    [10] => erger
+    [11] => 2025-09-20T10:22
+    [12] => Resolved
+    [13] => erg
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation POST: id='25'
+Delete Violation Query: Array
+(
+    [0] => 25
+    [1] => 5
+)
+
+Delete Violation Success: Violation deleted.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation POST: Array
+(
+    [create_violation] => 1
+    [user_id] => 153
+    [violator_name] => fwef
+    [plate_number] => fhfg
+    [violation_type_id] => 14
+    [reason] => htrhrt
+    [license_number] => rthrth
+    [or_number] => shtr
+    [issued_date] => 2025-09-20T10:29
+    [status] => Resolved
+    [notes] => rhrt
+)
+
+Create Violation Query: Array
+(
+    [0] => 5
+    [1] => 153
+    [2] => fwef
+    [3] => fhfg
+    [4] => htrhrt
+    [5] => 14
+    [6] => 0
+    [7] => rthrth
+    [8] => 0
+    [9] => 0
+    [10] => shtr
+    [11] => 2025-09-20T10:29
+    [12] => Resolved
+    [13] => rhrt
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation POST: id='89'
+Delete Violation Query: Array
+(
+    [0] => 89
+    [1] => 5
+)
+
+Delete Violation Success: Violation deleted.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation POST: Array
+(
+    [create_violation] => 1
+    [user_id] => 156
+    [violator_name] => dfgdfgerger
+    [plate_number] => sdvd
+    [violation_type_id] => 14
+    [reason] => dsv
+    [license_number] => dv
+    [or_number] => sdv
+    [issued_date] => 2025-09-20T10:36
+    [status] => Resolved
+    [notes] => dv
+)
+
+Create Violation Query: Array
+(
+    [0] => 5
+    [1] => 156
+    [2] => dfgdfgerger
+    [3] => sdvd
+    [4] => dsv
+    [5] => 14
+    [6] => 0
+    [7] => dv
+    [8] => 0
+    [9] => 0
+    [10] => sdv
+    [11] => 2025-09-20T10:36
+    [12] => Resolved
+    [13] => dv
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetched Violations: 4 records for officer_id=5
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation POST: id='92'
+Delete Violation Query: Array
+(
+    [0] => 92
+    [1] => 5
+)
+
+Delete Violation Success: Violation deleted.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetched Violations: 3 records for officer_id=5
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation POST: Array
+(
+    [create_violation] => 1
+    [user_id] => 157
+    [violator_name] => sdfsd
+    [plate_number] => saf
+    [violation_type_id] => 14
+    [reason] => sdas
+    [license_number] => dasd
+    [or_number] => dssd
+    [issued_date] => 2025-09-20T10:44
+    [status] => Resolved
+    [notes] => sd
+)
+
+Create Violation Query: Array
+(
+    [0] => 5
+    [1] => 157
+    [2] => sdfsd
+    [3] => saf
+    [4] => sdas
+    [5] => 14
+    [6] => 0
+    [7] => dasd
+    [8] => 0
+    [9] => 0
+    [10] => dssd
+    [11] => 2025-09-20T10:44
+    [12] => Resolved
+    [13] => sd
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetched Violations: 4 records for officer_id=5
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', plate_number='sdfds', reason='wefwe', violation_type_id='14'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Delete Violation Input: id='104'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='100'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='dfgdfgerger', user_id='156', plate_number='dbdf', reason='dgdf', violation_type_id='17'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='dfgfd', user_id='', plate_number='gerg', reason='ergerg', violation_type_id='17'
+Created new user: username='dfgfd', user_id='158'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='106'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Edit Violation Input: id='105', violator_name='dfgdfgergersdf', plate_number='dbdf', reason='dgdf', violation_type_id='17'
+Edit Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [edit_success] => 1
+)
+
+Edit Violation Input: id='105', violator_name='dfgdfgergersdf', plate_number='dbdf', reason='dgdf', violation_type_id='17'
+Edit Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [edit_success] => 1
+)
+
+Delete Violation Input: id='105'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+

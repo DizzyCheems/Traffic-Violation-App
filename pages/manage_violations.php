@@ -135,8 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                     $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
                     $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
                     $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
-                    header("Location: manage_violations.php");
-                    exit;
                 } else {
                     $toastr_messages[] = "toastr.error('Failed to create violation.');";
                     file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
@@ -183,8 +181,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
                 $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
-                header("Location: manage_violations.php");
-                exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to update violation or you lack permission.');";
                 file_put_contents('../debug.log', "Edit Violation Failed: No rows affected.\n", FILE_APPEND);
@@ -751,7 +747,36 @@ try {
             }).then((result) => {
                 if (result.isConfirmed) {
                     console.log('Create violation form submission confirmed');
-                    this.submit();
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this)
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                title: 'Created!',
+                                text: 'Violation has been created successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Failed to create violation.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while creating the violation.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
                 } else {
                     console.log('Create violation form submission canceled');
                 }
@@ -830,7 +855,36 @@ try {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         console.log('Edit violation form submission confirmed');
-                        this.submit();
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: new FormData(this)
+                        }).then(response => {
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: 'Updated!',
+                                    text: 'Violation has been updated successfully.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Failed to update violation.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        }).catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred while updating the violation.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        });
                     } else {
                         console.log('Edit violation form submission canceled');
                     }
