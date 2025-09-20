@@ -2,13 +2,35 @@
 session_start();
 include '../config/conn.php';
 
-//if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
- //   header("Location: ../login.php");
-  //  exit;
-//}
+// Check if user is logged in and has a valid role
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'officer'])) {
+    header("Location: ../login.php");
+    exit;
+}
 
 // Initialize toastr messages
 $toastr_messages = [];
+
+// Function to generate a unique username
+function generateUniqueUsername($pdo, $base_username) {
+    $username = $base_username;
+    $attempt = 0;
+    $max_attempts = 100; // Limit to prevent infinite loops
+
+    while (true) {
+        $sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$username]);
+        if ($stmt->fetchColumn() == 0) {
+            return $username;
+        }
+        $attempt++;
+        if ($attempt >= $max_attempts) {
+            return false; // Unable to generate unique username
+        }
+        $username = $base_username . '_' . $attempt;
+    }
+}
 
 // Fetch violation types
 try {
@@ -37,14 +59,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_violation'])) {
             $toastr_messages[] = "toastr.error('Violation Type, Violator Name, and Reason are required.');";
         } elseif (strlen($violator_name) > 255 || strlen($plate_number) > 50) {
             $toastr_messages[] = "toastr.error('Violator Name or Plate Number exceeds maximum length.');";
+        } elseif (strlen($violator_name) > 50) {
+            $toastr_messages[] = "toastr.error('Violator Name exceeds maximum username length (50 characters).');";
         } else {
-            $stmt = $pdo->prepare("INSERT INTO violations (violation_type_id, violator_name, plate_number, reason, user_id, has_license, is_impounded, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)");
-            $success = $stmt->execute([$violation_type_id, htmlspecialchars($violator_name), htmlspecialchars($plate_number), htmlspecialchars($reason), $_SESSION['user_id'], $has_license, $is_impounded, $notes]);
-            if ($success) {
-                $toastr_messages[] = "toastr.success('Violation issued successfully.');";
+            // Check if user exists in users table
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE full_name = ?");
+            $stmt->execute([htmlspecialchars($violator_name)]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                // User exists, use their ID
+                $user_id = $user['id'];
+                $toastr_messages[] = "toastr.info('User already exists: " . addslashes(htmlspecialchars($violator_name)) . "');";
             } else {
-                $toastr_messages[] = "toastr.error('Failed to issue violation.');";
-                file_put_contents('../debug.log', "Issue Violation Failed: No rows affected.\n", FILE_APPEND);
+                // Create new user with role 'user'
+                $username = generateUniqueUsername($pdo, $violator_name);
+                if ($username === false) {
+                    $toastr_messages[] = "toastr.error('Failed to generate a unique username for the user.');";
+                    file_put_contents('../debug.log', "User Creation Failed: Could not generate unique username for '$violator_name'.\n", FILE_APPEND);
+                    $user_id = null;
+                } else {
+                    $password = 'x'; // Plain text password as requested
+                    $officer_id = ($_SESSION['role'] === 'officer') ? $_SESSION['user_id'] : null;
+                    $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id) VALUES (?, ?, ?, 'user', ?)");
+                    $success = $stmt->execute([htmlspecialchars($username), $password, htmlspecialchars($violator_name), $officer_id]);
+                    if ($success) {
+                        $user_id = $pdo->lastInsertId();
+                        $toastr_messages[] = "Swal.fire({ title: 'Success!', text: 'New user created: " . addslashes(htmlspecialchars($violator_name)) . "', icon: 'success', confirmButtonText: 'OK' });";
+                        file_put_contents('../debug.log', "New User Created: username='$username', user_id='$user_id', officer_id='$officer_id'\n", FILE_APPEND);
+                    } else {
+                        $toastr_messages[] = "toastr.error('Failed to create user account.');";
+                        file_put_contents('../debug.log', "User Creation Failed: No rows affected for '$violator_name'.\n", FILE_APPEND);
+                        $user_id = null;
+                    }
+                }
+            }
+
+            if ($user_id) {
+                // Insert violation with the user_id
+                $stmt = $pdo->prepare("INSERT INTO violations (violation_type_id, violator_name, plate_number, reason, user_id, has_license, is_impounded, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)");
+                $success = $stmt->execute([$violation_type_id, htmlspecialchars($violator_name), htmlspecialchars($plate_number), htmlspecialchars($reason), $user_id, $has_license, $is_impounded, $notes]);
+                if ($success) {
+                    $toastr_messages[] = "toastr.success('Violation issued successfully.');";
+                } else {
+                    $toastr_messages[] = "toastr.error('Failed to issue violation.');";
+                    file_put_contents('../debug.log', "Issue Violation Failed: No rows affected for user_id='$user_id'.\n", FILE_APPEND);
+                }
+            } else {
+                $toastr_messages[] = "toastr.error('Failed to issue violation due to user creation error.');";
             }
         }
     } catch (PDOException $e) {
@@ -60,7 +122,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['issue_violation'])) {
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
         <div class="row">
-            <?php include '../layout/menubar.php'; ?>
+            <?php
+            // Conditional menubar include based on user role
+            if ($_SESSION['role'] === 'admin') {
+                include '../layout/menubar.php';
+            } elseif ($_SESSION['role'] === 'officer') {
+                include '../layout/officer_menubar.php';
+            }
+            ?>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Issue Traffic Violation</h1>

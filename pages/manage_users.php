@@ -2,6 +2,12 @@
 session_start();
 include '../config/conn.php';
 
+// Check if user is logged in and has a valid role
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'officer', 'user'])) {
+    header("Location: ../login.php");
+    exit;
+}
+
 // Initialize toastr messages
 $toastr_messages = [];
 
@@ -13,7 +19,16 @@ if (isset($_SESSION['create_success']) && $_SESSION['create_success']) {
         icon: 'success',
         confirmButtonText: 'OK'
     });";
-    unset($_SESSION['create_success']); // Clear the session variable
+    unset($_SESSION['create_success']);
+}
+if (isset($_SESSION['edit_success']) && $_SESSION['edit_success']) {
+    $toastr_messages[] = "Swal.fire({
+        title: 'Updated!',
+        text: 'User has been updated successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });";
+    unset($_SESSION['edit_success']);
 }
 if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
     $toastr_messages[] = "Swal.fire({
@@ -22,7 +37,7 @@ if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
         icon: 'success',
         confirmButtonText: 'OK'
     });";
-    unset($_SESSION['delete_success']); // Clear the session variable
+    unset($_SESSION['delete_success']);
 }
 
 // Function to check if username exists (case-insensitive)
@@ -40,8 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
         $password = trim($_POST['password'] ?? '');
         $full_name = trim($_POST['full_name'] ?? '');
         $role = trim($_POST['role'] ?? '');
+        $officer_id = ($_SESSION['role'] === 'officer' && $role === 'user') ? $_SESSION['user_id'] : null;
 
-        file_put_contents('../debug.log', "Create User Input: username='$username', full_name='$full_name', role='$role'\n", FILE_APPEND);
+        file_put_contents('../debug.log', "Create User Input: username='$username', full_name='$full_name', role='$role', officer_id='$officer_id'\n", FILE_APPEND);
 
         if (empty($username) || empty($password) || empty($full_name) || empty($role)) {
             $toastr_messages[] = "toastr.error('All fields are required.');";
@@ -52,12 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
         } elseif (usernameExists($pdo, $username)) {
             $toastr_messages[] = "toastr.error('Username already exists (case-insensitive).');";
         } else {
-            // Note: In production, use password_hash($password, PASSWORD_DEFAULT)
-            $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, ?)");
-            $success = $stmt->execute([htmlspecialchars($username), $password, htmlspecialchars($full_name), $role]);
+            $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id) VALUES (?, ?, ?, ?, ?)");
+            $success = $stmt->execute([htmlspecialchars($username), password_hash($password, PASSWORD_DEFAULT), htmlspecialchars($full_name), $role, $officer_id]);
             if ($success) {
-                $_SESSION['create_success'] = true; // Set session variable for success message
-                header("Location: manage_users.php"); // Redirect to clear POST data
+                $_SESSION['create_success'] = true;
+                header("Location: manage_users.php");
                 exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create user.');";
@@ -78,8 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
         $full_name = trim($_POST['full_name'] ?? '');
         $role = trim($_POST['role'] ?? '');
         $password = trim($_POST['password'] ?? '');
+        $officer_id = ($_SESSION['role'] === 'officer' && $role === 'user') ? $_SESSION['user_id'] : null;
 
-        file_put_contents('../debug.log', "Edit User Input: id='$id', username='$username', full_name='$full_name', role='$role'\n", FILE_APPEND);
+        file_put_contents('../debug.log', "Edit User Input: id='$id', username='$username', full_name='$full_name', role='$role', officer_id='$officer_id'\n", FILE_APPEND);
 
         if (empty($id) || empty($username) || empty($full_name) || empty($role)) {
             $toastr_messages[] = "toastr.error('ID, Username, Full Name, and Role are required.');";
@@ -90,18 +106,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
         } elseif (usernameExists($pdo, $username, $id)) {
             $toastr_messages[] = "toastr.error('Username already exists (case-insensitive).');";
         } else {
-            $sql = "UPDATE users SET username = ?, full_name = ?, role = ?";
-            $params = [htmlspecialchars($username), htmlspecialchars($full_name), $role];
+            $sql = "UPDATE users SET username = ?, full_name = ?, role = ?, officer_id = ?";
+            $params = [htmlspecialchars($username), htmlspecialchars($full_name), $role, $officer_id];
             if (!empty($password)) {
                 $sql .= ", password = ?";
-                $params[] = $password; // Use password_hash in production
+                $params[] = password_hash($password, PASSWORD_DEFAULT);
             }
             $sql .= " WHERE id = ?";
             $params[] = $id;
             $stmt = $pdo->prepare($sql);
             $success = $stmt->execute($params);
             if ($success) {
-                $toastr_messages[] = "toastr.success('User updated successfully.');";
+                $_SESSION['edit_success'] = true;
+                header("Location: manage_users.php");
+                exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to update user.');";
                 file_put_contents('../debug.log', "Edit User Failed: No rows affected.\n", FILE_APPEND);
@@ -125,15 +143,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
         } elseif ($id == $_SESSION['user_id']) {
             $toastr_messages[] = "toastr.error('Cannot delete your own account.');";
         } else {
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-            $success = $stmt->execute([$id]);
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND (officer_id = ? OR officer_id IS NULL OR ? = 'admin')");
+            $success = $stmt->execute([$id, $_SESSION['user_id'], $_SESSION['role']]);
             if ($success) {
-                $_SESSION['delete_success'] = true; // Set session variable for success message
-                header("Location: manage_users.php"); // Redirect to clear POST data
+                $_SESSION['delete_success'] = true;
+                header("Location: manage_users.php");
                 exit;
             } else {
-                $toastr_messages[] = "toastr.error('Failed to delete user.');";
-                file_put_contents('../debug.log', "Delete User Failed: No rows affected.\n", FILE_APPEND);
+                $toastr_messages[] = "toastr.error('Failed to delete user or you lack permission.');";
+                file_put_contents('../debug.log', "Delete User Failed: No rows affected or permission denied.\n", FILE_APPEND);
             }
         }
     } catch (PDOException $e) {
@@ -144,7 +162,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
 
 // Fetch users
 try {
-    $stmt = $pdo->query("SELECT id, username, full_name, role, created_at FROM users ORDER BY created_at DESC");
+    $sql = "SELECT id, username, full_name, role, created_at FROM users";
+    $params = [];
+    if ($_SESSION['role'] === 'officer') {
+        $sql .= " WHERE officer_id = ? OR id = ?";
+        $params = [$_SESSION['user_id'], $_SESSION['user_id']];
+    }
+    $sql .= " ORDER BY created_at DESC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching users: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
@@ -159,7 +185,7 @@ try {
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
         <div class="row">
-            <?php include '../layout/menubar.php'; ?>
+            <?php include '../layout/officer_menubar.php'; ?>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
                     <h1 class="h2 text-primary">Manage Users</h1>
@@ -319,7 +345,7 @@ try {
         // Function to attach delete form event listeners
         function attachDeleteFormListeners() {
             console.log('Attaching delete form listeners');
-            document.removeEventListener('submit', handleDeleteFormSubmit); // Remove existing listener to prevent duplicates
+            document.removeEventListener('submit', handleDeleteFormSubmit);
             document.addEventListener('submit', handleDeleteFormSubmit);
         }
 

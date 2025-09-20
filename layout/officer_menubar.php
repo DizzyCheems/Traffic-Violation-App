@@ -7,12 +7,8 @@
                     <span>Officer Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="../pages/issue_violation.php">
-                    <i class="fas fa-ticket-alt me-2"></i>
-                    <span>Issue Violation</span>
-                </a>
-            </li>
+
+            
             <li class="nav-item">
                 <a class="nav-link" href="../pages/manage_violations.php">
                     <i class="fas fa-list-alt me-2"></i>

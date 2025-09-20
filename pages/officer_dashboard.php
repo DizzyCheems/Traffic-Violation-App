@@ -371,12 +371,8 @@ foreach ($violations as $violation) {
                                 Issue Violation
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/all_violations.php">
-                                <i class="fas fa-list me-2"></i>
-                                All Violations
-                            </a>
-                        </li>
+
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>
@@ -423,12 +419,8 @@ foreach ($violations as $violation) {
                                 Issue Violation
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/all_violations.php">
-                                <i class="fas fa-list me-2"></i>
-                                All Violations
-                            </a>
-                        </li>
+
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>

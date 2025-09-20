@@ -3626,3 +3626,249 @@ Create User Input: username='qewq', full_name='dqd', role='user'
 Delete User Input: id='148'
 Delete User Input: id='149'
 Edit User Input: id='146', username='sfdsdf', full_name='sdfsd', role='officer'
+Edit User Input: id='146', username='sfdsdf', full_name='sdfsdsfwef', role='officer'
+Create User Input: username='ergerg', full_name='dfdsf', role='user'
+Create User Input: username='wefwdfsd', full_name='sdfsdf', role='user'
+Delete User Input: id='150'
+Login.php accessed: 2025-09-18 15:53:46
+Login.php accessed: 2025-09-18 15:54:12
+Login successful for user_id: 1, role: admin
+Delete Violation Type Input: id='13'
+Delete Violation Type Input: id='112'
+Delete Violation Type Input: id='112'
+Delete Violation Type Failed: No rows affected.
+Delete Violation Type Input: id='110'
+Delete Violation Type Input: id='110'
+Delete Violation Type Failed: No rows affected.
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Officer Performance Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.violation_id' in 'on clause'
+Login.php accessed: 2025-09-18 15:56:48
+Login.php accessed: 2025-09-18 15:58:07
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 15:58:16
+Login.php accessed: 2025-09-18 15:59:59
+Login.php accessed: 2025-09-18 16:00:28
+Login.php accessed: 2025-09-18 16:00:33
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-18 16:00:41
+Login.php accessed: 2025-09-18 16:00:45
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:00:55
+Login.php accessed: 2025-09-18 16:01:00
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-18 16:01:08
+Login.php accessed: 2025-09-18 16:02:02
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:02:17
+Login.php accessed: 2025-09-18 16:02:22
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:03:13
+Login.php accessed: 2025-09-18 16:03:19
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Type Input: violation_type='No Helmet', fine_amount='1000', description=''
+Create Violation Type Query Params: Array
+(
+    [0] => No Helmet
+    [1] => 1000
+    [2] => 
+)
+
+Issue Violation Input: violation_type_id='115', violator_name='John', plate_number='OIO123', reason='No helmet', has_license='1', is_impounded='1'
+Login.php accessed: 2025-09-18 16:05:26
+Login.php accessed: 2025-09-18 16:05:30
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:06:44
+Login.php accessed: 2025-09-18 16:06:48
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-18 16:07:51
+Login.php accessed: 2025-09-18 16:07:56
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:11:51
+Login.php accessed: 2025-09-18 16:12:09
+Login.php accessed: 2025-09-18 16:15:43
+Login.php accessed: 2025-09-18 16:15:55
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:16:01
+Login.php accessed: 2025-09-18 16:16:07
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Issue Violation Input: violation_type_id='13', violator_name='Gaben', plate_number='XVC123', reason='Over Speeding', has_license='0', is_impounded='0'
+Login.php accessed: 2025-09-18 16:17:20
+Login.php accessed: 2025-09-18 16:17:25
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-18 16:23:01
+Login.php accessed: 2025-09-18 16:23:05
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-18 16:34:41
+Login.php accessed: 2025-09-20 07:30:18
+Login.php accessed: 2025-09-20 07:30:24
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Issue Violation Input: violation_type_id='14', violator_name='URNCVN', plate_number='09795746', reason='EW213', has_license='1', is_impounded='0'
+New User Created: username='urncvn_68ce43ce2fd3b', user_id='152', officer_id='5'
+Issue Violation Input: violation_type_id='14', violator_name='URNCVN', plate_number='09795746', reason='EW213', has_license='1', is_impounded='0'
+Issue Violation Input: violation_type_id='14', violator_name='fwef', plate_number='sf1231', reason='ewrwefsvv', has_license='1', is_impounded='0'
+New User Created: username='fwef', user_id='153', officer_id='5'
+Issue Violation Input: violation_type_id='14', violator_name='YYEBH', plate_number='YXG123', reason='qwe', has_license='1', is_impounded='0'
+New User Created: username='YYEBH', user_id='154', officer_id='5'
+Login.php accessed: 2025-09-20 08:19:24
+Login.php accessed: 2025-09-20 08:19:26
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Login.php accessed: 2025-09-20 08:29:40
+Login.php accessed: 2025-09-20 08:29:43
+Login successful for user_id: 4, role: user
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Recent Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: concern_text='DSGSD'
+Report Concern Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: user_id='4', concern_text='GREGD'
+Report Concern Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: user_id='4', concern_text='GREGD'
+Report Concern Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'concern_text' in 'field list'
+Report Concern Input: user_id='4', description='YYA'

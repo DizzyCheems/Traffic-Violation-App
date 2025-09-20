@@ -61,48 +61,70 @@ try {
     $open_concerns = 0;
 }
 
-// Fetch recent violations
+// Fetch all violations grouped by violation type
 try {
-    $stmt = $pdo->prepare("SELECT v.id, v.violation_type_id, t.violation_type, t.fine_amount, v.issued_date, v.is_paid 
-                          FROM violations v 
-                          JOIN types t ON v.violation_type_id = t.id 
-                          WHERE v.user_id = ? 
-                          ORDER BY v.issued_date DESC LIMIT 5");
+    $stmt = $pdo->prepare("
+        SELECT v.id, v.violation_type_id, COALESCE(t.violation_type, 'Unknown Type') AS violation_type, 
+               COALESCE(t.fine_amount, 0.00) AS fine_amount, v.issued_date, v.is_paid 
+        FROM violations v 
+        LEFT JOIN types t ON v.violation_type_id = t.id 
+        WHERE v.user_id = ? 
+        ORDER BY COALESCE(t.violation_type, 'Unknown Type'), v.issued_date DESC
+    ");
     $stmt->execute([$user_id]);
-    $recent_violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Group violations by violation_type_id
+    $grouped_violations = [];
+    foreach ($violations as $violation) {
+        $type_id = $violation['violation_type_id'] ?: 'unknown';
+        if (!isset($grouped_violations[$type_id])) {
+            $grouped_violations[$type_id] = [
+                'violation_type' => $violation['violation_type'],
+                'violations' => []
+            ];
+        }
+        $grouped_violations[$type_id]['violations'][] = $violation;
+    }
 } catch (PDOException $e) {
-    $toastr_messages[] = "toastr.error('Error fetching recent violations: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-    file_put_contents('../debug.log', "Fetch Recent Violations Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $recent_violations = [];
+    $toastr_messages[] = "toastr.error('Error fetching violations: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Violations Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $grouped_violations = [];
 }
 
-// Fetch recent concerns
+// Fetch all concerns
 try {
-    $stmt = $pdo->prepare("SELECT id, concern_text, status, created_at FROM concerns WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+    $stmt = $pdo->prepare("SELECT id, description, status, created_at FROM concerns WHERE user_id = ? ORDER BY created_at DESC");
     $stmt->execute([$user_id]);
-    $recent_concerns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $concerns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $toastr_messages[] = "toastr.error('Error fetching recent concerns: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-    file_put_contents('../debug.log', "Fetch Recent Concerns Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $recent_concerns = [];
+    $toastr_messages[] = "toastr.error('Error fetching concerns: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Concerns Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $concerns = [];
 }
 
 // Handle report concern
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_concern'])) {
     try {
-        $concern_text = trim($_POST['concern_text'] ?? '');
-        file_put_contents('../debug.log', "Report Concern Input: concern_text='$concern_text'\n", FILE_APPEND);
+        $description = trim($_POST['description'] ?? '');
+        file_put_contents('../debug.log', "Report Concern Input: user_id='$user_id', description='$description'\n", FILE_APPEND);
 
-        if (empty($concern_text)) {
+        if (empty($description)) {
             $toastr_messages[] = "toastr.error('Concern description is required.');";
+        } elseif (strlen($description) > 65535) { // TEXT column limit
+            $toastr_messages[] = "toastr.error('Concern description is too long.');";
         } else {
-            $stmt = $pdo->prepare("INSERT INTO concerns (user_id, concern_text, status) VALUES (?, ?, 'OPEN')");
-            $success = $stmt->execute([$user_id, htmlspecialchars($concern_text)]);
+            $stmt = $pdo->prepare("INSERT INTO concerns (user_id, description, status, created_at) VALUES (?, ?, 'OPEN', NOW())");
+            $success = $stmt->execute([$user_id, htmlspecialchars($description)]);
             if ($success) {
-                $toastr_messages[] = "toastr.success('Concern reported successfully.');";
+                $toastr_messages[] = "Swal.fire({ title: 'Success!', text: 'Concern reported successfully.', icon: 'success', confirmButtonText: 'OK' });";
+                // Refresh concerns list
+                $stmt = $pdo->prepare("SELECT id, description, status, created_at FROM concerns WHERE user_id = ? ORDER BY created_at DESC");
+                $stmt->execute([$user_id]);
+                $concerns = $stmt->fetchAll(PDO::FETCH_ASSOC);
             } else {
                 $toastr_messages[] = "toastr.error('Failed to report concern.');";
-                file_put_contents('../debug.log', "Report Concern Failed: No rows affected.\n", FILE_APPEND);
+                file_put_contents('../debug.log', "Report Concern Failed: No rows affected for user_id='$user_id'.\n", FILE_APPEND);
             }
         }
     } catch (PDOException $e) {
@@ -116,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
     try {
         $violation_id = trim($_POST['violation_id'] ?? '');
         $appeal_text = trim($_POST['appeal_text'] ?? '');
-        file_put_contents('../debug.log', "Apply Appeal Input: violation_id='$violation_id', appeal_text='$appeal_text'\n", FILE_APPEND);
+        file_put_contents('../debug.log', "Apply Appeal Input: user_id='$user_id', violation_id='$violation_id', appeal_text='$appeal_text'\n", FILE_APPEND);
 
         if (empty($violation_id) || empty($appeal_text)) {
             $toastr_messages[] = "toastr.error('Violation ID and appeal description are required.');";
@@ -125,13 +147,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
             $stmt = $pdo->prepare("SELECT id FROM violations WHERE id = ? AND user_id = ?");
             $stmt->execute([$violation_id, $user_id]);
             if ($stmt->fetch()) {
-                $stmt = $pdo->prepare("INSERT INTO concerns (user_id, concern_text, status) VALUES (?, ?, 'PENDING')");
+                $stmt = $pdo->prepare("INSERT INTO concerns (user_id, description, status, created_at) VALUES (?, ?, 'PENDING', NOW())");
                 $success = $stmt->execute([$user_id, htmlspecialchars("Appeal for Violation #$violation_id: $appeal_text")]);
                 if ($success) {
-                    $toastr_messages[] = "toastr.success('Appeal submitted successfully.');";
+                    $toastr_messages[] = "Swal.fire({ title: 'Success!', text: 'Appeal submitted successfully.', icon: 'success', confirmButtonText: 'OK' });";
+                    // Refresh concerns list
+                    $stmt = $pdo->prepare("SELECT id, description, status, created_at FROM concerns WHERE user_id = ? ORDER BY created_at DESC");
+                    $stmt->execute([$user_id]);
+                    $concerns = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 } else {
                     $toastr_messages[] = "toastr.error('Failed to submit appeal.');";
-                    file_put_contents('../debug.log', "Apply Appeal Failed: No rows affected.\n", FILE_APPEND);
+                    file_put_contents('../debug.log', "Apply Appeal Failed: No rows affected for user_id='$user_id'.\n", FILE_APPEND);
                 }
             } else {
                 $toastr_messages[] = "toastr.error('Invalid or unauthorized violation ID.');";
@@ -270,9 +296,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">My Overview</h5>
-                                <p class="card-text">Unpaid Violations: <?php echo htmlspecialchars($unpaid_violations); ?> <a href="#recent-violations" class="text-decoration-none link-primary">[View]</a></p>
-                                <p class="card-text">Pending Appeals: <?php echo htmlspecialchars($pending_appeals); ?> <a href="#recent-concerns" class="text-decoration-none link-primary">[View]</a></p>
-                                <p class="card-text">Open Concerns: <?php echo htmlspecialchars($open_concerns); ?> <a href="#recent-concerns" class="text-decoration-none link-primary">[View]</a></p>
+                                <p class="card-text">Unpaid Violations: <?php echo htmlspecialchars($unpaid_violations); ?> <a href="#violations" class="text-decoration-none link-primary">[View]</a></p>
+                                <p class="card-text">Pending Appeals: <?php echo htmlspecialchars($pending_appeals); ?> <a href="#concerns" class="text-decoration-none link-primary">[View]</a></p>
+                                <p class="card-text">Open Concerns: <?php echo htmlspecialchars($open_concerns); ?> <a href="#concerns" class="text-decoration-none link-primary">[View]</a></p>
                             </div>
                         </div>
                     </div>
@@ -291,49 +317,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                     </div>
                 </div>
 
-                <!-- Recent Violations -->
-                <div class="card mb-4 shadow-sm" id="recent-violations">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Recent Violations</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Violation ID</th>
-                                        <th>Type</th>
-                                        <th>Fine</th>
-                                        <th>Issued</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($recent_violations)): ?>
-                                        <tr><td colspan="5" class="text-center text-muted">No violations found</td></tr>
-                                    <?php else: ?>
-                                        <?php foreach ($recent_violations as $violation): ?>
-                                            <tr class="table-row-hover">
-                                                <td>#V-<?php echo htmlspecialchars($violation['id']); ?></td>
-                                                <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
-                                                <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
-                                                <td><?php echo htmlspecialchars(date('d M Y', strtotime($violation['issued_date']))); ?></td>
-                                                <td>
-                                                    <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
-                                                        <?php echo $violation['is_paid'] ? 'Paid ✅' : 'Unpaid'; ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
+                <!-- Violations by Type -->
+                <div class="mb-4" id="violations">
+                    <h3 class="text-primary mb-3">My Violations</h3>
+                    <?php if (empty($grouped_violations)): ?>
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <p class="text-center text-muted">No violations found</p>
+                            </div>
                         </div>
-                    </div>
+                    <?php else: ?>
+                        <?php foreach ($grouped_violations as $type_id => $group): ?>
+                            <div class="card mb-4 shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <h4 class="mb-0"><?php echo htmlspecialchars($group['violation_type']); ?> Violations</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Violation ID</th>
+                                                    <th>Type</th>
+                                                    <th>Fine</th>
+                                                    <th>Issued</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($group['violations'] as $violation): ?>
+                                                    <tr class="table-row-hover">
+                                                        <td>#V-<?php echo htmlspecialchars($violation['id']); ?></td>
+                                                        <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
+                                                        <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
+                                                        <td><?php echo htmlspecialchars($violation['issued_date'] ? date('d M Y', strtotime($violation['issued_date'])) : 'N/A'); ?></td>
+                                                        <td>
+                                                            <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
+                                                                <?php echo $violation['is_paid'] ? 'Paid ✅' : 'Unpaid'; ?>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
-                <!-- Recent Concerns -->
-                <div class="card mb-4 shadow-sm" id="recent-concerns">
+                <!-- All Concerns -->
+                <div class="card mb-4 shadow-sm" id="concerns">
                     <div class="card-header bg-primary text-white">
                         <h3 class="mb-0">Road Concerns</h3>
                     </div>
@@ -349,13 +384,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (empty($recent_concerns)): ?>
+                                    <?php if (empty($concerns)): ?>
                                         <tr><td colspan="4" class="text-center text-muted">No concerns found</td></tr>
                                     <?php else: ?>
-                                        <?php foreach ($recent_concerns as $concern): ?>
+                                        <?php foreach ($concerns as $concern): ?>
                                             <tr class="table-row-hover">
                                                 <td>#C-<?php echo htmlspecialchars($concern['id']); ?></td>
-                                                <td><?php echo htmlspecialchars($concern['concern_text'] ?: 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($concern['description'] ?: 'N/A'); ?></td>
                                                 <td>
                                                     <span class="badge <?php echo $concern['status'] === 'OPEN' ? 'bg-warning text-dark' : ($concern['status'] === 'PENDING' ? 'bg-info text-dark' : 'bg-success'); ?>">
                                                         <?php echo htmlspecialchars($concern['status']); ?> 
@@ -384,8 +419,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                                 <form method="POST" class="form-outline" id="reportConcernForm">
                                     <input type="hidden" name="report_concern" value="1">
                                     <div class="mb-3">
-                                        <textarea class="form-control" name="concern_text" id="concern_text" required rows="4"></textarea>
-                                        <label class="form-label" for="concern_text">Concern Description</label>
+                                        <textarea class="form-control" name="description" id="description" required rows="4"></textarea>
+                                        <label class="form-label" for="description">Concern Description</label>
                                         <div class="invalid-feedback">Please enter a concern description.</div>
                                     </div>
                                     <button type="submit" name="report_concern" class="btn btn-primary">Submit Concern</button>
@@ -409,7 +444,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                                     <div class="mb-3">
                                         <select class="form-select" name="violation_id" id="violation_id" required>
                                             <option value="" disabled selected>Select Violation</option>
-                                            <?php foreach ($recent_violations as $violation): ?>
+                                            <?php foreach ($violations as $violation): ?>
                                                 <option value="<?php echo htmlspecialchars($violation['id']); ?>">
                                                     #V-<?php echo htmlspecialchars($violation['id']); ?> - <?php echo htmlspecialchars($violation['violation_type']); ?>
                                                 </option>
@@ -446,10 +481,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
 
         document.getElementById('reportConcernForm').addEventListener('submit', function(e) {
             console.log('Report concern form submission attempted');
-            const concernText = document.getElementById('concern_text').value.trim();
+            const description = document.getElementById('description').value.trim();
 
-            if (!concernText) {
-                document.getElementById('concern_text').classList.add('is-invalid');
+            if (!description) {
+                document.getElementById('description').classList.add('is-invalid');
                 console.log('Client-side validation failed for report concern');
                 e.preventDefault();
                 return;
