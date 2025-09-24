@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 18, 2025 at 04:20 PM
+-- Generation Time: Sep 24, 2025 at 03:07 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -80,7 +80,8 @@ INSERT INTO `appeals` (`id`, `violation_id`, `user_id`, `appeal_reason`, `status
 (35, 3, 1, 'Additional evidence for malfunctioning signal', 'PENDING', 'Awaiting further review', '2025-08-22 02:00:00', '2025-08-22 02:00:00'),
 (36, 3, 1, 'I believe the traffic signal was malfunctioning.', 'PENDING', 'Under review by officer', '2025-08-21 01:00:00', '2025-08-21 01:00:00'),
 (37, 4, 2, 'I had a helmet but it fell off during the ride.', 'REJECTED', 'Evidence shows no helmet at time of violation', '2025-08-26 03:00:00', '2025-08-27 06:30:00'),
-(38, 3, 1, 'Additional evidence for malfunctioning signal', 'PENDING', 'Awaiting further review', '2025-08-22 02:00:00', '2025-08-22 02:00:00');
+(38, 3, 1, 'Additional evidence for malfunctioning signal', 'PENDING', 'Awaiting further review', '2025-08-22 02:00:00', '2025-08-22 02:00:00'),
+(39, 1, 4, 'BAKIT !', 'PENDING', NULL, '2025-09-20 06:53:02', '2025-09-20 06:53:02');
 
 -- --------------------------------------------------------
 
@@ -240,7 +241,10 @@ INSERT INTO `concerns` (`id`, `user_id`, `description`, `status`, `created_at`) 
 (63, 2, 'Broken traffic light at España Blvd', 'IN_PROGRESS', '2025-08-15 02:30:00'),
 (64, 1, 'Pothole on Quezon Avenue near EDSA', 'OPEN', '2025-08-16 01:00:00'),
 (65, 3, 'Streetlight outage in Makati CBD', 'RESOLVED', '2025-08-20 04:00:00'),
-(66, 6, 'Illegal parking issues in BGC', 'OPEN', '2025-08-28 07:00:00');
+(66, 6, 'Illegal parking issues in BGC', 'OPEN', '2025-08-28 07:00:00'),
+(67, 4, 'YYA', 'OPEN', '2025-09-20 06:38:56'),
+(68, 4, 'Appeal for Violation #25: asd', '', '2025-09-20 06:46:00'),
+(69, 4, 'Appeal for Violation #25: Huh bakit?', '', '2025-09-20 06:49:14');
 
 -- --------------------------------------------------------
 
@@ -642,26 +646,36 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `full_name` varchar(255) NOT NULL,
   `role` enum('officer','admin','user') DEFAULT 'officer',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `officer_id` text DEFAULT NULL,
+  `email` text DEFAULT NULL,
+  `contact_number` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `created_at`) VALUES
-(1, 'Admin', 'admin', 'Admin', 'admin', '2025-08-30 10:38:10'),
-(4, 'User', 'user', 'User', 'user', '2025-08-30 10:38:10'),
-(5, 'Officer', 'officer', 'officer', 'officer', '2025-08-30 10:38:10'),
-(27, 'juan_dela_cruz', '123', 'Juan Dela Cruz', 'user', '2024-01-01 00:00:00'),
-(28, 'maria_santos', '123', 'Maria Santos', 'user', '2024-02-15 01:30:00'),
-(29, 'officer_lopez', '123', 'Pedro Lopez', 'officer', '2024-03-10 02:00:00'),
-(30, 'admin_garcia', '123', 'Ana Garcia', 'admin', '2024-04-05 03:15:00'),
-(31, 'officer_reyes', '123', 'Carlos Reyes', 'officer', '2024-05-20 04:00:00'),
-(32, 'jose_mercado', '123', 'Jose Mercado', 'user', '2024-06-01 05:45:00'),
-(144, 'rthtj', '123', 'tyjhk', 'user', '2025-09-14 04:12:43'),
-(146, 'sfdsdf', '123', 'sdfsdsfwef', 'officer', '2025-09-14 04:23:37'),
-(151, 'wefwdfsd', '123', 'sdfsdf', 'user', '2025-09-14 04:32:06');
+INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `role`, `created_at`, `officer_id`, `email`, `contact_number`) VALUES
+(1, 'Admin', 'admin', 'Admin', 'admin', '2025-08-30 10:38:10', NULL, NULL, NULL),
+(4, 'User', 'user', 'User', 'user', '2025-08-30 10:38:10', NULL, NULL, NULL),
+(5, 'Officer', 'officer', 'officer', 'officer', '2025-08-30 10:38:10', NULL, NULL, NULL),
+(27, 'juan_dela_cruz', '123', 'Juan Dela Cruz', 'user', '2024-01-01 00:00:00', '5', NULL, NULL),
+(28, 'maria_santos', '123', 'Maria Santos', 'user', '2024-02-15 01:30:00', NULL, NULL, NULL),
+(29, 'officer_lopez', '123', 'Pedro Lopez', 'officer', '2024-03-10 02:00:00', NULL, NULL, NULL),
+(30, 'admin_garcia', '123', 'Ana Garcia', 'admin', '2024-04-05 03:15:00', NULL, NULL, NULL),
+(31, 'officer_reyes', '123', 'Carlos Reyes', 'officer', '2024-05-20 04:00:00', NULL, NULL, NULL),
+(32, 'jose_mercado', '123', 'Jose Mercado', 'user', '2024-06-01 05:45:00', NULL, NULL, NULL),
+(144, 'rthtj', '123', 'tyjhk', 'user', '2025-09-14 04:12:43', NULL, NULL, NULL),
+(146, 'sfdsdf', '123', 'sdfsdsfwef', 'officer', '2025-09-14 04:23:37', NULL, NULL, NULL),
+(151, 'wefwdfsd', '123', 'sdfsdf', 'user', '2025-09-14 04:32:06', NULL, NULL, NULL),
+(153, 'fwef', 'x', 'fwef', 'user', '2025-09-20 06:09:16', '5', NULL, NULL),
+(154, 'YYEBH', 'x', 'YYEBH', 'user', '2025-09-20 06:17:27', '5', NULL, NULL),
+(156, 'dfgdfgerger', 'x', 'dfgdfgerger', 'user', '2025-09-20 07:45:09', '5', NULL, NULL),
+(157, 'sdfsd', 'x', 'sdfsd', 'user', '2025-09-20 07:54:22', '5', NULL, NULL),
+(158, 'dfgfd', 'x', 'dfgfd', 'user', '2025-09-20 08:56:10', '5', NULL, NULL),
+(159, 'sdfe', 'x', 'sdfe', 'user', '2025-09-20 09:24:48', '5', 'rgrg@sdfg.com', 0),
+(160, 'fef', 'x', 'fef', 'user', '2025-09-20 09:25:24', '5', NULL, 980879978);
 
 -- --------------------------------------------------------
 
@@ -685,96 +699,106 @@ CREATE TABLE `violations` (
   `or_number` varchar(50) DEFAULT NULL,
   `issued_date` datetime DEFAULT NULL,
   `status` text DEFAULT NULL,
-  `notes` text DEFAULT NULL
+  `notes` text DEFAULT NULL,
+  `officer_id` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `violations`
 --
 
-INSERT INTO `violations` (`id`, `violator_name`, `plate_number`, `remarks`, `reason`, `violation_type_id`, `user_id`, `issue_date`, `has_license`, `license_number`, `is_impounded`, `is_paid`, `or_number`, `issued_date`, `status`, `notes`) VALUES
-(1, 'fs', '95XD', NULL, 'BAWAL TAE!', '9', '4', '2025-08-31 03:41:12', 0, '1WT5224', 1, 1, 'OR1756676042', '2025-08-31 05:40:00', 'Pending', 'GDG'),
-(2, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '3', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(3, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '2', '3', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(4, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '3', '5', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(5, 'Juan Dela Cruz', 'GHI789', NULL, 'No helmet on motorcycle', '4', '3', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(6, 'Maria Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '5', '5', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(7, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(8, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(9, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(10, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(11, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(12, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(13, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(14, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(15, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(16, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(17, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(18, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(19, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(20, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(21, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(22, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(23, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(24, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(25, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(26, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(27, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(28, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(29, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(30, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(31, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(32, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(33, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(34, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(35, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(36, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(37, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(38, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(39, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(40, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(41, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(42, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(43, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(44, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(45, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(46, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(47, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(48, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(49, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(50, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(51, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(52, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(53, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(54, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(55, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(56, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(57, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(58, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(59, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(60, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(61, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(62, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(63, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(64, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(65, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(66, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(67, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(68, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(69, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(70, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(71, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(72, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(73, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense'),
-(74, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot'),
-(75, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green'),
-(76, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded'),
-(77, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results'),
-(78, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense'),
-(79, 'John', '0678678', NULL, '124', '14', '5', '2025-09-01 08:56:55', 0, NULL, 0, 0, '07897', '2025-09-01 10:56:00', 'Pending', 'Kadto LTO office'),
-(80, 'Eddie', 'GED23', NULL, 'Dasig Dasig gid!', '13', '5', '2025-09-13 13:15:28', 1, NULL, 0, 0, NULL, NULL, 'Pending', 'Pay Fine'),
-(81, 'John', 'OIO123', NULL, 'No helmet', '115', '5', '2025-09-18 14:05:08', 1, NULL, 1, 0, NULL, NULL, 'Resolved', 'OK kaayo'),
-(82, 'Gaben', 'XVC123', NULL, 'Over Speeding', '13', '5', '2025-09-18 14:16:53', 0, NULL, 0, 0, NULL, NULL, 'Resolved', 'Okay Na');
+INSERT INTO `violations` (`id`, `violator_name`, `plate_number`, `remarks`, `reason`, `violation_type_id`, `user_id`, `issue_date`, `has_license`, `license_number`, `is_impounded`, `is_paid`, `or_number`, `issued_date`, `status`, `notes`, `officer_id`) VALUES
+(1, 'fs', '95XD', NULL, 'BAWAL TAE!', '13', '4', '2025-08-31 03:41:12', 0, '1WT5224', 1, 1, 'OR1758351697', '2025-08-31 05:40:00', 'Pending', 'GDG', NULL),
+(2, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '3', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(3, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '2', '3', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(4, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '3', '5', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(5, 'Juan Dela Cruz', 'GHI789', NULL, 'No helmet on motorcycle', '4', '3', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(6, 'Maria Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '5', '5', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(7, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(8, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(9, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(10, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(11, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(12, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(13, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(14, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(15, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(16, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(17, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(18, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(19, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(20, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(21, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(22, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(23, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(24, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(26, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(27, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(28, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(29, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(30, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(31, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(32, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(33, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(34, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(35, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(36, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(37, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(38, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(39, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(40, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(41, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(42, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(43, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(44, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(45, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(46, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(47, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(48, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(49, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(50, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(51, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(52, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(53, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(54, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(55, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(56, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(57, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(58, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(59, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(60, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(61, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(62, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(63, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(64, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(65, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(66, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(67, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(68, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(69, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(70, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(71, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(72, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(73, 'Juan Dela Cruz', 'ABC123', 'Caught on EDSA', 'Speeding on a 40kph zone', '1', '5', '2025-08-01 06:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-01 14:00:00', 'Pending', 'First offense', NULL),
+(74, 'Maria Santos', 'XYZ789', 'Parked near Quiapo Church', 'Blocking pedestrian lane', '3', '5', '2025-08-15 01:00:00', 1, 'L789012', 0, 1, 'OR12345', '2025-08-15 09:00:00', 'Resolved', 'Paid on the spot', NULL),
+(75, 'Jose Mercado', 'DEF456', 'Intersection violation', 'Ignored traffic signal', '5', '7', '2025-08-20 08:30:00', 1, 'L345678', 0, 0, NULL, '2025-08-20 16:30:00', 'Disputed', 'Driver claims signal was green', NULL),
+(76, 'Juan Dela Cruz Jr', 'GHI789', NULL, 'No helmet on motorcycle', '6', '5', '2025-08-25 02:00:00', 0, NULL, 1, 0, NULL, '2025-08-25 10:00:00', 'Pending', 'Vehicle impounded', NULL),
+(77, 'Maria Ana Santos', 'JKL012', 'Highway incident', 'Suspected intoxication', '7', '7', '2025-08-30 14:00:00', 1, 'L789012', 1, 0, NULL, '2025-08-30 22:00:00', 'Pending', 'Awaiting breathalyzer results', NULL),
+(78, 'Juan Dela Cruz', 'MNO345', 'Repeat offense', 'Speeding again on EDSA', '2', '5', '2025-08-31 07:00:00', 1, 'L123456', 0, 0, NULL, '2025-08-31 15:00:00', 'Pending', 'Second speeding offense', NULL),
+(79, 'Johns', '0678678', NULL, '124', '14', '5', '2025-09-01 08:56:55', 0, NULL, 0, 0, '07897', '2025-09-01 10:56:00', 'Pending', 'Kadto LTO office', NULL),
+(80, 'Eddie', 'GED23', NULL, 'Dasig Dasig gid!', '13', '5', '2025-09-13 13:15:28', 1, NULL, 0, 0, NULL, NULL, 'Pending', 'Pay Fine', NULL),
+(81, 'John', 'OIO123', NULL, 'No helmet', '115', '5', '2025-09-18 14:05:08', 1, NULL, 1, 0, NULL, NULL, 'Resolved', 'OK kaayo', NULL),
+(82, 'Gaben', 'XVC123', NULL, 'Over Speeding', '13', '5', '2025-09-18 14:16:53', 0, NULL, 0, 0, NULL, NULL, 'Resolved', 'Okay Na', NULL),
+(83, 'URNCVN', '09795746', NULL, 'EW213', '14', '152', '2025-09-20 06:03:58', 1, NULL, 0, 0, NULL, NULL, 'Pending', 'qew', NULL),
+(84, 'URNCVN', '09795746', NULL, 'EW213', '14', '152', '2025-09-20 06:08:40', 1, NULL, 0, 0, NULL, NULL, 'Pending', 'qew', NULL),
+(85, 'fwef', 'sf1231', NULL, 'ewrwefsvv', '14', '153', '2025-09-20 06:09:16', 1, NULL, 0, 0, NULL, NULL, 'Pending', 'ewrwer', NULL),
+(86, 'YYEBH', 'YXG123', NULL, 'qwe', '14', '154', '2025-09-20 06:17:27', 1, NULL, 0, 0, NULL, NULL, 'Pending', '123a', NULL),
+(101, 'fwef', 'fhfg', NULL, 'htrhrt', '14', '153', '2025-09-20 08:30:00', 0, 'rthrth', 0, 0, 'shtr', '2025-09-20 10:29:00', 'Resolved', 'rhrt', '5'),
+(102, 'dfgdfgerger', 'sdvd', NULL, 'dsv', '14', '156', '2025-09-20 08:36:31', 0, 'dv', 0, 0, 'sdv', '2025-09-20 10:36:00', 'Resolved', 'dv', '5'),
+(103, 'sdfsd', 'saf', NULL, 'sdas', '14', '157', '2025-09-20 08:44:51', 0, 'dasd', 0, 0, 'dssd', '2025-09-20 10:44:00', 'Resolved', 'sd', '5'),
+(107, 'dfgfd', 'efew', NULL, 'fgerg', '17', '158', '2025-09-20 09:24:06', 0, 'eger', 0, 0, 'erger', '2025-09-20 11:23:00', 'Pending', 'erg', '5'),
+(108, 'sdfe', 'efw', NULL, 'dfgfd', '14', '159', '2025-09-20 09:24:48', 0, 'ege', 1, 0, 'ere', '2025-09-20 11:24:00', 'Pending', 'ege', '5'),
+(109, 'fef', 'gerg', NULL, 'ere', '14', '160', '2025-09-20 09:25:24', 0, 'ere', 0, 0, 'ewr', '2025-09-20 11:24:00', 'Pending', 'ere', '5');
 
 -- --------------------------------------------------------
 
@@ -1000,7 +1024,7 @@ ALTER TABLE `violation_location_details`
 -- AUTO_INCREMENT for table `appeals`
 --
 ALTER TABLE `appeals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `audit_log`
@@ -1012,7 +1036,7 @@ ALTER TABLE `audit_log`
 -- AUTO_INCREMENT for table `concerns`
 --
 ALTER TABLE `concerns`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT for table `holiday_rules`
@@ -1066,13 +1090,13 @@ ALTER TABLE `types`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 
 --
 -- AUTO_INCREMENT for table `violations`
 --
 ALTER TABLE `violations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
 
 --
 -- AUTO_INCREMENT for table `violation_analytics`
