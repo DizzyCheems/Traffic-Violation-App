@@ -8,3 +8,9 @@ ADD COLUMN email text NULL;
 
 ALTER TABLE users   
 ADD COLUMN contact int NULL;
+
+
+
+
+ALTER TABLE violations   
+ADD COLUMN offense_freq int NULL;

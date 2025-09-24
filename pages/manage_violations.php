@@ -130,24 +130,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 }
             }
 
-            // Insert violation with user_id
-            if ($user_id || true) { // Proceed even if user_id is null (nullable column)
-                $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes];
-                $success = $stmt->execute($params);
-                if ($success) {
-                    $_SESSION['create_success'] = true;
-                    // Update officer earnings
-                    $week_start = date('Y-m-d', strtotime('monday this week'));
-                    $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
-                    $stmt->execute([$violation_type_id]);
-                    $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
-                    $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
-                    $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
-                } else {
-                    $toastr_messages[] = "toastr.error('Failed to create violation.');";
-                    file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
-                }
+            // Calculate offense_freq
+            $offense_freq = 1; // Default to 1 for the first offense
+            if ($user_id) {
+                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE user_id = ? AND officer_id = ?");
+                $stmt->execute([$user_id, $_SESSION['user_id']]);
+                $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
+                file_put_contents('../debug.log', "Offense Frequency for user_id='$user_id': $offense_freq\n", FILE_APPEND);
+            } else {
+                // Fallback: count violations by violator_name if user_id is not set
+                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE LOWER(violator_name) = LOWER(?) AND officer_id = ?");
+                $stmt->execute([$violator_name, $_SESSION['user_id']]);
+                $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
+                file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
+            }
+
+            // Insert violation with user_id and offense_freq
+            $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq];
+            $success = $stmt->execute($params);
+            if ($success) {
+                $_SESSION['create_success'] = true;
+                // Update officer earnings
+                $week_start = date('Y-m-d', strtotime('monday this week'));
+                $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
+                $stmt->execute([$violation_type_id]);
+                $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
+                $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
+                $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
+            } else {
+                $toastr_messages[] = "toastr.error('Failed to create violation.');";
+                file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
             }
         }
     } catch (PDOException $e) {
@@ -279,7 +292,7 @@ try {
 // Fetch all violations issued by the officer
 try {
     $stmt = $pdo->prepare("
-        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, v.or_number, v.issued_date, v.status, v.notes, t.violation_type, t.fine_amount 
+        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, v.or_number, v.issued_date, v.status, v.notes, v.offense_freq, t.violation_type, t.fine_amount 
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
         WHERE v.officer_id = ? 
@@ -314,12 +327,14 @@ try {
                                 Officer Dashboard
                             </a>
                         </li>
-                        <li class="nav-item">
+
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/issue_violation.php">
                                 <i class="fas fa-ticket-alt me-2"></i>
                                 Issue Violation
                             </a>
-                        </li>
+                        </li>-->
+
                         <li class="nav-item">
                             <a class="nav-link active" href="../pages/manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>
@@ -429,12 +444,13 @@ try {
                                         <th>Date</th>
                                         <th>Status</th>
                                         <th>Notes</th>
+                                        <th>Offense Frequency</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (empty($violations)): ?>
-                                        <tr><td colspan="15" class="text-center text-muted">No violations found</td></tr>
+                                        <tr><td colspan="16" class="text-center text-muted">No violations found</td></tr>
                                     <?php else: ?>
                                         <?php foreach ($violations as $violation): ?>
                                             <?php
@@ -465,6 +481,11 @@ try {
                                                     </span>
                                                 </td>
                                                 <td><?php echo htmlspecialchars($violation['notes'] ?: 'N/A'); ?></td>
+                                                <td>
+                                                    <span class="badge <?php echo ($violation['offense_freq'] == 1) ? 'bg-warning text-dark' : ($violation['offense_freq'] >= 2 ? 'bg-danger text-white' : 'bg-light text-dark'); ?>">
+                                                        <?php echo ($violation['offense_freq'] == 0) ? 'No Recurring Offense' : htmlspecialchars($violation['offense_freq']); ?>
+                                                    </span>
+                                                </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationModal<?php echo $violation['id']; ?>">Edit</button>
                                                     <form method="POST" style="display: inline;" class="delete-violation-form">

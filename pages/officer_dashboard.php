@@ -365,12 +365,13 @@ foreach ($violations as $violation) {
                                 Officer Dashboard
                             </a>
                         </li>
-                        <li class="nav-item">
+
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/issue_violation.php">
                                 <i class="fas fa-ticket-alt me-2"></i>
                                 Issue Violation
                             </a>
-                        </li>
+                        </li>-->
 
                         
                         <li class="nav-item">
