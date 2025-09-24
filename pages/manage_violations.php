@@ -65,6 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
     try {
         $violator_name = trim($_POST['violator_name'] ?? '');
         $user_id = trim($_POST['user_id'] ?? '') ?: null;
+        $contact_number = trim($_POST['contact_number'] ?? '');
+        $email = trim($_POST['email'] ?? '') ?: null;
         $plate_number = trim($_POST['plate_number'] ?? '');
         $reason = trim($_POST['reason'] ?? '');
         $violation_type_id = trim($_POST['violation_type_id'] ?? '');
@@ -77,10 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
         $status = trim($_POST['status'] ?? 'Pending');
         $notes = trim($_POST['notes'] ?? '') ?: null;
 
-        file_put_contents('../debug.log', "Create Violation Input: violator_name='$violator_name', user_id='$user_id', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id'\n", FILE_APPEND);
+        file_put_contents('../debug.log', "Create Violation Input: violator_name='$violator_name', user_id='$user_id', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id'\n", FILE_APPEND);
 
-        if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id)) {
-            $toastr_messages[] = "toastr.error('Violator Name, Plate Number, Reason, and Violation Type are required.');";
+        if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
+            $toastr_messages[] = "toastr.error('Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
         } else {
             // Check if user_id is provided and valid
             if ($user_id) {
@@ -101,6 +103,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($existing_user) {
                     $user_id = $existing_user['id'];
+                    // Update existing user's contact number and email
+                    $stmt = $pdo->prepare("UPDATE users SET contact_number = ?, email = ? WHERE id = ?");
+                    $success = $stmt->execute([$contact_number, $email, $user_id]);
+                    if (!$success) {
+                        $toastr_messages[] = "toastr.error('Failed to update user contact information.');";
+                        file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
+                    }
                 } else {
                     // Create new user
                     $username = substr(strtolower(str_replace(' ', '_', $violator_name)), 0, 50);
@@ -109,11 +118,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                     if ($stmt->fetchColumn() > 0) {
                         $username .= '_' . rand(1000, 9999); // Append random number if username exists
                     }
-                    $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id) VALUES (?, 'x', ?, 'user', ?)");
-                    $success = $stmt->execute([$username, $violator_name, $_SESSION['user_id']]);
+                    $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id, contact_number, email) VALUES (?, 'x', ?, 'user', ?, ?, ?)");
+                    $success = $stmt->execute([$username, $violator_name, $_SESSION['user_id'], $contact_number, $email]);
                     if ($success) {
                         $user_id = $pdo->lastInsertId();
-                        file_put_contents('../debug.log', "Created new user: username='$username', user_id='$user_id'\n", FILE_APPEND);
+                        file_put_contents('../debug.log', "Created new user: username='$username', user_id='$user_id', contact_number='$contact_number', email='$email'\n", FILE_APPEND);
                     } else {
                         $toastr_messages[] = "toastr.error('Failed to create new user.');";
                         file_put_contents('../debug.log', "Create User Failed: No rows affected.\n", FILE_APPEND);
@@ -152,6 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
     try {
         $id = trim($_POST['id'] ?? '');
         $violator_name = trim($_POST['violator_name'] ?? '');
+        $contact_number = trim($_POST['contact_number'] ?? '');
+        $email = trim($_POST['email'] ?? '') ?: null;
         $plate_number = trim($_POST['plate_number'] ?? '');
         $reason = trim($_POST['reason'] ?? '');
         $violation_type_id = trim($_POST['violation_type_id'] ?? '');
@@ -164,11 +175,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
         $status = trim($_POST['status'] ?? 'Pending');
         $notes = trim($_POST['notes'] ?? '') ?: null;
 
-        file_put_contents('../debug.log', "Edit Violation Input: id='$id', violator_name='$violator_name', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id'\n", FILE_APPEND);
+        file_put_contents('../debug.log', "Edit Violation Input: id='$id', violator_name='$violator_name', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id'\n", FILE_APPEND);
 
-        if (empty($id) || empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id)) {
-            $toastr_messages[] = "toastr.error('ID, Violator Name, Plate Number, Reason, and Violation Type are required.');";
+        if (empty($id) || empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
+            $toastr_messages[] = "toastr.error('ID, Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
         } else {
+            // Update user contact information if user_id exists
+            $stmt = $pdo->prepare("SELECT user_id FROM violations WHERE id = ? AND officer_id = ?");
+            $stmt->execute([$id, $_SESSION['user_id']]);
+            $violation = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($violation['user_id']) {
+                $stmt = $pdo->prepare("UPDATE users SET full_name = ?, contact_number = ?, email = ? WHERE id = ?");
+                $success = $stmt->execute([$violator_name, $contact_number, $email, $violation['user_id']]);
+                if (!$success) {
+                    $toastr_messages[] = "toastr.error('Failed to update user contact information.');";
+                    file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
+                }
+            }
+
             $stmt = $pdo->prepare("UPDATE violations SET violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, or_number = ?, issued_date = ?, status = ?, notes = ? WHERE id = ? AND officer_id = ?");
             $params = [$violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $id, $_SESSION['user_id']];
             $success = $stmt->execute($params);
@@ -243,7 +267,7 @@ try {
 
 // Fetch users under the officer
 try {
-    $stmt = $pdo->prepare("SELECT id, username, full_name FROM users WHERE officer_id = ? ORDER BY full_name");
+    $stmt = $pdo->prepare("SELECT id, username, full_name, contact_number, email FROM users WHERE officer_id = ? ORDER BY full_name");
     $stmt->execute([$_SESSION['user_id']]);
     $supervised_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -413,6 +437,15 @@ try {
                                         <tr><td colspan="15" class="text-center text-muted">No violations found</td></tr>
                                     <?php else: ?>
                                         <?php foreach ($violations as $violation): ?>
+                                            <?php
+                                                // Fetch user contact info for edit modal
+                                                $user_contact = ['contact_number' => '', 'email' => ''];
+                                                if ($violation['user_id']) {
+                                                    $stmt = $pdo->prepare("SELECT contact_number, email FROM users WHERE id = ?");
+                                                    $stmt->execute([$violation['user_id']]);
+                                                    $user_contact = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['contact_number' => '', 'email' => ''];
+                                                }
+                                            ?>
                                             <tr class="table-row-hover">
                                                 <td><?php echo htmlspecialchars($violation['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['officer_id']); ?></td>
@@ -458,6 +491,17 @@ try {
                                                                         <label for="violator_name_<?php echo $violation['id']; ?>" class="form-label">Violator Name</label>
                                                                         <input type="text" class="form-control" name="violator_name" id="violator_name_<?php echo $violation['id']; ?>" required value="<?php echo htmlspecialchars($violation['violator_name']); ?>">
                                                                         <div class="invalid-feedback">Please enter a valid violator name.</div>
+                                                                    </div>
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="contact_number_<?php echo $violation['id']; ?>" class="form-label">Contact Number</label>
+                                                                        <input type="text" class="form-control" name="contact_number" id="contact_number_<?php echo $violation['id']; ?>" required value="<?php echo htmlspecialchars($user_contact['contact_number']); ?>">
+                                                                        <div class="invalid-feedback">Please enter a valid contact number.</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="email_<?php echo $violation['id']; ?>" class="form-label">Email (Optional)</label>
+                                                                        <input type="email" class="form-control" name="email" id="email_<?php echo $violation['id']; ?>" value="<?php echo htmlspecialchars($user_contact['email'] ?: ''); ?>">
                                                                     </div>
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="plate_number_<?php echo $violation['id']; ?>" class="form-label">License Plate</label>
@@ -566,6 +610,15 @@ try {
                                                 <div class="invalid-feedback">Please enter a valid violator name.</div>
                                             </div>
                                             <div class="mb-3">
+                                                <label for="contact_number" class="form-label">Contact Number</label>
+                                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
+                                                <div class="invalid-feedback">Please enter a valid contact number.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email (Optional)</label>
+                                                <input type="email" class="form-control" name="email" id="email">
+                                            </div>
+                                            <div class="mb-3">
                                                 <h6>Users Under Your Supervision</h6>
                                                 <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
                                                     <table class="table table-hover table-sm">
@@ -573,16 +626,20 @@ try {
                                                             <tr>
                                                                 <th>Username</th>
                                                                 <th>Full Name</th>
+                                                                <th>Contact</th>
+                                                                <th>Email</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             <?php if (empty($supervised_users)): ?>
-                                                                <tr><td colspan="2" class="text-center text-muted">No users found</td></tr>
+                                                                <tr><td colspan="4" class="text-center text-muted">No users found</td></tr>
                                                             <?php else: ?>
                                                                 <?php foreach ($supervised_users as $user): ?>
-                                                                    <tr class="user-row" data-user-id="<?php echo htmlspecialchars($user['id']); ?>" data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>" style="cursor: pointer;">
+                                                                    <tr class="user-row" data-user-id="<?php echo htmlspecialchars($user['id']); ?>" data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>" data-contact-number="<?php echo htmlspecialchars($user['contact_number']); ?>" data-email="<?php echo htmlspecialchars($user['email'] ?: ''); ?>" style="cursor: pointer;">
                                                                         <td><?php echo htmlspecialchars($user['username']); ?></td>
                                                                         <td><?php echo htmlspecialchars($user['full_name']); ?></td>
+                                                                        <td><?php echo htmlspecialchars($user['contact_number']); ?></td>
+                                                                        <td><?php echo htmlspecialchars($user['email'] ?: 'N/A'); ?></td>
                                                                     </tr>
                                                                 <?php endforeach; ?>
                                                             <?php endif; ?>
@@ -702,6 +759,7 @@ try {
         document.getElementById('createViolationForm').addEventListener('submit', function(e) {
             console.log('Create violation form submission attempted');
             const violatorName = document.getElementById('violator_name').value.trim();
+            const contactNumber = document.getElementById('contact_number').value.trim();
             const plateNumber = document.getElementById('plate_number').value.trim();
             const reason = document.getElementById('reason').value.trim();
             const violationTypeId = document.getElementById('violation_type_id').value;
@@ -709,12 +767,17 @@ try {
             let isValid = true;
 
             document.getElementById('violator_name').classList.remove('is-invalid');
+            document.getElementById('contact_number').classList.remove('is-invalid');
             document.getElementById('plate_number').classList.remove('is-invalid');
             document.getElementById('reason').classList.remove('is-invalid');
             document.getElementById('violation_type_id').classList.remove('is-invalid');
 
             if (!violatorName) {
                 document.getElementById('violator_name').classList.add('is-invalid');
+                isValid = false;
+            }
+            if (!contactNumber) {
+                document.getElementById('contact_number').classList.add('is-invalid');
                 isValid = false;
             }
             if (!plateNumber) {
@@ -788,21 +851,28 @@ try {
             row.addEventListener('click', function() {
                 const userId = this.getAttribute('data-user-id');
                 const fullName = this.getAttribute('data-full-name');
+                const contactNumber = this.getAttribute('data-contact-number');
+                const email = this.getAttribute('data-email');
                 document.getElementById('violator_name').value = fullName;
+                document.getElementById('contact_number').value = contactNumber;
+                document.getElementById('email').value = email;
                 document.getElementById('user_id').value = userId;
                 document.getElementById('violator_name').classList.remove('is-invalid');
-                console.log(`Selected user: ID=${userId}, Full Name=${fullName}`);
+                document.getElementById('contact_number').classList.remove('is-invalid');
+                console.log(`Selected user: ID=${userId}, Full Name=${fullName}, Contact=${contactNumber}, Email=${email}`);
                 // Highlight selected row
                 document.querySelectorAll('.user-row').forEach(r => r.classList.remove('table-primary'));
                 this.classList.add('table-primary');
             });
         });
 
-        // Clear user_id if violator_name is manually changed
+        // Clear user_id and fields if violator_name is manually changed
         document.getElementById('violator_name').addEventListener('input', function() {
             document.getElementById('user_id').value = '';
+            document.getElementById('contact_number').value = '';
+            document.getElementById('email').value = '';
             document.querySelectorAll('.user-row').forEach(row => row.classList.remove('table-primary'));
-            console.log('Violator name manually changed, cleared user_id');
+            console.log('Violator name manually changed, cleared user_id, contact_number, and email');
         });
 
         // Client-side validation for Edit Violation Forms
@@ -810,6 +880,7 @@ try {
             form.addEventListener('submit', function(e) {
                 console.log('Edit violation form submission attempted');
                 const violatorName = this.querySelector('input[name="violator_name"]').value.trim();
+                const contactNumber = this.querySelector('input[name="contact_number"]').value.trim();
                 const plateNumber = this.querySelector('input[name="plate_number"]').value.trim();
                 const reason = this.querySelector('input[name="reason"]').value.trim();
                 const violationTypeId = this.querySelector('select[name="violation_type_id"]').value;
@@ -817,12 +888,17 @@ try {
                 let isValid = true;
 
                 this.querySelector('input[name="violator_name"]').classList.remove('is-invalid');
+                this.querySelector('input[name="contact_number"]').classList.remove('is-invalid');
                 this.querySelector('input[name="plate_number"]').classList.remove('is-invalid');
                 this.querySelector('input[name="reason"]').classList.remove('is-invalid');
                 this.querySelector('select[name="violation_type_id"]').classList.remove('is-invalid');
 
                 if (!violatorName) {
                     this.querySelector('input[name="violator_name"]').classList.add('is-invalid');
+                    isValid = false;
+                }
+                if (!contactNumber) {
+                    this.querySelector('input[name="contact_number"]').classList.add('is-invalid');
                     isValid = false;
                 }
                 if (!plateNumber) {

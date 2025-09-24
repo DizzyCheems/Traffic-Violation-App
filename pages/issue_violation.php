@@ -15,7 +15,7 @@ $toastr_messages = [];
 function generateUniqueUsername($pdo, $base_username) {
     $username = $base_username;
     $attempt = 0;
-    $max_attempts = 100; // Limit to prevent infinite loops
+    $max_attempts = 100; // Limit to prevent infinite loops 
 
     while (true) {
         $sql = "SELECT COUNT(*) FROM users WHERE username = ?";

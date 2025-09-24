@@ -4983,3 +4983,132 @@ Session Data: Array
     [delete_success] => 1
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetch Supervised Users Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'contact_number' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='dfgfd', user_id='158', contact_number='234234', email='', plate_number='efew', reason='fgerg', violation_type_id='17'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='sdfe', user_id='', contact_number='efe', email='rgrg@sdfg.com', plate_number='efw', reason='dfgfd', violation_type_id='14'
+Created new user: username='sdfe', user_id='159', contact_number='efe', email='rgrg@sdfg.com'
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='fef', user_id='', contact_number='0980879978', email='', plate_number='gerg', reason='ere', violation_type_id='14'
+Created new user: username='fef', user_id='160', contact_number='0980879978', email=''
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [create_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-24 10:19:28
+Login.php accessed: 2025-09-24 10:19:32
+Login.php accessed: 2025-09-24 10:20:09
+Login.php accessed: 2025-09-24 10:24:26
+Login.php accessed: 2025-09-24 10:24:36
+Login.php accessed: 2025-09-24 10:36:52
+Login.php accessed: 2025-09-24 10:36:56
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-09-24 10:43:53

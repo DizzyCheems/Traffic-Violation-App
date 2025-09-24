@@ -1,2 +1,10 @@
 ALTER TABLE users   
 ADD COLUMN officer_id text NULL;
+
+
+ALTER TABLE users   
+ADD COLUMN email text NULL;
+
+
+ALTER TABLE users   
+ADD COLUMN contact int NULL;
