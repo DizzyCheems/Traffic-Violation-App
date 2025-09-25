@@ -487,12 +487,7 @@ try {
                         </li>
 
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="../index.php">
-                                <i class="fas fa-home me-2"></i>
-                                Home
-                            </a>
-                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>
