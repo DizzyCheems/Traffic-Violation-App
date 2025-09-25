@@ -13,72 +13,74 @@
                     Manage Users
                 </a>
             </li>
-            <li class="nav-item">
+            
+            <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/issue_violation.php">
                     <i class="fas fa-exclamation-circle me-2"></i>
                     Issue Violation
                 </a>
-            </li>
+            </li>-->
+
             <li class="nav-item">
                 <a class="nav-link" href="../pages/monitor_violations.php">
                     <i class="fas fa-list me-2"></i>
                     Monitor Violations
                 </a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="../pages/violation_report.php">
                     <i class="fas fa-chart-bar me-2"></i>
                     Violation Reports
                 </a>
             </li>
-            <li class="nav-item">
+            
+            <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/violation_heatmap.php">
                     <i class="fas fa-map-marked-alt me-2"></i>
                     Violation Heatmap
                 </a>
-            </li>
+            </li>-->
+
             <li class="nav-item">
                 <a class="nav-link" href="../pages/set_fines.php">
                     <i class="fas fa-dollar-sign me-2"></i>
                     Set Fines
                 </a>
             </li>
+            
             <li class="nav-item">
                 <a class="nav-link" href="../pages/manage_concerns.php">
                     <i class="fas fa-comment-dots me-2"></i>
                     Manage Complaints
                 </a>
             </li>
-            <li class="nav-item">
+            
+            <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/officer_performance.php">
                     <i class="fas fa-star me-2"></i>
                     Officer Performance
                 </a>
-            </li>
+            </li>-->
+
             <li class="nav-item">
                 <a class="nav-link" href="../pages/audit_log.php">
                     <i class="fas fa-file-alt me-2"></i>
                     Audit Log
                 </a>
             </li>
-            <li class="nav-item">
+            <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/holiday_rules.php">
                     <i class="fas fa-calendar-alt me-2"></i>
                     Holiday Rules
                 </a>
-            </li>
-            <li class="nav-item">
+            </li>-->
+            <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/appeal_workflow.php">
                     <i class="fas fa-gavel me-2"></i>
                     Appeal Workflow
                 </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="../pages/database_backup.php">
-                    <i class="fas fa-database me-2"></i>
-                    Database Backup
-                </a>
-            </li>
+            </li>-->
             <li class="nav-item">
                 <a class="nav-link" href="../index.php">
                     <i class="fas fa-home me-2"></i>
