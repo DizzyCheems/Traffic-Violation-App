@@ -13,21 +13,28 @@ require '../vendor/autoload.php';
 file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
 
 // Check session variables
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower(trim($_SESSION['role'])) !== 'officer') {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || 
+    !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
+    
     $reason = "Redirecting to login.php. ";
+    
     if (!isset($_SESSION['user_id'])) {
         $reason .= "user_id not set. ";
     }
+    
     if (!isset($_SESSION['role'])) {
         $reason .= "role not set. ";
     }
-    if (isset($_SESSION['role']) && strtolower(trim($_SESSION['role'])) !== 'officer') {
-        $reason .= "role is '" . $_SESSION['role'] . "' instead of 'officer'.";
+    
+    if (isset($_SESSION['role']) && !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
+        $reason .= "role is '" . $_SESSION['role'] . "' instead of 'officer' or 'admin'.";
     }
+
     file_put_contents('../debug.log', $reason . "\n", FILE_APPEND);
     header("Location: ../login.php");
     exit;
 }
+
 
 // Initialize toastr messages
 $toastr_messages = [];
@@ -207,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                         $mail->Host = 'smtp.gmail.com';
                         $mail->SMTPAuth = true;
                         $mail->Username = 'stine6595@gmail.com';
-                        $mail->Password = 'qvkb ycan jdij yffz';
+                        $mail->Password = 'qvkb ycan jd потенциальный рискij yffz';
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
@@ -302,49 +309,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
         if (empty($id) || empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
             $toastr_messages[] = "toastr.error('ID, Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
         } else {
-            // Update user contact information if user_id exists
+            // Verify violation belongs to the officer
             $stmt = $pdo->prepare("SELECT user_id, plate_image FROM violations WHERE id = ? AND officer_id = ?");
             $stmt->execute([$id, $_SESSION['user_id']]);
             $violation = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($violation['user_id']) {
-                $stmt = $pdo->prepare("UPDATE users SET full_name = ?, contact_number = ?, email = ? WHERE id = ?");
-                $success = $stmt->execute([$violator_name, $contact_number, $email, $violation['user_id']]);
-                if (!$success) {
-                    $toastr_messages[] = "toastr.error('Failed to update user contact information.');";
-                    file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
-                }
-            }
-
-            // If a new image is uploaded, delete the old one
-            if ($plate_image && $violation['plate_image'] && file_exists($violation['plate_image'])) {
-                unlink($violation['plate_image']);
-            }
-
-            // Prepare update query
-            $query = "UPDATE violations SET violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, or_number = ?, issued_date = ?, status = ?, notes = ?";
-            $params = [$violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes];
-            if ($plate_image) {
-                $query .= ", plate_image = ?";
-                $params[] = $plate_image;
-            }
-            $query .= " WHERE id = ? AND officer_id = ?";
-            $params[] = $id;
-            $params[] = $_SESSION['user_id'];
-
-            $stmt = $pdo->prepare($query);
-            $success = $stmt->execute($params);
-            if ($success) {
-                $_SESSION['edit_success'] = true;
-                // Update officer earnings if violation type changed
-                $week_start = date('Y-m-d', strtotime('monday this week'));
-                $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
-                $stmt->execute([$violation_type_id]);
-                $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
-                $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
-                $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
+            if (!$violation) {
+                $toastr_messages[] = "toastr.error('Violation not found or you lack permission.');";
+                file_put_contents('../debug.log', "Edit Violation Failed: Violation ID='$id' not found or unauthorized.\n", FILE_APPEND);
             } else {
-                $toastr_messages[] = "toastr.error('Failed to update violation or you lack permission.');";
-                file_put_contents('../debug.log', "Edit Violation Failed: No rows affected.\n", FILE_APPEND);
+                // Update user contact information if user_id exists and is supervised by the officer
+                if ($violation['user_id']) {
+                    $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ? AND officer_id = ?");
+                    $stmt->execute([$violation['user_id'], $_SESSION['user_id']]);
+                    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                        $stmt = $pdo->prepare("UPDATE users SET full_name = ?, contact_number = ?, email = ? WHERE id = ?");
+                        $success = $stmt->execute([$violator_name, $contact_number, $email, $violation['user_id']]);
+                        if (!$success) {
+                            $toastr_messages[] = "toastr.error('Failed to update user contact information.');";
+                            file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
+                        }
+                    } else {
+                        $toastr_messages[] = "toastr.error('User is not under your supervision.');";
+                        file_put_contents('../debug.log', "Edit Violation Failed: user_id='$violation[user_id]' not supervised by officer_id='$_SESSION[user_id]'.\n", FILE_APPEND);
+                    }
+                }
+
+                // If a new image is uploaded, delete the old one
+                if ($plate_image && $violation['plate_image'] && file_exists($violation['plate_image'])) {
+                    unlink($violation['plate_image']);
+                }
+
+                // Prepare update query
+                $query = "UPDATE violations SET violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, or_number = ?, issued_date = ?, status = ?, notes = ?";
+                $params = [$violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes];
+                if ($plate_image) {
+                    $query .= ", plate_image = ?";
+                    $params[] = $plate_image;
+                }
+                $query .= " WHERE id = ? AND officer_id = ?";
+                $params[] = $id;
+                $params[] = $_SESSION['user_id'];
+
+                $stmt = $pdo->prepare($query);
+                $success = $stmt->execute($params);
+                if ($success) {
+                    $_SESSION['edit_success'] = true;
+                    // Update officer earnings if violation type changed
+                    $week_start = date('Y-m-d', strtotime('monday this week'));
+                    $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
+                    $stmt->execute([$violation_type_id]);
+                    $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
+                    $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
+                    $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
+                } else {
+                    $toastr_messages[] = "toastr.error('Failed to update violation or you lack permission.');";
+                    file_put_contents('../debug.log', "Edit Violation Failed: No rows affected.\n", FILE_APPEND);
+                }
             }
         }
     } catch (PDOException $e) {
@@ -362,24 +382,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) 
         if (empty($id)) {
             $toastr_messages[] = "toastr.error('Violation ID is required.');";
         } else {
-            // Delete associated image
+            // Verify violation belongs to the officer
             $stmt = $pdo->prepare("SELECT plate_image FROM violations WHERE id = ? AND officer_id = ?");
             $stmt->execute([$id, $_SESSION['user_id']]);
             $violation = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($violation['plate_image'] && file_exists($violation['plate_image'])) {
-                unlink($violation['plate_image']);
-            }
+            if ($violation) {
+                // Delete associated image
+                if ($violation['plate_image'] && file_exists($violation['plate_image'])) {
+                    unlink($violation['plate_image']);
+                }
 
-            $stmt = $pdo->prepare("DELETE FROM violations WHERE id = ? AND officer_id = ?");
-            $params = [$id, $_SESSION['user_id']];
-            $success = $stmt->execute($params);
-            if ($success) {
-                $_SESSION['delete_success'] = true;
-                header("Location: manage_violations.php");
-                exit;
+                $stmt = $pdo->prepare("DELETE FROM violations WHERE id = ? AND officer_id = ?");
+                $params = [$id, $_SESSION['user_id']];
+                $success = $stmt->execute($params);
+                if ($success) {
+                    $_SESSION['delete_success'] = true;
+                    header("Location: manage_violations.php");
+                    exit;
+                } else {
+                    $toastr_messages[] = "toastr.error('Failed to delete violation or you lack permission.');";
+                    file_put_contents('../debug.log', "Delete Violation Failed: No rows affected.\n", FILE_APPEND);
+                }
             } else {
-                $toastr_messages[] = "toastr.error('Failed to delete violation or you lack permission.');";
-                file_put_contents('../debug.log', "Delete Violation Failed: No rows affected.\n", FILE_APPEND);
+                $toastr_messages[] = "toastr.error('Violation not found or you lack permission.');";
+                file_put_contents('../debug.log', "Delete Violation Failed: Violation ID='$id' not found or unauthorized.\n", FILE_APPEND);
             }
         }
     } catch (PDOException $e) {
@@ -576,8 +602,8 @@ try {
                                                 // Fetch user contact info for edit modal
                                                 $user_contact = ['contact_number' => '', 'email' => ''];
                                                 if ($violation['user_id']) {
-                                                    $stmt = $pdo->prepare("SELECT contact_number, email FROM users WHERE id = ?");
-                                                    $stmt->execute([$violation['user_id']]);
+                                                    $stmt = $pdo->prepare("SELECT contact_number, email FROM users WHERE id = ? AND officer_id = ?");
+                                                    $stmt->execute([$violation['user_id'], $_SESSION['user_id']]);
                                                     $user_contact = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['contact_number' => '', 'email' => ''];
                                                 }
                                             ?>
@@ -832,10 +858,12 @@ try {
                                                     </select>
                                                     <div class="invalid-feedback">Please select a violation type.</div>
                                                 </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="reason" class="form-label">Reason</label>
-                                                    <input type="text" class="form-control" name="reason" id="reason" required>
-                                                    <div class="invalid-feedback">Please enter a valid reason.</div>
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-3">
+                                                        <label for="reason" class="form-label">Reason</label>
+                                                        <input type="text" class="form-control" name="reason" id="reason" required>
+                                                        <div class="invalid-feedback">Please enter a valid reason.</div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -845,12 +873,10 @@ try {
                                                         <label class="form-check-label" for="has_license">Has License</label>
                                                     </div>
                                                 </div>
-                                                
-                                                <!--<div class="col-md-6 mb-3">
+                                                <div class="col-md-6 mb-3">
                                                     <label for="license_number" class="form-label">License Number</label>
                                                     <input type="text" class="form-control" name="license_number" id="license_number">
-                                                </div>-->
-
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">

@@ -4,3 +4,235 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-09-25 15:24:24
+Login.php accessed: 2025-09-25 15:24:29
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 15:48:49
+Login.php accessed: 2025-09-25 15:48:52
+Login successful for user_id: 1, role: admin
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Redirecting to login.php. role is 'admin' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. role is '' instead of 'officer'.
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Login.php accessed: 2025-09-25 15:50:17
+Login.php accessed: 2025-09-25 15:50:17
+Login.php accessed: 2025-09-25 15:50:21
+Login successful for user_id: 1, role: admin
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Redirecting to login.php. role is 'admin' instead of 'officer'.
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Redirecting to login.php. role is 'admin' instead of 'officer'.
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+

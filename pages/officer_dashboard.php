@@ -348,6 +348,7 @@ try {
     $assigned_concerns = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching assigned concerns: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Assigned Concerns Error: " . $e->getMessage() . "\n", FILE_APPEND);
     $assigned_concerns = 0;
 }
 
@@ -362,7 +363,6 @@ try {
     $toastr_messages[] = "toastr.error('Error fetching earnings: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
     $wtd_earnings = '₱0.00';
 }
-
 
 // Fetch violation types
 try {
@@ -385,15 +385,17 @@ try {
     $supervised_users = [];
 }
 
-// Fetch users with violations
+// Fetch users with violations (only those with officer_id matching the logged-in officer)
 try {
-    $stmt = $pdo->prepare("SELECT u.id, u.username, u.full_name, COUNT(v.id) as violation_count 
-                          FROM users u 
-                          LEFT JOIN violations v ON u.id = v.user_id 
-                          WHERE u.role = 'user' 
-                          GROUP BY u.id 
-                          ORDER BY violation_count DESC");
-    $stmt->execute();
+    $stmt = $pdo->prepare("
+        SELECT u.id, u.username, u.full_name, COUNT(v.id) as violation_count 
+        FROM users u 
+        LEFT JOIN violations v ON u.id = v.user_id 
+        WHERE u.role = 'user' AND u.officer_id = ? 
+        GROUP BY u.id 
+        ORDER BY violation_count DESC
+    ");
+    $stmt->execute([$_SESSION['user_id']]);
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching users: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
@@ -678,7 +680,6 @@ try {
                         </div>
                     </div>
                 </div>
-
 
                 <!-- Violation Types -->
                 <div class="card mb-4 shadow-sm">
