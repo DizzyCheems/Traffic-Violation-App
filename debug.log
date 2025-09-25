@@ -5284,3 +5284,7 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-09-25 06:27:27
+Login.php accessed: 2025-09-25 06:27:29
+Login successful for user_id: 4, role: user
+Login.php accessed: 2025-09-25 06:38:41

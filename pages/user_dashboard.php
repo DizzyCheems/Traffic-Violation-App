@@ -61,35 +61,22 @@ try {
     $open_concerns = 0;
 }
 
-// Fetch all violations grouped by violation type
+// Fetch all violations for the user with offense frequency
 try {
     $stmt = $pdo->prepare("
-        SELECT v.id, v.violation_type_id, COALESCE(t.violation_type, 'Unknown Type') AS violation_type, 
+        SELECT v.id, v.violation_type_id, v.offense_freq, COALESCE(t.violation_type, 'Unknown Type') AS violation_type, 
                COALESCE(t.fine_amount, 0.00) AS fine_amount, v.issued_date, v.is_paid 
         FROM violations v 
         LEFT JOIN types t ON v.violation_type_id = t.id 
         WHERE v.user_id = ? 
-        ORDER BY COALESCE(t.violation_type, 'Unknown Type'), v.issued_date DESC
+        ORDER BY v.issued_date DESC
     ");
     $stmt->execute([$user_id]);
     $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Group violations by violation_type_id
-    $grouped_violations = [];
-    foreach ($violations as $violation) {
-        $type_id = $violation['violation_type_id'] ?: 'unknown';
-        if (!isset($grouped_violations[$type_id])) {
-            $grouped_violations[$type_id] = [
-                'violation_type' => $violation['violation_type'],
-                'violations' => []
-            ];
-        }
-        $grouped_violations[$type_id]['violations'][] = $violation;
-    }
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching violations: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
     file_put_contents('../debug.log', "Fetch Violations Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $grouped_violations = [];
+    $violations = [];
 }
 
 // Fetch all concerns
@@ -330,53 +317,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_appeal'])) {
                     </div>
                 </div>
 
-                <!-- Violations by Type -->
+                <!-- My Violations -->
                 <div class="mb-4" id="violations">
                     <h3 class="text-primary mb-3">My Violations</h3>
-                    <?php if (empty($grouped_violations)): ?>
+                    <?php if (empty($violations)): ?>
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <p class="text-center text-muted">No violations found</p>
                             </div>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($grouped_violations as $type_id => $group): ?>
-                            <div class="card mb-4 shadow-sm">
-                                <div class="card-header bg-primary text-white">
-                                    <h4 class="mb-0"><?php echo htmlspecialchars($group['violation_type']); ?> Violations</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Violation ID</th>
-                                                    <th>Type</th>
-                                                    <th>Fine</th>
-                                                    <th>Issued</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($group['violations'] as $violation): ?>
-                                                    <tr class="table-row-hover">
-                                                        <td>#V-<?php echo htmlspecialchars($violation['id']); ?></td>
-                                                        <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
-                                                        <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
-                                                        <td><?php echo htmlspecialchars($violation['issued_date'] ? date('d M Y', strtotime($violation['issued_date'])) : 'N/A'); ?></td>
-                                                        <td>
-                                                            <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
-                                                                <?php echo $violation['is_paid'] ? 'Paid ✅' : 'Unpaid'; ?>
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            <?php foreach ($violations as $violation): ?>
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?php echo htmlspecialchars($violation['violation_type']); ?></h5>
+                                            <p class="card-text">
+                                                <strong>Violation ID:</strong> #V-<?php echo htmlspecialchars($violation['id']); ?><br>
+                                                <strong>Frequency:</strong> <?php echo htmlspecialchars($violation['offense_freq']); ?><br>
+                                                <strong>Fine:</strong> ₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?><br>
+                                                <strong>Issued:</strong> <?php echo htmlspecialchars($violation['issued_date'] ? date('d M Y', strtotime($violation['issued_date'])) : 'N/A'); ?><br>
+                                                <strong>Status:</strong> 
+                                                <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
+                                                    <?php echo $violation['is_paid'] ? 'Paid ✅' : 'Unpaid'; ?>
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
 
