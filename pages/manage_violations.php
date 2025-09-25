@@ -2,6 +2,7 @@
 session_start();
 include '../config/conn.php';
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 require '../vendor/autoload.php'; // Adjust path to PHPMailer autoload.php
@@ -223,17 +224,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                         ";
                         $mail->AltBody = "Traffic Violation Filed\n\nDear {$violator_name},\n\nA traffic violation has been filed against you. Details:\n- Violation ID: #V-{$violation_id}\n- Violation Type: {$violation_type}\n- Fine Amount: ₱" . number_format($fine, 2) . "\n- Issued Date: " . date('d M Y H:i', strtotime($issued_date)) . "\n- Reason: {$reason}\n- Offense Frequency: {$offense_freq}\n\nPlease log in to your User Dashboard at http://localhost/Traffic-Violation-App/pages/user_dashboard.php to view more details or take action.\n\nThank you,\nTraffic Violation System";
 
-                        // Enable debug output
-                        $mail->SMTPDebug = 2;
-                        $mail->Debugoutput = function($str, $level) {
-                            file_put_contents('../debug.log', "SMTP Debug [$level]: $str\n", FILE_APPEND);
-                        };
-
                         $mail->send();
+                        $toastr_messages[] = "toastr.success('Email notification sent to {$email}.');";
                         file_put_contents('../debug.log', "Email sent successfully to $email for violation_id=$violation_id\n", FILE_APPEND);
                     } catch (Exception $e) {
-                        $toastr_messages[] = "toastr.warning('Violation created, but failed to send email notification.');";
-                        file_put_contents('../debug.log', "Email Sending Failed: {$mail->ErrorInfo}\n", FILE_APPEND);
+                        $toastr_messages[] = "toastr.warning('Violation created, but failed to send email notification to {$email}.');";
+                        file_put_contents('../debug.log', "Email Sending Failed for create violation: {$mail->ErrorInfo}\n", FILE_APPEND);
                     }
                 }
             } else {
@@ -322,7 +318,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $week_start = date('Y-m-d', strtotime('monday this week'));
                 $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
                 $stmt->execute([$violation_type_id]);
-                $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
+                $type_data = $stmt->fetch(PDO::FETCH_ASSOC);
+                $fine = $type_data['fine_amount'] ?? 0;
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
                 $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
             } else {
