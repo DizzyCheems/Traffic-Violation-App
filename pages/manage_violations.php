@@ -1,6 +1,10 @@
 <?php
 session_start();
 include '../config/conn.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../vendor/autoload.php'; // Adjust path to PHPMailer autoload.php
 
 // Debug: Log session data
 file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
@@ -61,7 +65,7 @@ if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
 }
 
 // Ensure uploads directory exists
-$upload_dir = '../uploads/';
+$upload_dir = '../Uploads/';
 if (!is_dir($upload_dir)) {
     mkdir($upload_dir, 0755, true);
 }
@@ -170,14 +174,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq, $plate_image];
             $success = $stmt->execute($params);
             if ($success) {
+                $violation_id = $pdo->lastInsertId();
                 $_SESSION['create_success'] = true;
                 // Update officer earnings
                 $week_start = date('Y-m-d', strtotime('monday this week'));
-                $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
+                $stmt = $pdo->prepare("SELECT fine_amount, violation_type FROM types WHERE id = ?");
                 $stmt->execute([$violation_type_id]);
-                $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
+                $type_data = $stmt->fetch(PDO::FETCH_ASSOC);
+                $fine = $type_data['fine_amount'] ?? 0;
+                $violation_type = $type_data['violation_type'] ?? 'Unknown';
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
                 $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
+
+                // Send email notification if email is provided
+                if (!empty($email)) {
+                    $mail = new PHPMailer(true);
+                    try {
+                        // Gmail SMTP settings
+                        $mail->isSMTP();
+                        $mail->Host = 'smtp.gmail.com';
+                        $mail->SMTPAuth = true;
+                        $mail->Username = 'stine6595@gmail.com';
+                        $mail->Password = 'qvkb ycan jdij yffz';
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port = 587;
+
+                        // Sender and recipient
+                        $mail->setFrom('stine6595@gmail.com', 'Traffic Violation System');
+                        $mail->addAddress($email, $violator_name);
+
+                        // Email content
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Traffic Violation Notification';
+                        $mail->Body = "
+                            <h2>Traffic Violation Filed</h2>
+                            <p>Dear {$violator_name},</p>
+                            <p>A traffic violation has been filed against you. Below are the details:</p>
+                            <ul>
+                                <li><strong>Violation ID:</strong> #V-{$violation_id}</li>
+                                <li><strong>Violation Type:</strong> {$violation_type}</li>
+                                <li><strong>Fine Amount:</strong> ₱" . number_format($fine, 2) . "</li>
+                                <li><strong>Issued Date:</strong> " . date('d M Y H:i', strtotime($issued_date)) . "</li>
+                                <li><strong>Reason:</strong> {$reason}</li>
+                                <li><strong>Offense Frequency:</strong> {$offense_freq}</li>
+                            </ul>
+                            <p>Please log in to your <a href='http://localhost/Traffic-Violation-App/pages/user_dashboard.php'>User Dashboard</a> to view more details or take action (e.g., pay the fine or file an appeal).</p>
+                            <p>Thank you,<br>Traffic Violation System</p>
+                        ";
+                        $mail->AltBody = "Traffic Violation Filed\n\nDear {$violator_name},\n\nA traffic violation has been filed against you. Details:\n- Violation ID: #V-{$violation_id}\n- Violation Type: {$violation_type}\n- Fine Amount: ₱" . number_format($fine, 2) . "\n- Issued Date: " . date('d M Y H:i', strtotime($issued_date)) . "\n- Reason: {$reason}\n- Offense Frequency: {$offense_freq}\n\nPlease log in to your User Dashboard at http://localhost/Traffic-Violation-App/pages/user_dashboard.php to view more details or take action.\n\nThank you,\nTraffic Violation System";
+
+                        // Enable debug output
+                        $mail->SMTPDebug = 2;
+                        $mail->Debugoutput = function($str, $level) {
+                            file_put_contents('../debug.log', "SMTP Debug [$level]: $str\n", FILE_APPEND);
+                        };
+
+                        $mail->send();
+                        file_put_contents('../debug.log', "Email sent successfully to $email for violation_id=$violation_id\n", FILE_APPEND);
+                    } catch (Exception $e) {
+                        $toastr_messages[] = "toastr.warning('Violation created, but failed to send email notification.');";
+                        file_put_contents('../debug.log', "Email Sending Failed: {$mail->ErrorInfo}\n", FILE_APPEND);
+                    }
+                }
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create violation.');";
                 file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
