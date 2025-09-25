@@ -561,12 +561,8 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../index.php">
-                                <i class="fas fa-home me-2"></i>
-                                Home
-                            </a>
-                        </li>
+
+
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>
@@ -593,12 +589,6 @@ try {
                             <a class="nav-link" href="../pages/manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>
                                 Manage Violations
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../index.php">
-                                <i class="fas fa-home me-2"></i>
-                                Home
                             </a>
                         </li>
                         <li class="nav-item">
@@ -861,8 +851,6 @@ try {
                             <label for="plate_image" class="form-label">Upload Plate Image (Optional)</label>
                             <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
                             <div id="ocr_status" class="form-text"></div>
-                            <label for="ocr_result" class="form-label mt-2">OCR Result</label>
-                            <input type="text" class="form-control" name="ocr_result" id="ocr_result" readonly placeholder="OCR extracted text will appear here">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="violation_type_id" class="form-label">Violation Type</label>
