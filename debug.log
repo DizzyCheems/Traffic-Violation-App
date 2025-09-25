@@ -5179,3 +5179,51 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-09-25 04:31:59
+Login.php accessed: 2025-09-25 04:32:04
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetch Violations Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.plate_image' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetch Violations Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.plate_image' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 04:35:08
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+

@@ -60,6 +60,12 @@ if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
     unset($_SESSION['delete_success']);
 }
 
+// Ensure uploads directory exists
+$upload_dir = '../uploads/';
+if (!is_dir($upload_dir)) {
+    mkdir($upload_dir, 0755, true);
+}
+
 // Handle create violation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) {
     try {
@@ -78,8 +84,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
         $issued_date = trim($_POST['issued_date'] ?? '') ?: date('Y-m-d H:i:s');
         $status = trim($_POST['status'] ?? 'Pending');
         $notes = trim($_POST['notes'] ?? '') ?: null;
+        $plate_image = null;
 
-        file_put_contents('../debug.log', "Create Violation Input: violator_name='$violator_name', user_id='$user_id', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id'\n", FILE_APPEND);
+        // Handle file upload
+        if (isset($_FILES['plate_image']) && $_FILES['plate_image']['error'] === UPLOAD_ERR_OK) {
+            $file_tmp = $_FILES['plate_image']['tmp_name'];
+            $file_name = uniqid() . '_' . basename($_FILES['plate_image']['name']);
+            $file_path = $upload_dir . $file_name;
+            if (move_uploaded_file($file_tmp, $file_path)) {
+                $plate_image = $file_path;
+            } else {
+                $toastr_messages[] = "toastr.error('Failed to upload plate image.');";
+                file_put_contents('../debug.log', "File Upload Failed: Unable to move file to $file_path\n", FILE_APPEND);
+            }
+        }
+
+        file_put_contents('../debug.log', "Create Violation Input: violator_name='$violator_name', user_id='$user_id', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id', plate_image='$plate_image'\n", FILE_APPEND);
 
         if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
             $toastr_messages[] = "toastr.error('Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
@@ -145,9 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
             }
 
-            // Insert violation with user_id and offense_freq
-            $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq];
+            // Insert violation with user_id, offense_freq, and plate_image
+            $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq, plate_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq, $plate_image];
             $success = $stmt->execute($params);
             if ($success) {
                 $_SESSION['create_success'] = true;
@@ -187,14 +207,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
         $issued_date = trim($_POST['issued_date'] ?? '') ?: date('Y-m-d H:i:s');
         $status = trim($_POST['status'] ?? 'Pending');
         $notes = trim($_POST['notes'] ?? '') ?: null;
+        $plate_image = null;
 
-        file_put_contents('../debug.log', "Edit Violation Input: id='$id', violator_name='$violator_name', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id'\n", FILE_APPEND);
+        // Handle file upload for edit
+        if (isset($_FILES['plate_image']) && $_FILES['plate_image']['error'] === UPLOAD_ERR_OK) {
+            $file_tmp = $_FILES['plate_image']['tmp_name'];
+            $file_name = uniqid() . '_' . basename($_FILES['plate_image']['name']);
+            $file_path = $upload_dir . $file_name;
+            if (move_uploaded_file($file_tmp, $file_path)) {
+                $plate_image = $file_path;
+            } else {
+                $toastr_messages[] = "toastr.error('Failed to upload plate image.');";
+                file_put_contents('../debug.log', "File Upload Failed: Unable to move file to $file_path\n", FILE_APPEND);
+            }
+        }
+
+        file_put_contents('../debug.log', "Edit Violation Input: id='$id', violator_name='$violator_name', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id', plate_image='$plate_image'\n", FILE_APPEND);
 
         if (empty($id) || empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
             $toastr_messages[] = "toastr.error('ID, Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
         } else {
             // Update user contact information if user_id exists
-            $stmt = $pdo->prepare("SELECT user_id FROM violations WHERE id = ? AND officer_id = ?");
+            $stmt = $pdo->prepare("SELECT user_id, plate_image FROM violations WHERE id = ? AND officer_id = ?");
             $stmt->execute([$id, $_SESSION['user_id']]);
             $violation = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($violation['user_id']) {
@@ -206,8 +240,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 }
             }
 
-            $stmt = $pdo->prepare("UPDATE violations SET violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, or_number = ?, issued_date = ?, status = ?, notes = ? WHERE id = ? AND officer_id = ?");
-            $params = [$violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $id, $_SESSION['user_id']];
+            // If a new image is uploaded, delete the old one
+            if ($plate_image && $violation['plate_image'] && file_exists($violation['plate_image'])) {
+                unlink($violation['plate_image']);
+            }
+
+            // Prepare update query
+            $query = "UPDATE violations SET violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, or_number = ?, issued_date = ?, status = ?, notes = ?";
+            $params = [$violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes];
+            if ($plate_image) {
+                $query .= ", plate_image = ?";
+                $params[] = $plate_image;
+            }
+            $query .= " WHERE id = ? AND officer_id = ?";
+            $params[] = $id;
+            $params[] = $_SESSION['user_id'];
+
+            $stmt = $pdo->prepare($query);
             $success = $stmt->execute($params);
             if ($success) {
                 $_SESSION['edit_success'] = true;
@@ -216,8 +265,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
                 $stmt->execute([$violation_type_id]);
                 $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
-                $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
-                $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
+                $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
+                $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
             } else {
                 $toastr_messages[] = "toastr.error('Failed to update violation or you lack permission.');";
                 file_put_contents('../debug.log', "Edit Violation Failed: No rows affected.\n", FILE_APPEND);
@@ -238,6 +287,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) 
         if (empty($id)) {
             $toastr_messages[] = "toastr.error('Violation ID is required.');";
         } else {
+            // Delete associated image
+            $stmt = $pdo->prepare("SELECT plate_image FROM violations WHERE id = ? AND officer_id = ?");
+            $stmt->execute([$id, $_SESSION['user_id']]);
+            $violation = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($violation['plate_image'] && file_exists($violation['plate_image'])) {
+                unlink($violation['plate_image']);
+            }
+
             $stmt = $pdo->prepare("DELETE FROM violations WHERE id = ? AND officer_id = ?");
             $params = [$id, $_SESSION['user_id']];
             $success = $stmt->execute($params);
@@ -292,7 +349,7 @@ try {
 // Fetch all violations issued by the officer
 try {
     $stmt = $pdo->prepare("
-        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, v.or_number, v.issued_date, v.status, v.notes, v.offense_freq, t.violation_type, t.fine_amount 
+        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, v.or_number, v.issued_date, v.status, v.notes, v.offense_freq, v.plate_image, t.violation_type, t.fine_amount 
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
         WHERE v.officer_id = ? 
@@ -327,14 +384,6 @@ try {
                                 Officer Dashboard
                             </a>
                         </li>
-
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/issue_violation.php">
-                                <i class="fas fa-ticket-alt me-2"></i>
-                                Issue Violation
-                            </a>
-                        </li>-->
-
                         <li class="nav-item">
                             <a class="nav-link active" href="../pages/manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>
@@ -373,12 +422,6 @@ try {
                             <a class="nav-link" href="../pages/officer_dashboard.php">
                                 <i class="fas fa-tachometer-alt me-2"></i>
                                 Officer Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/issue_violation.php">
-                                <i class="fas fa-ticket-alt me-2"></i>
-                                Issue Violation
                             </a>
                         </li>
                         <li class="nav-item">
@@ -434,6 +477,7 @@ try {
                                         <th>Officer ID</th>
                                         <th>Violator</th>
                                         <th>Plate</th>
+                                        <th>Plate Image</th>
                                         <th>Type</th>
                                         <th>Fine</th>
                                         <th>Reason</th>
@@ -450,7 +494,7 @@ try {
                                 </thead>
                                 <tbody>
                                     <?php if (empty($violations)): ?>
-                                        <tr><td colspan="16" class="text-center text-muted">No violations found</td></tr>
+                                        <tr><td colspan="17" class="text-center text-muted">No violations found</td></tr>
                                     <?php else: ?>
                                         <?php foreach ($violations as $violation): ?>
                                             <?php
@@ -467,6 +511,15 @@ try {
                                                 <td><?php echo htmlspecialchars($violation['officer_id']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violator_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['plate_number']); ?></td>
+                                                <td>
+                                                    <?php if ($violation['plate_image'] && file_exists($violation['plate_image'])): ?>
+                                                        <a href="<?php echo htmlspecialchars($violation['plate_image']); ?>" target="_blank">
+                                                            <img src="<?php echo htmlspecialchars($violation['plate_image']); ?>" alt="Plate Image" style="max-width: 100px; max-height: 100px;">
+                                                        </a>
+                                                    <?php else: ?>
+                                                        N/A
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
                                                 <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['reason']); ?></td>
@@ -504,7 +557,7 @@ try {
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form method="POST" class="form-outline edit-violation-form">
+                                                            <form method="POST" class="form-outline edit-violation-form" enctype="multipart/form-data">
                                                                 <input type="hidden" name="id" value="<?php echo $violation['id']; ?>">
                                                                 <input type="hidden" name="edit_violation" value="1">
                                                                 <div class="row">
@@ -532,6 +585,13 @@ try {
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col-md-6 mb-3">
+                                                                        <label for="plate_image_<?php echo $violation['id']; ?>" class="form-label">Plate Image (Optional)</label>
+                                                                        <input type="file" class="form-control" name="plate_image" id="plate_image_<?php echo $violation['id']; ?>" accept="image/*">
+                                                                        <?php if ($violation['plate_image'] && file_exists($violation['plate_image'])): ?>
+                                                                            <a href="<?php echo htmlspecialchars($violation['plate_image']); ?>" target="_blank">View Current Image</a>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                    <div class="col-md-6 mb-3">
                                                                         <label for="violation_type_id_<?php echo $violation['id']; ?>" class="form-label">Violation Type</label>
                                                                         <select class="form-select" name="violation_type_id" id="violation_type_id_<?php echo $violation['id']; ?>" required>
                                                                             <option value="">Select</option>
@@ -543,55 +603,57 @@ try {
                                                                         </select>
                                                                         <div class="invalid-feedback">Please select a violation type.</div>
                                                                     </div>
+                                                                </div>
+                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="reason_<?php echo $violation['id']; ?>" class="form-label">Reason</label>
                                                                         <input type="text" class="form-control" name="reason" id="reason_<?php echo $violation['id']; ?>" required value="<?php echo htmlspecialchars($violation['reason']); ?>">
                                                                         <div class="invalid-feedback">Please enter a valid reason.</div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <div class="form-check">
                                                                             <input type="checkbox" class="form-check-input" name="has_license" id="has_license_<?php echo $violation['id']; ?>" <?php echo $violation['has_license'] ? 'checked' : ''; ?>>
                                                                             <label class="form-check-label" for="has_license_<?php echo $violation['id']; ?>">Has License</label>
                                                                         </div>
                                                                     </div>
+                                                                </div>
+                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="license_number_<?php echo $violation['id']; ?>" class="form-label">License Number</label>
                                                                         <input type="text" class="form-control" name="license_number" id="license_number_<?php echo $violation['id']; ?>" value="<?php echo htmlspecialchars($violation['license_number'] ?: ''); ?>">
                                                                     </div>
-                                                                </div>
-                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <div class="form-check">
                                                                             <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded_<?php echo $violation['id']; ?>" <?php echo $violation['is_impounded'] ? 'checked' : ''; ?>>
                                                                             <label class="form-check-label" for="is_impounded_<?php echo $violation['id']; ?>">Is Impounded</label>
                                                                         </div>
                                                                     </div>
+                                                                </div>
+                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <div class="form-check">
                                                                             <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid_<?php echo $violation['id']; ?>" <?php echo $violation['is_paid'] ? 'checked' : ''; ?>>
                                                                             <label class="form-check-label" for="is_paid_<?php echo $violation['id']; ?>">Is Paid</label>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="or_number_<?php echo $violation['id']; ?>" class="form-label">OR Number</label>
                                                                         <input type="text" class="form-control" name="or_number" id="or_number_<?php echo $violation['id']; ?>" value="<?php echo htmlspecialchars($violation['or_number'] ?: ''); ?>">
                                                                     </div>
+                                                                </div>
+                                                                <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="issued_date_<?php echo $violation['id']; ?>" class="form-label">Issued Date</label>
                                                                         <input type="datetime-local" class="form-control" name="issued_date" id="issued_date_<?php echo $violation['id']; ?>" value="<?php echo date('Y-m-d\TH:i', strtotime($violation['issued_date'])); ?>">
                                                                     </div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="status_<?php echo $violation['id']; ?>" class="form-label">Status</label>
-                                                                    <select class="form-select" name="status" id="status_<?php echo $violation['id']; ?>">
-                                                                        <option value="Pending" <?php echo $violation['status'] === 'Pending' ? 'selected' : ''; ?>>Pending</option>
-                                                                        <option value="Resolved" <?php echo $violation['status'] === 'Resolved' ? 'selected' : ''; ?>>Resolved</option>
-                                                                        <option value="Disputed" <?php echo $violation['status'] === 'Disputed' ? 'selected' : ''; ?>>Disputed</option>
-                                                                    </select>
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="status_<?php echo $violation['id']; ?>" class="form-label">Status</label>
+                                                                        <select class="form-select" name="status" id="status_<?php echo $violation['id']; ?>">
+                                                                            <option value="Pending" <?php echo $violation['status'] === 'Pending' ? 'selected' : ''; ?>>Pending</option>
+                                                                            <option value="Resolved" <?php echo $violation['status'] === 'Resolved' ? 'selected' : ''; ?>>Resolved</option>
+                                                                            <option value="Disputed" <?php echo $violation['status'] === 'Disputed' ? 'selected' : ''; ?>>Disputed</option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label for="notes_<?php echo $violation['id']; ?>" class="form-label">Notes</label>
@@ -620,7 +682,7 @@ try {
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" class="form-outline create-violation-form" id="createViolationForm">
+                                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
                                     <input type="hidden" name="create_violation" value="1">
                                     <input type="hidden" name="user_id" id="user_id">
                                     <div class="row">
@@ -672,10 +734,17 @@ try {
                                         <div class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
+                                                    <label for="plate_image" class="form-label">Plate Image (Optional)</label>
+                                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
+                                                    <div id="ocr_status" class="form-text"></div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
                                                     <label for="plate_number" class="form-label">License Plate</label>
                                                     <input type="text" class="form-control" name="plate_number" id="plate_number" required>
                                                     <div class="invalid-feedback">Please enter a valid license plate.</div>
                                                 </div>
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-md-6 mb-3">
                                                     <label for="violation_type_id" class="form-label">Violation Type</label>
                                                     <select class="form-select" name="violation_type_id" id="violation_type_id" required>
@@ -688,9 +757,7 @@ try {
                                                     </select>
                                                     <div class="invalid-feedback">Please select a violation type.</div>
                                                 </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12 mb-3">
+                                                <div class="col-md-6 mb-3">
                                                     <label for="reason" class="form-label">Reason</label>
                                                     <input type="text" class="form-control" name="reason" id="reason" required>
                                                     <div class="invalid-feedback">Please enter a valid reason.</div>
@@ -762,6 +829,7 @@ try {
         </div>
     </div>
     <?php include '../layout/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
     <script>
         // Initialize Toastr
         toastr.options = {
@@ -775,6 +843,28 @@ try {
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
+
+        // Function to perform OCR on image and populate plate number
+        function performOCR(file, inputId) {
+            if (!file) return;
+            const ocrStatus = document.getElementById('ocr_status');
+            ocrStatus.textContent = 'Processing image...';
+            Tesseract.recognize(
+                file,
+                'eng',
+                {
+                    logger: m => console.log(m)
+                }
+            ).then(({ data: { text } }) => {
+                const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                document.getElementById(inputId).value = cleanedText;
+                ocrStatus.textContent = 'Text extracted successfully!';
+                console.log('OCR Result:', cleanedText);
+            }).catch(error => {
+                ocrStatus.textContent = 'Error extracting text from image.';
+                console.error('OCR Error:', error);
+            });
+        }
 
         // Client-side validation for Create Violation Form
         document.getElementById('createViolationForm').addEventListener('submit', function(e) {
@@ -863,6 +953,25 @@ try {
                     });
                 } else {
                     console.log('Create violation form submission canceled');
+                }
+            });
+        });
+
+        // Handle image upload for OCR in Create Violation Form
+        document.getElementById('plate_image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                performOCR(file, 'plate_number');
+            }
+        });
+
+        // Handle image upload for OCR in Edit Violation Forms
+        document.querySelectorAll('input[name="plate_image"]').forEach(input => {
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const inputId = this.id.replace('plate_image_', 'plate_number_');
+                    performOCR(file, inputId);
                 }
             });
         });

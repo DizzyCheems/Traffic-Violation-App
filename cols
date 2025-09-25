@@ -11,6 +11,9 @@ ADD COLUMN contact int NULL;
 
 
 
-
+/*Sept 25 */
 ALTER TABLE violations   
 ADD COLUMN offense_freq int NULL;
+
+
+ALTER TABLE violations ADD COLUMN plate_image VARCHAR(255) DEFAULT NULL;
