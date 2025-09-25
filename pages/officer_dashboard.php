@@ -485,12 +485,8 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_users.php">
-                                <i class="fas fa-users me-2"></i>
-                                Manage Users
-                            </a>
-                        </li>
+
+
                         <li class="nav-item">
                             <a class="nav-link" href="../index.php">
                                 <i class="fas fa-home me-2"></i>
@@ -1033,7 +1029,7 @@ try {
             <?php echo $msg; ?>
         <?php endforeach; ?>
 
-        // Function to perform OCR on image and populate plate number
+        // Function to perform OCR on image and populate license number
         function performOCR(file, inputId) {
             if (!file) return;
             const ocrStatus = document.getElementById('ocr_status');
@@ -1150,7 +1146,7 @@ try {
         document.getElementById('plate_image').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                performOCR(file, 'plate_number');
+                performOCR(file, 'license_number');
             }
         });
 
@@ -1298,7 +1294,7 @@ try {
                     } else {
                         console.log('Delete violation type form submission canceled');
                     }
-                });
+                }); 
             });
         });
     </script>

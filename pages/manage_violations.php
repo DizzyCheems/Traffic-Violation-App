@@ -470,7 +470,10 @@ try {
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
-        <!-- Toggle button for offcanvas sidebar (mobile only) -->
+        
+    
+    
+    <!-- Toggle button for offcanvas sidebar (mobile only) -->
         <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <i class="fas fa-bars"></i> Menu
         </button>
@@ -480,10 +483,20 @@ try {
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="../pages/officer_dashboard.php">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Officer Dashboard
-                            </a>
+                            
+<?php if (isset($_SESSION['role']) && strtolower(trim($_SESSION['role'])) === 'admin'): ?>
+    <a class="nav-link" href="../pages/admin_dashboard.php">
+        <i class="fas fa-tachometer-alt me-2"></i>
+        Home
+    </a>
+<?php else: ?>
+    <a class="nav-link" href="../pages/officer_dashboard.php">
+        <i class="fas fa-tachometer-alt me-2"></i>
+        Officer Dashboard
+    </a>
+<?php endif; ?>
+
+
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" href="../pages/manage_violations.php">
