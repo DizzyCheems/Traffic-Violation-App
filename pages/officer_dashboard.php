@@ -630,7 +630,7 @@ try {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                 <!--<div class="col-md-4">
                         <div class="card shadow-sm">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Create Violation</h3>
@@ -639,7 +639,8 @@ try {
                                 <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createViolationModal">Open Create Violation Form</button>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
+    
                     <div class="col-md-4">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
