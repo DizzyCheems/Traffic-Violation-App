@@ -2,11 +2,19 @@
 session_start();
 include '../config/conn.php';
 
+// Include PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require '../vendor/autoload.php';
+
 // Debug: Log session data
 file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
 
 // Check session variables
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower(trim($_SESSION['role'])) !== 'officer') {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || 
+    !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
     $reason = "Redirecting to login.php. ";
     if (!isset($_SESSION['user_id'])) {
         $reason .= "user_id not set. ";
@@ -14,8 +22,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower(trim
     if (!isset($_SESSION['role'])) {
         $reason .= "role not set. ";
     }
-    if (isset($_SESSION['role']) && strtolower(trim($_SESSION['role'])) !== 'officer') {
-        $reason .= "role is '" . $_SESSION['role'] . "' instead of 'officer'.";
+    if (isset($_SESSION['role']) && !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
+        $reason .= "role is '" . $_SESSION['role'] . "' instead of 'officer' or 'admin'.";
     }
     file_put_contents('../debug.log', $reason . "\n", FILE_APPEND);
     header("Location: ../login.php");
@@ -82,16 +90,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
 
         if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
             $toastr_messages[] = "toastr.error('Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
+            file_put_contents('../debug.log', "Create Violation Failed: Missing required fields.\n", FILE_APPEND);
         } else {
             // Check if user_id is provided and valid
             if ($user_id) {
-                $stmt = $pdo->prepare("SELECT id, full_name FROM users WHERE id = ? AND officer_id = ?");
+                $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE id = ? AND officer_id = ?");
                 $stmt->execute([$user_id, $_SESSION['user_id']]);
                 $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (!$existing_user || strtolower(trim($existing_user['full_name'])) !== strtolower(trim($violator_name))) {
                     $toastr_messages[] = "toastr.error('Selected user is invalid or does not match the provided name.');";
                     file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
                     $user_id = null;
+                } else {
+                    // Use email from users table if not provided in form
+                    $email = $email ?: $existing_user['email'];
                 }
             }
 
@@ -144,19 +156,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
             }
 
+            // Fetch violation type details for email
+            $stmt = $pdo->prepare("SELECT violation_type, fine_amount FROM types WHERE id = ?");
+            $stmt->execute([$violation_type_id]);
+            $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
+            $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
+            $fine_amount = $violation_type['fine_amount'] ?? 0;
+
             // Insert violation with user_id, offense_freq, and plate_image
             $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq, plate_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq, $plate_image];
+            file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
             $success = $stmt->execute($params);
             if ($success) {
-                $_SESSION['create_success'] = true;
                 // Update officer earnings
                 $week_start = date('Y-m-d', strtotime('monday this week'));
-                $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
-                $stmt->execute([$violation_type_id]);
-                $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
-                $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
+                $success_earnings = $stmt->execute([$_SESSION['user_id'], $week_start, $fine_amount, $fine_amount]);
+                if (!$success_earnings) {
+                    $toastr_messages[] = "toastr.error('Failed to update officer earnings.');";
+                    file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
+                }
+
+                // Send email if email address is provided and valid
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    try {
+                        $mail = new PHPMailer(true);
+                        $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable debug output
+                        $mail->isSMTP();
+                        $mail->Host = 'smtp.gmail.com';
+                        $mail->SMTPAuth = true;
+                        $mail->Username = 'stine6595@gmail.com';
+                        $mail->Password = 'qvkb ycan jdi j yffz';
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port = 587;
+
+                        $mail->setFrom('stine6595@gmail.com', 'Traffic Violation System');
+                        $mail->addAddress($email, $violator_name);
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Traffic Violation Recorded';
+                        $mail->Body = "
+                            <h3>Traffic Violation Notification</h3>
+                            <p>Dear " . htmlspecialchars($violator_name) . ",</p>
+                            <p>A traffic violation has been recorded with the following details:</p>
+                            <ul>
+                                <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
+                                <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
+                                <li><strong>Fine Amount:</strong> ₱" . number_format($fine_amount, 2) . "</li>
+                                <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
+                                <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
+                                <li><strong>Issue Date:</strong> " . htmlspecialchars($issued_date) . "</li>
+                                <li><strong>Offense Frequency:</strong> " . htmlspecialchars($offense_freq) . "</li>
+                            </ul>
+                            <p>Please address this violation promptly.</p>
+                            <p>Regards,<br>Traffic Violation System</p>
+                        ";
+                        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- Reason: $reason\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: $issued_date\n- Offense Frequency: $offense_freq\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
+
+                        ob_start();
+                        $mail->send();
+                        $debug_output = ob_get_clean();
+                        $toastr_messages[] = "toastr.success('Email sent successfully to " . htmlspecialchars($email) . "!');";
+                        file_put_contents('../debug.log', "Email sent successfully to $email\nDebug Output: $debug_output\n", FILE_APPEND);
+                    } catch (Exception $e) {
+                        $debug_output = ob_get_clean();
+                        $toastr_messages[] = "toastr.error('Failed to send email to " . htmlspecialchars($email) . ": " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+                        file_put_contents('../debug.log', "Email sending failed: " . $e->getMessage() . "\nDebug Output: $debug_output\n", FILE_APPEND);
+                    }
+                } else {
+                    $toastr_messages[] = "toastr.warning('No valid email address provided for notification. Email: " . htmlspecialchars($email) . "');";
+                    file_put_contents('../debug.log', "No valid email address provided for violation notification. Email: '$email'\n", FILE_APPEND);
+                }
+
+                // Set success flag only after all operations
+                $_SESSION['create_success'] = true;
+                header("Location: officer_dashboard.php");
+                exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create violation.');";
                 file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
@@ -485,9 +561,12 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-
-
-                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.php">
+                                <i class="fas fa-home me-2"></i>
+                                Home
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>
@@ -516,7 +595,6 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" href="../index.php">
                                 <i class="fas fa-home me-2"></i>
@@ -630,7 +708,7 @@ try {
                             </div>
                         </div>
                     </div>
-                 <!--<div class="col-md-4">
+                    <div class="col-md-4">
                         <div class="card shadow-sm">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Create Violation</h3>
@@ -639,8 +717,7 @@ try {
                                 <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createViolationModal">Open Create Violation Form</button>
                             </div>
                         </div>
-                    </div> -->
-    
+                    </div>
                     <div class="col-md-4">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
@@ -746,158 +823,292 @@ try {
                     </div>
                 </div>
 
-                <!-- Create Violation Modal -->
-                <div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <!-- Create Violation Modal -->
+<div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
+                    <input type="hidden" name="create_violation" value="1">
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="violator_name" class="form-label">Violator Name</label>
+                            <input type="text" class="form-control" name="violator_name" id="violator_name" required>
+                            <div class="invalid-feedback">Please enter a valid violator name.</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="contact_number" class="form-label">Contact Number</label>
+                            <input type="text" class="form-control" name="contact_number" id="contact_number" required>
+                            <div class="invalid-feedback">Please enter a valid contact number.</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="email" class="form-label">Email (Optional)</label>
+                            <input type="email" class="form-control" name="email" id="email">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="plate_number" class="form-label">License Plate</label>
+                            <input type="text" class="form-control" name="plate_number" id="plate_number" required>
+                            <div class="invalid-feedback">Please enter a valid license plate.</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="plate_image" class="form-label">Upload Plate Image (Optional)</label>
+                            <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
+                            <div id="ocr_status" class="form-text"></div>
+                            <label for="ocr_result" class="form-label mt-2">OCR Result</label>
+                            <input type="text" class="form-control" name="ocr_result" id="ocr_result" readonly placeholder="OCR extracted text will appear here">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="violation_type_id" class="form-label">Violation Type</label>
+                            <select class="form-select" name="violation_type_id" id="violation_type_id" required>
+                                <option value="" disabled selected>Select</option>
+                                <?php foreach ($types as $type): ?>
+                                    <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                                        <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback">Please select a violation type.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <input type="text" class="form-control" name="reason" id="reason" required>
+                            <div class="invalid-feedback">Please enter a valid reason.</div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="license_number" class="form-label">License Number</label>
+                            <input type="text" class="form-control" name="license_number" id="license_number">
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
+                                <label class="form-check-label" for="has_license">Has License</label>
                             </div>
-                            <div class="modal-body">
-                                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
-                                    <input type="hidden" name="create_violation" value="1">
-                                    <input type="hidden" name="user_id" id="user_id">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="violator_name" class="form-label">Violator Name</label>
-                                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
-                                                <div class="invalid-feedback">Please enter a valid violator name.</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="contact_number" class="form-label">Contact Number</label>
-                                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
-                                                <div class="invalid-feedback">Please enter a valid contact number.</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email (Optional)</label>
-                                                <input type="email" class="form-control" name="email" id="email">
-                                            </div>
-                                            <div class="mb-3">
-                                                <h6>Users Under Your Supervision</h6>
-                                                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                                                    <table class="table table-hover table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Username</th>
-                                                                <th>Full Name</th>
-                                                                <th>Contact</th>
-                                                                <th>Email</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php if (empty($supervised_users)): ?>
-                                                                <tr><td colspan="4" class="text-center text-muted">No users found</td></tr>
-                                                            <?php else: ?>
-                                                                <?php foreach ($supervised_users as $user): ?>
-                                                                    <tr class="user-row" data-user-id="<?php echo htmlspecialchars($user['id']); ?>" data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>" data-contact-number="<?php echo htmlspecialchars($user['contact_number']); ?>" data-email="<?php echo htmlspecialchars($user['email'] ?: ''); ?>" style="cursor: pointer;">
-                                                                        <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                                        <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                                                                        <td><?php echo htmlspecialchars($user['contact_number']); ?></td>
-                                                                        <td><?php echo htmlspecialchars($user['email'] ?: 'N/A'); ?></td>
-                                                                    </tr>
-                                                                <?php endforeach; ?>
-                                                            <?php endif; ?>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
-                                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
-                                                    <div id="ocr_status" class="form-text"></div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="plate_number" class="form-label">License Plate</label>
-                                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required>
-                                                    <div class="invalid-feedback">Please enter a valid license plate.</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="violation_type_id" class="form-label">Violation Type</label>
-                                                    <select class="form-select" name="violation_type_id" id="violation_type_id" required>
-                                                        <option value="" disabled selected>Select</option>
-                                                        <?php foreach ($types as $type): ?>
-                                                            <option value="<?php echo htmlspecialchars($type['id']); ?>">
-                                                                <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                    <div class="invalid-feedback">Please select a violation type.</div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="reason" class="form-label">Reason</label>
-                                                    <input type="text" class="form-control" name="reason" id="reason" required>
-                                                    <div class="invalid-feedback">Please enter a valid reason.</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
-                                                        <label class="form-check-label" for="has_license">Has License</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="license_number" class="form-label">License Number</label>
-                                                    <input type="text" class="form-control" name="license_number" id="license_number">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
-                                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
-                                                        <label class="form-check-label" for="is_paid">Is Paid</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="or_number" class="form-label">OR Number</label>
-                                                    <input type="text" class="form-control" name="or_number" id="or_number">
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="issued_date" class="form-label">Issued Date</label>
-                                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="status" class="form-label">Status</label>
-                                                    <select class="form-select" name="status" id="status">
-                                                        <option value="Pending" selected>Pending</option>
-                                                        <option value="Resolved">Resolved</option>
-                                                        <option value="Disputed">Disputed</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="notes" class="form-label">Notes</label>
-                                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <button type="submit" class="btn btn-primary">Create Violation</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="or_number" class="form-label">OR Number</label>
+                            <input type="text" class="form-control" name="or_number" id="or_number">
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
+                                <label class="form-check-label" for="is_impounded">Is Impounded</label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
+                                <label class="form-check-label" for="is_paid">Is Paid</label>
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="issued_date" class="form-label">Issued Date</label>
+                            <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" name="status" id="status">
+                                <option value="Pending" selected>Pending</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Disputed">Disputed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" name="notes" id="notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Users Under Your Supervision</h6>
+                        <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Full Name</th>
+                                        <th>Contact</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($supervised_users)): ?>
+                                        <tr><td colspan="4" class="text-center text-muted">No users found</td></tr>
+                                    <?php else: ?>
+                                        <?php foreach ($supervised_users as $user): ?>
+                                            <tr class="user-row" data-user-id="<?php echo htmlspecialchars($user['id']); ?>" data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>" data-contact-number="<?php echo htmlspecialchars($user['contact_number']); ?>" data-email="<?php echo htmlspecialchars($user['email'] ?: ''); ?>" style="cursor: pointer;">
+                                                <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                                <td><?php echo htmlspecialchars($user['full_name']); ?></td>
+                                                <td><?php echo htmlspecialchars($user['contact_number']); ?></td>
+                                                <td><?php echo htmlspecialchars($user['email'] ?: 'N/A'); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Violation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Function to perform OCR on image and populate fields
+    function performOCR(file, inputId, ocrResultId) {
+        if (!file) return;
+        const ocrStatus = document.getElementById('ocr_status');
+        ocrStatus.textContent = 'Processing image...';
+        Tesseract.recognize(
+            file,
+            'eng',
+            {
+                logger: m => console.log(m)
+            }
+        ).then(({ data: { text } }) => {
+            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            document.getElementById(inputId).value = cleanedText;
+            document.getElementById(ocrResultId).value = cleanedText;
+            ocrStatus.textContent = 'Text extracted successfully!';
+            console.log('OCR Result:', cleanedText);
+        }).catch(error => {
+            ocrStatus.textContent = 'Error extracting text from image.';
+            console.error('OCR Error:', error);
+        });
+    }
+
+    // Handle image upload for OCR in Create Violation Form
+    document.getElementById('plate_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            performOCR(file, 'plate_number', 'ocr_result');
+        }
+    });
+
+    // Handle user selection from mini-table
+    document.querySelectorAll('.user-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const fullName = this.getAttribute('data-full-name');
+            const contactNumber = this.getAttribute('data-contact-number');
+            const email = this.getAttribute('data-email');
+            document.getElementById('violator_name').value = fullName;
+            document.getElementById('contact_number').value = contactNumber;
+            document.getElementById('email').value = email;
+            document.getElementById('user_id').value = userId;
+            document.getElementById('violator_name').classList.remove('is-invalid');
+            document.getElementById('contact_number').classList.remove('is-invalid');
+            console.log(`Selected user: ID=${userId}, Full Name=${fullName}, Contact=${contactNumber}, Email=${email}`);
+            // Highlight selected row
+            document.querySelectorAll('.user-row').forEach(r => r.classList.remove('table-primary'));
+            this.classList.add('table-primary');
+        });
+    });
+
+    // Clear user_id and fields if violator_name is manually changed
+    document.getElementById('violator_name').addEventListener('input', function() {
+        document.getElementById('user_id').value = '';
+        document.getElementById('contact_number').value = '';
+        document.getElementById('email').value = '';
+        document.querySelectorAll('.user-row').forEach(row => row.classList.remove('table-primary'));
+        console.log('Violator name manually changed, cleared user_id, contact_number, and email');
+    });
+
+    // Client-side validation and SweetAlert for Create Violation Form
+    document.getElementById('createViolationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const violatorName = document.getElementById('violator_name').value.trim();
+        const contactNumber = document.getElementById('contact_number').value.trim();
+        const plateNumber = document.getElementById('plate_number').value.trim();
+        const reason = document.getElementById('reason').value.trim();
+        const violationTypeId = document.getElementById('violation_type_id').value;
+
+        let isValid = true;
+
+        document.getElementById('violator_name').classList.remove('is-invalid');
+        document.getElementById('contact_number').classList.remove('is-invalid');
+        document.getElementById('plate_number').classList.remove('is-invalid');
+        document.getElementById('reason').classList.remove('is-invalid');
+        document.getElementById('violation_type_id').classList.remove('is-invalid');
+
+        if (!violatorName) {
+            document.getElementById('violator_name').classList.add('is-invalid');
+            isValid = false;
+        }
+        if (!contactNumber) {
+            document.getElementById('contact_number').classList.add('is-invalid');
+            isValid = false;
+        }
+        if (!plateNumber) {
+            document.getElementById('plate_number').classList.add('is-invalid');
+            isValid = false;
+        }
+        if (!reason) {
+            document.getElementById('reason').classList.add('is-invalid');
+            isValid = false;
+        }
+        if (!violationTypeId) {
+            document.getElementById('violation_type_id').classList.add('is-invalid');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            console.log('Client-side validation failed for create violation');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to create this violation?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, create it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('Create violation form submission confirmed');
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this)
+                }).then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            title: 'Created!',
+                            text: 'Violation has been created successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to create violation.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while creating the violation.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            } else {
+                console.log('Create violation form submission canceled');
+            }
+        });
+    });
+</script>
 
                 <!-- Users with Violations -->
                 <div class="card mb-4 shadow-sm">
@@ -1020,7 +1231,7 @@ try {
             <?php echo $msg; ?>
         <?php endforeach; ?>
 
-        // Function to perform OCR on image and populate license number
+        // Function to perform OCR on image and populate plate number
         function performOCR(file, inputId) {
             if (!file) return;
             const ocrStatus = document.getElementById('ocr_status');
@@ -1137,7 +1348,7 @@ try {
         document.getElementById('plate_image').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                performOCR(file, 'license_number');
+                performOCR(file, 'plate_number');
             }
         });
 

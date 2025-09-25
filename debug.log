@@ -503,3 +503,301 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-09-25 17:17:40
+Login.php accessed: 2025-09-25 17:17:47
+Login.php accessed: 2025-09-25 17:17:51
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='er', user_id='', contact_number='erg', email='er@mail.com', plate_number='NBC1234', reason='erg', violation_type_id='14', plate_image='../Uploads/68d573b0e8e9e_2018_Philippine_new_plates.png'
+Created new user: username='er', user_id='161', contact_number='erg', email='er@mail.com'
+Offense Frequency for user_id='161': 1
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 161
+    [2] => er
+    [3] => NBC1234
+    [4] => erg
+    [5] => 14
+    [6] => 0
+    [7] => 
+    [8] => 0
+    [9] => 0
+    [10] => ert
+    [11] => 2025-09-25T18:53
+    [12] => Pending
+    [13] => 
+    [14] => 1
+    [15] => ../Uploads/68d573b0e8e9e_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 18:57:58
+Login.php accessed: 2025-09-25 18:58:01
+Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 19:00:07
+Login.php accessed: 2025-09-25 19:00:12
+Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Login.php accessed: 2025-09-25 19:08:58
+Login.php accessed: 2025-09-25 19:09:01
+Login successful for user_id: 4, role: user
+Login.php accessed: 2025-09-25 19:09:03
+Login.php accessed: 2025-09-25 19:09:07
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 19:09:08
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Login.php accessed: 2025-09-25 19:09:32
+Login.php accessed: 2025-09-25 19:09:34
+Login.php accessed: 2025-09-25 19:11:15
+Login.php accessed: 2025-09-25 19:11:57
+Login successful for user_id: 1, role: admin
+Create User Input: username='HI', full_name='YYHH', role='officer', officer_id=''
+Login.php accessed: 2025-09-25 19:13:22
+Login.php accessed: 2025-09-25 19:13:29
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 19:15:06
+Login.php accessed: 2025-09-25 19:15:11
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='ff', violation_type_id='17', plate_image='../Uploads/68d578d1b35b5_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 4
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => ff
+    [5] => 17
+    [6] => 0
+    [7] => eq
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-09-25T19:15
+    [12] => Pending
+    [13] => e
+    [14] => 4
+    [15] => ../Uploads/68d578d1b35b5_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 19:16:37
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Session Data: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Login.php accessed: 2025-09-25 19:16:40

@@ -176,7 +176,7 @@ try {
                                                 <td><?php echo htmlspecialchars($violation['plate_number']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['reason']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
-                                                <td><?php echo '$' . number_format($violation['fine_amount'], 2); ?></td>
+                                                <td><?php echo '₱' . number_format($violation['fine_amount'], 2); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['issued_date']); ?></td>
                                                 <td>
                                                     <span class="badge <?php echo $violation['has_license'] ? 'bg-success' : 'bg-danger'; ?>">

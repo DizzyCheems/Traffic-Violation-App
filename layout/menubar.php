@@ -44,7 +44,7 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="../pages/set_fines.php">
-                    <i class="fas fa-dollar-sign me-2"></i>
+                    <i class="fas fa-peso-sign me-2"></i>
                     Set Fines
                 </a>
             </li>

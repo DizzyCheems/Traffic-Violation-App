@@ -88,7 +88,7 @@ try {
                                             <tr class="table-row-hover">
                                                 <td><?php echo htmlspecialchars($type['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
-                                                <td><?php echo '$' . number_format($type['fine_amount'], 2); ?></td>
+                                                <td><?php echo '₱' . number_format($type['fine_amount'], 2); ?></td>
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editFineModal<?php echo $type['id']; ?>">Edit Fine</button>

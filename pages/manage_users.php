@@ -30,7 +30,7 @@ if (isset($_SESSION['create_success']) && $_SESSION['create_success']) {
 if (isset($_SESSION['edit_success']) && $_SESSION['edit_success']) {
     $toastr_messages[] = "Swal.fire({
         title: 'Updated!',
-        text: 'User has been updated successfully.',
+        text: 'User has been updated successfully.',a
         icon: 'success',
         confirmButtonText: 'OK'
     });";
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
             $toastr_messages[] = "toastr.error('Username already exists (case-insensitive).');";
         } else {
             $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id) VALUES (?, ?, ?, ?, ?)");
-            $success = $stmt->execute([htmlspecialchars($username), password_hash($password, PASSWORD_DEFAULT), htmlspecialchars($full_name), $role, $officer_id]);
+            $success = $stmt->execute([htmlspecialchars($username), htmlspecialchars($password), htmlspecialchars($full_name), $role, $officer_id]);
             if ($success) {
                 $_SESSION['create_success'] = true;
                 header("Location: manage_users.php");
@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
             $params = [htmlspecialchars($username), htmlspecialchars($full_name), $role, $officer_id];
             if (!empty($password)) {
                 $sql .= ", password = ?";
-                $params[] = password_hash($password, PASSWORD_DEFAULT);
+                $params[] = htmlspecialchars($password);
             }
             $sql .= " WHERE id = ? AND (? = 'admin' OR officer_id = ? OR id = ?)";
             $params[] = $id;

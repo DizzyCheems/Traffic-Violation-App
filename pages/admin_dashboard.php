@@ -295,7 +295,7 @@ try {
 
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/set_fines.php">
-                                <i class="fas fa-dollar-sign me-2"></i>
+                                <i class="fas fa-peso-sign me-2"></i>
                                 Set Fines
                             </a>
                         </li>
@@ -385,7 +385,7 @@ try {
 
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/set_fines.php">
-                                <i class="fas fa-dollar-sign me-2"></i>
+                                <i class="fas fa-peso-sign me-2"></i>
                                 Set Fines
                             </a>
                         </li>
@@ -450,7 +450,7 @@ try {
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Violation Collection</h5>
-                                <p class="card-text">MTD: <?php echo htmlspecialchars($total_revenue); ?></p>
+                                <p class="card-text">Amount: <?php echo htmlspecialchars($total_revenue); ?></p>
                             </div>
                         </div>
                     </div>
