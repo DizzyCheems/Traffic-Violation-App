@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
 $dbname = 'traffic';
-$username = 'root';
-$password = '';
+$username = 'tvp';
+$password = 'dbuser';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);

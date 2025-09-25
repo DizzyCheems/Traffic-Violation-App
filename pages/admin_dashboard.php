@@ -418,23 +418,13 @@ try {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="../pages/holiday_rules.php">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Holiday Rules
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="../pages/appeal_workflow.php">
                                 <i class="fas fa-gavel me-2"></i>
                                 Appeal Workflow
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/database_backup.php">
-                                <i class="fas fa-database me-2"></i>
-                                Database Backup
-                            </a>
-                        </li>
+
+
                         <li class="nav-item">
                             <a class="nav-link" href="../index.php">
                                 <i class="fas fa-home me-2"></i>
