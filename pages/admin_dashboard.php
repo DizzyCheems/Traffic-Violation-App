@@ -278,6 +278,7 @@ try {
                                 Monitor Violations
                             </a>
                         </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/violation_report.php">
                                 <i class="fas fa-chart-bar me-2"></i>
@@ -317,12 +318,6 @@ try {
                             <a class="nav-link" href="../pages/audit_log.php">
                                 <i class="fas fa-file-alt me-2"></i>
                                 Audit Log
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/holiday_rules.php">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Holiday Rules
                             </a>
                         </li>
                         
@@ -387,12 +382,7 @@ try {
                                 Violation Reports
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/violation_heatmap.php">
-                                <i class="fas fa-map-marked-alt me-2"></i>
-                                Violation Heatmap
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/set_fines.php">
                                 <i class="fas fa-dollar-sign me-2"></i>
@@ -405,18 +395,14 @@ try {
                                 Manage Complaints
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/officer_performance.php">
-                                <i class="fas fa-star me-2"></i>
-                                Officer Performance
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/audit_log.php">
                                 <i class="fas fa-file-alt me-2"></i>
                                 Audit Log
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/appeal_workflow.php">
                                 <i class="fas fa-gavel me-2"></i>
@@ -521,9 +507,6 @@ try {
                                 <ul class="list-unstyled">
                                     <li><a href="../pages/manage_users.php" class="text-decoration-none link-primary">▪ Manage All Users</a></li>
                                     <li><a href="../pages/audit_log.php" class="text-decoration-none link-primary">▪ View Audit Log</a></li>
-                                    <li><a href="../pages/officer_performance.php" class="text-decoration-none link-primary">▪ Officer Performance</a></li>
-                                    <li><a href="../pages/database_backup.php" class="text-decoration-none link-primary">▪ Database Backup</a></li>
-                                    <li><a href="../pages/issue_violation.php" class="text-decoration-none link-primary">▪ Issue Traffic Violation</a></li>
                                     <li><a href="../pages/manage_concerns.php" class="text-decoration-none link-primary">▪ Manage Complaints</a></li>
                                 </ul>
                             </div>
@@ -536,7 +519,6 @@ try {
                                 <ul class="list-unstyled">
                                     <li><a href="#" class="text-decoration-none link-primary" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">▪ Configure Violation Types</a></li>
                                     <li><a href="../pages/set_fines.php" class="text-decoration-none link-primary">▪ Set Fine Amounts</a></li>
-                                    <li><a href="../pages/holiday_rules.php" class="text-decoration-none link-primary">▪ Holiday Rules</a></li>
                                     <li><a href="../pages/appeal_workflow.php" class="text-decoration-none link-primary">▪ Edit Appeal Workflow</a></li>
                                 </ul>
                             </div>
