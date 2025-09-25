@@ -734,7 +734,7 @@ try {
                                         <div class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
-                                                    <label for="plate_image" class="form-label">Plate Image (Optional)</label>
+                                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
                                                     <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
                                                     <div id="ocr_status" class="form-text"></div>
                                                 </div>

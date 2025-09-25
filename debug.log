@@ -5227,3 +5227,9 @@ Session Data: Array
     [role] => officer
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
