@@ -1,11 +1,13 @@
 <?php
 session_start();
 include '../config/conn.php';
+
+// Include PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require '../vendor/autoload.php'; // Adjust path to PHPMailer autoload.php
+require '../vendor/autoload.php';
 
 // Debug: Log session data
 file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
@@ -108,16 +110,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
 
         if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
             $toastr_messages[] = "toastr.error('Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
+            file_put_contents('../debug.log', "Create Violation Failed: Missing required fields.\n", FILE_APPEND);
         } else {
             // Check if user_id is provided and valid
             if ($user_id) {
-                $stmt = $pdo->prepare("SELECT id, full_name FROM users WHERE id = ? AND officer_id = ?");
+                $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE id = ? AND officer_id = ?");
                 $stmt->execute([$user_id, $_SESSION['user_id']]);
                 $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (!$existing_user || strtolower(trim($existing_user['full_name'])) !== strtolower(trim($violator_name))) {
                     $toastr_messages[] = "toastr.error('Selected user is invalid or does not match the provided name.');";
                     file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
                     $user_id = null;
+                } else {
+                    // Use email from users table if not provided in form
+                    $email = $email ?: $existing_user['email'];
                 }
             }
 
@@ -170,28 +176,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
             }
 
+            // Fetch violation type details for email
+            $stmt = $pdo->prepare("SELECT violation_type, fine_amount FROM types WHERE id = ?");
+            $stmt->execute([$violation_type_id]);
+            $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
+            $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
+            $fine_amount = $violation_type['fine_amount'] ?? 0;
+
             // Insert violation with user_id, offense_freq, and plate_image
             $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq, plate_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq, $plate_image];
+            file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
             $success = $stmt->execute($params);
             if ($success) {
-                $violation_id = $pdo->lastInsertId();
-                $_SESSION['create_success'] = true;
                 // Update officer earnings
                 $week_start = date('Y-m-d', strtotime('monday this week'));
-                $stmt = $pdo->prepare("SELECT fine_amount, violation_type FROM types WHERE id = ?");
-                $stmt->execute([$violation_type_id]);
-                $type_data = $stmt->fetch(PDO::FETCH_ASSOC);
-                $fine = $type_data['fine_amount'] ?? 0;
-                $violation_type = $type_data['violation_type'] ?? 'Unknown';
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
-                $stmt->execute([$_SESSION['user_id'], $week_start, $fine, $fine]);
+                $success_earnings = $stmt->execute([$_SESSION['user_id'], $week_start, $fine_amount, $fine_amount]);
+                if (!$success_earnings) {
+                    $toastr_messages[] = "toastr.error('Failed to update officer earnings.');";
+                    file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
+                }
 
-                // Send email notification if email is provided
-                if (!empty($email)) {
-                    $mail = new PHPMailer(true);
+                // Send email if email address is provided and valid
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     try {
-                        // Gmail SMTP settings
+                        $mail = new PHPMailer(true);
+                        $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable debug output
                         $mail->isSMTP();
                         $mail->Host = 'smtp.gmail.com';
                         $mail->SMTPAuth = true;
@@ -200,38 +211,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
-                        // Sender and recipient
                         $mail->setFrom('stine6595@gmail.com', 'Traffic Violation System');
                         $mail->addAddress($email, $violator_name);
 
-                        // Email content
                         $mail->isHTML(true);
-                        $mail->Subject = 'Traffic Violation Notification';
+                        $mail->Subject = 'Traffic Violation Recorded';
                         $mail->Body = "
-                            <h2>Traffic Violation Filed</h2>
-                            <p>Dear {$violator_name},</p>
-                            <p>A traffic violation has been filed against you. Below are the details:</p>
+                            <h3>Traffic Violation Notification</h3>
+                            <p>Dear " . htmlspecialchars($violator_name) . ",</p>
+                            <p>A traffic violation has been recorded with the following details:</p>
                             <ul>
-                                <li><strong>Violation ID:</strong> #V-{$violation_id}</li>
-                                <li><strong>Violation Type:</strong> {$violation_type}</li>
-                                <li><strong>Fine Amount:</strong> ₱" . number_format($fine, 2) . "</li>
-                                <li><strong>Issued Date:</strong> " . date('d M Y H:i', strtotime($issued_date)) . "</li>
-                                <li><strong>Reason:</strong> {$reason}</li>
-                                <li><strong>Offense Frequency:</strong> {$offense_freq}</li>
+                                <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
+                                <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
+                                <li><strong>Fine Amount:</strong> ₱" . number_format($fine_amount, 2) . "</li>
+                                <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
+                                <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
+                                <li><strong>Issue Date:</strong> " . htmlspecialchars($issued_date) . "</li>
+                                <li><strong>Offense Frequency:</strong> " . htmlspecialchars($offense_freq) . "</li>
                             </ul>
-                            <p>Please log in to your <a href='http://localhost/Traffic-Violation-App/pages/user_dashboard.php'>User Dashboard</a> to view more details or take action (e.g., pay the fine or file an appeal).</p>
-                            <p>Thank you,<br>Traffic Violation System</p>
+                            <p>Please address this violation promptly.</p>
+                            <p>Regards,<br>Traffic Violation System</p>
                         ";
-                        $mail->AltBody = "Traffic Violation Filed\n\nDear {$violator_name},\n\nA traffic violation has been filed against you. Details:\n- Violation ID: #V-{$violation_id}\n- Violation Type: {$violation_type}\n- Fine Amount: ₱" . number_format($fine, 2) . "\n- Issued Date: " . date('d M Y H:i', strtotime($issued_date)) . "\n- Reason: {$reason}\n- Offense Frequency: {$offense_freq}\n\nPlease log in to your User Dashboard at http://localhost/Traffic-Violation-App/pages/user_dashboard.php to view more details or take action.\n\nThank you,\nTraffic Violation System";
+                        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- Reason: $reason\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: $issued_date\n- Offense Frequency: $offense_freq\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
 
+                        ob_start();
                         $mail->send();
-                        $toastr_messages[] = "toastr.success('Email notification sent to {$email}.');";
-                        file_put_contents('../debug.log', "Email sent successfully to $email for violation_id=$violation_id\n", FILE_APPEND);
+                        $debug_output = ob_get_clean();
+                        $toastr_messages[] = "toastr.success('Email sent successfully to " . htmlspecialchars($email) . "!');";
+                        file_put_contents('../debug.log', "Email sent successfully to $email\nDebug Output: $debug_output\n", FILE_APPEND);
                     } catch (Exception $e) {
-                        $toastr_messages[] = "toastr.warning('Violation created, but failed to send email notification to {$email}.');";
-                        file_put_contents('../debug.log', "Email Sending Failed for create violation: {$mail->ErrorInfo}\n", FILE_APPEND);
+                        $debug_output = ob_get_clean();
+                        $toastr_messages[] = "toastr.error('Failed to send email to " . htmlspecialchars($email) . ": " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+                        file_put_contents('../debug.log', "Email sending failed: " . $e->getMessage() . "\nDebug Output: $debug_output\n", FILE_APPEND);
                     }
+                } else {
+                    $toastr_messages[] = "toastr.warning('No valid email address provided for notification. Email: " . htmlspecialchars($email) . "');";
+                    file_put_contents('../debug.log', "No valid email address provided for violation notification. Email: '$email'\n", FILE_APPEND);
                 }
+
+                // Set success flag only after all operations
+                $_SESSION['create_success'] = true;
+                header("Location: manage_violations.php");
+                exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create violation.');";
                 file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
@@ -318,8 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $week_start = date('Y-m-d', strtotime('monday this week'));
                 $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
                 $stmt->execute([$violation_type_id]);
-                $type_data = $stmt->fetch(PDO::FETCH_ASSOC);
-                $fine = $type_data['fine_amount'] ?? 0;
+                $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
                 $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
             } else {
@@ -825,10 +845,12 @@ try {
                                                         <label class="form-check-label" for="has_license">Has License</label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6 mb-3">
+                                                
+                                                <!--<div class="col-md-6 mb-3">
                                                     <label for="license_number" class="form-label">License Number</label>
                                                     <input type="text" class="form-control" name="license_number" id="license_number">
-                                                </div>
+                                                </div>-->
+
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
