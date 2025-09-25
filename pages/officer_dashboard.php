@@ -363,19 +363,6 @@ try {
     $wtd_earnings = '₱0.00';
 }
 
-// Fetch urgent items (top 2 concerns or violations marked as urgent)
-try {
-    $stmt = $pdo->prepare("
-        (SELECT 'Concern' as type, id, description as title, status FROM concerns WHERE user_id = ? AND status = 'OPEN' LIMIT 1)
-        UNION
-        (SELECT 'Violation' as type, id, reason as title, status FROM violations WHERE officer_id = ? AND status = 'OPEN' LIMIT 1)
-    ");
-    $stmt->execute([$officer_id, $officer_id]);
-    $urgent_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $toastr_messages[] = "toastr.error('Error fetching urgent items: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-    $urgent_items = [];
-}
 
 // Fetch violation types
 try {
@@ -414,15 +401,24 @@ try {
     $users = [];
 }
 
-// Fetch assigned patrol zones
-try {
-    $stmt = $pdo->prepare("SELECT zone_name, urgency, assigned_date FROM patrol_zones WHERE officer_id = ? ORDER BY assigned_date DESC");
-    $stmt->execute([$officer_id]);
-    $patrol_zones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $toastr_messages[] = "toastr.error('Error fetching patrol zones: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-    file_put_contents('../debug.log', "Fetch Patrol Zones Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $patrol_zones = [];
+// Fetch violations for each user
+$user_violations = [];
+foreach ($users as $user) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT v.id, v.officer_id, v.violator_name, v.plate_number, v.reason, v.issued_date, v.status, t.violation_type, t.fine_amount 
+            FROM violations v 
+            JOIN types t ON v.violation_type_id = t.id 
+            WHERE v.user_id = ? 
+            ORDER BY v.issued_date DESC
+        ");
+        $stmt->execute([$user['id']]);
+        $user_violations[$user['id']] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $toastr_messages[] = "toastr.error('Error fetching violations for user ID {$user['id']}: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+        file_put_contents('../debug.log', "Fetch User Violations Error (User ID {$user['id']}): " . $e->getMessage() . "\n", FILE_APPEND);
+        $user_violations[$user['id']] = [];
+    }
 }
 
 // Fetch all violations issued by the officer
@@ -447,6 +443,17 @@ $violations_by_month = [];
 foreach ($violations as $violation) {
     $month_year = date('F Y', strtotime($violation['issued_date']));
     $violations_by_month[$month_year][] = $violation;
+}
+
+// Fetch assigned patrol zones
+try {
+    $stmt = $pdo->prepare("SELECT zone_name, urgency, assigned_date FROM patrol_zones WHERE officer_id = ? ORDER BY assigned_date DESC");
+    $stmt->execute([$officer_id]);
+    $patrol_zones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $toastr_messages[] = "toastr.error('Error fetching patrol zones: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Patrol Zones Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $patrol_zones = [];
 }
 ?>
 <!DOCTYPE html>
@@ -672,44 +679,6 @@ foreach ($violations as $violation) {
                     </div>
                 </div>
 
-                <!-- Urgent Items -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Urgent Items</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>ID</th>
-                                        <th>Title</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($urgent_items)): ?>
-                                        <tr><td colspan="4" class="text-center text-muted">No urgent items found</td></tr>
-                                    <?php else: ?>
-                                        <?php foreach ($urgent_items as $item): ?>
-                                            <tr class="table-row-hover">
-                                                <td><?php echo htmlspecialchars($item['type']); ?></td>
-                                                <td><?php echo htmlspecialchars($item['id']); ?></td>
-                                                <td><?php echo htmlspecialchars($item['title'] ?: 'N/A'); ?></td>
-                                                <td>
-                                                    <span class="badge <?php echo $item['status'] === 'OPEN' ? 'bg-warning text-dark' : 'bg-success'; ?>">
-                                                        <?php echo htmlspecialchars($item['status']); ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Violation Types -->
                 <div class="card mb-4 shadow-sm">
@@ -948,32 +917,68 @@ foreach ($violations as $violation) {
                         <h3 class="mb-0">Users with Violations</h3>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Username</th>
-                                        <th>Full Name</th>
-                                        <th>Violation Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($users)): ?>
-                                        <tr><td colspan="4" class="text-center text-muted">No users found</td></tr>
-                                    <?php else: ?>
-                                        <?php foreach ($users as $user): ?>
-                                            <tr class="table-row-hover">
-                                                <td><?php echo htmlspecialchars($user['id']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['violation_count']); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                        <?php if (empty($users)): ?>
+                            <p class="text-center text-muted">No users found</p>
+                        <?php else: ?>
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                                <?php foreach ($users as $user): ?>
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><?php echo htmlspecialchars($user['full_name']); ?></h5>
+                                                <p class="card-text">
+                                                    <strong>Username:</strong> <?php echo htmlspecialchars($user['username']); ?><br>
+                                                    <strong>Violation Count:</strong> <?php echo htmlspecialchars($user['violation_count']); ?>
+                                                </p>
+                                                <button class="btn btn-primary btn-sm toggle-violations" data-bs-toggle="collapse" data-bs-target="#violations-<?php echo $user['id']; ?>" aria-expanded="false" aria-controls="violations-<?php echo $user['id']; ?>">
+                                                    View Violations
+                                                </button>
+                                            </div>
+                                            <div class="collapse" id="violations-<?php echo $user['id']; ?>">
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover align-middle">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>ID</th>
+                                                                    <th>Officer ID</th>
+                                                                    <th>Plate</th>
+                                                                    <th>Type</th>
+                                                                    <th>Fine</th>
+                                                                    <th>Date</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php if (empty($user_violations[$user['id']])): ?>
+                                                                    <tr><td colspan="7" class="text-center text-muted">No violations found for this user</td></tr>
+                                                                <?php else: ?>
+                                                                    <?php foreach ($user_violations[$user['id']] as $violation): ?>
+                                                                        <tr class="table-row-hover">
+                                                                            <td><?php echo htmlspecialchars($violation['id']); ?></td>
+                                                                            <td><?php echo htmlspecialchars($violation['officer_id']); ?></td>
+                                                                            <td><?php echo htmlspecialchars($violation['plate_number']); ?></td>
+                                                                            <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
+                                                                            <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
+                                                                            <td><?php echo htmlspecialchars(date('Y-m-d', strtotime($violation['issued_date']))); ?></td>
+                                                                            <td>
+                                                                                <span class="badge <?php echo $violation['status'] === 'Pending' ? 'bg-warning text-dark' : ($violation['status'] === 'Resolved' ? 'bg-success' : 'bg-danger'); ?>">
+                                                                                    <?php echo htmlspecialchars($violation['status']); ?>
+                                                                                </span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
+                                                                <?php endif; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

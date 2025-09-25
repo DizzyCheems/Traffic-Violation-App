@@ -5251,3 +5251,36 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-09-25 06:04:16
+Login.php accessed: 2025-09-25 06:04:19
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
