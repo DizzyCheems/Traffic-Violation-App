@@ -521,12 +521,7 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_users.php">
-                                <i class="fas fa-users me-2"></i>
-                                Manage Users
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="../index.php">
                                 <i class="fas fa-home me-2"></i>
