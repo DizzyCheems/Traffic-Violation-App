@@ -9,20 +9,43 @@ use PHPMailer\PHPMailer\Exception;
 
 require '../vendor/autoload.php';
 
-// Database connection settings (update these with your actual database details)
+// Database connection settings
 $host = 'localhost';
-$dbname = 'traffic'; // Replace with your database name
-$username = 'root'; // Default XAMPP MySQL user (update if different)
-$password = ''; // Default XAMPP MySQL password (update if different)
+$dbname = 'traffic';
+$username = 'root';
+$password = '';
 
 $status = ''; // To display success/error message
 
+try {
+    // Connect to the database
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Fetch existing violations
+    $stmt = $pdo->query("
+        SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
+               v.has_license, v.license_number, t.violation_type, u.email 
+        FROM violations v 
+        JOIN types t ON v.violation_type_id = t.id 
+        LEFT JOIN users u ON v.user_id = u.id 
+        ORDER BY v.violator_name, v.plate_number
+    ");
+    $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch violation types
+    $stmt = $pdo->query("SELECT id, violation_type FROM types ORDER BY violation_type");
+    $violation_types = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch users
+    $stmt = $pdo->query("SELECT id, full_name, email FROM users ORDER BY full_name");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $status = "Failed to fetch data. Database Error: " . $e->getMessage();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) {
     try {
-        // Connect to the database
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
         // Get form data
         $violator_name = $_POST['violator_name'] ?? '';
         $plate_number = $_POST['plate_number'] ?? '';
@@ -55,6 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
             $license_number
         ]);
 
+        // Fetch violation type name for email
+        $stmt = $pdo->prepare("SELECT violation_type FROM types WHERE id = ?");
+        $stmt->execute([$violation_type_id]);
+        $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
+        $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
+
         // Send email using PHPMailer
         $mail = new PHPMailer(true);
         $mail->isSMTP();
@@ -72,19 +101,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
         $mail->Subject = 'Traffic Violation Recorded';
         $mail->Body = "
             <h3>Traffic Violation Notification</h3>
-            <p>Dear $violator_name,</p>
+            <p>Dear " . htmlspecialchars($violator_name) . ",</p>
             <p>A traffic violation has been recorded with the following details:</p>
             <ul>
-                <li><strong>Plate Number:</strong> $plate_number</li>
-                <li><strong>Reason:</strong> $reason</li>
-                <li><strong>Violation Type ID:</strong> $violation_type_id</li>
-                <li><strong>License Number:</strong> " . ($license_number ?: 'N/A') . "</li>
+                <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
+                <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
+                <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
+                <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
                 <li><strong>Issue Date:</strong> " . date('Y-m-d H:i:s') . "</li>
             </ul>
             <p>Please address this violation promptly.</p>
             <p>Regards,<br>Traffic Violation System</p>
         ";
-        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type ID: $violation_type_id\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: " . date('Y-m-d H:i:s') . "\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
+        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type: $violation_type_name\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: " . date('Y-m-d H:i:s') . "\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
 
         $mail->send();
         $status = 'Violation recorded and email sent successfully to ' . htmlspecialchars($email) . '! Check the inbox or spam folder.';
@@ -134,11 +163,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
             font-weight: bold;
         }
         input[type="text"],
-        input[type="email"] {
+        input[type="email"],
+        select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
         input[type="checkbox"] {
             margin-right: 5px;
@@ -166,32 +197,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
         <h2>Create Traffic Violation</h2>
         <form method="post">
             <div class="form-group">
+                <label for="violation_id">Select Existing Violation *</label>
+                <select id="violation_id" name="violation_id" onchange="updateViolationFields()">
+                    <option value="">Select a Violation</option>
+                    <?php foreach ($violations as $violation): ?>
+                        <option value="<?php echo htmlspecialchars($violation['id']); ?>" 
+                                data-violator-name="<?php echo htmlspecialchars($violation['violator_name']); ?>"
+                                data-plate-number="<?php echo htmlspecialchars($violation['plate_number']); ?>"
+                                data-reason="<?php echo htmlspecialchars($violation['reason']); ?>"
+                                data-violation-type-id="<?php echo htmlspecialchars($violation['violation_type_id']); ?>"
+                                data-violation-type="<?php echo htmlspecialchars($violation['violation_type']); ?>"
+                                data-user-id="<?php echo htmlspecialchars($violation['user_id']); ?>"
+                                data-email="<?php echo htmlspecialchars($violation['email'] ?: ''); ?>"
+                                data-has-license="<?php echo htmlspecialchars($violation['has_license']); ?>"
+                                data-license-number="<?php echo htmlspecialchars($violation['license_number'] ?: ''); ?>">
+                            <?php echo htmlspecialchars($violation['violator_name'] . ' - ' . $violation['plate_number'] . ' (' . $violation['violation_type'] . ')'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="violator_name">Violator Name *</label>
                 <input type="text" id="violator_name" name="violator_name" required>
             </div>
             <div class="form-group">
-                <label for="plate_number">Plate Number *</label>
-                <input type="text" id="plate_number" name="plate_number" required>
-            </div>
-            <div class="form-group">
-                <label for="reason">Reason *</label>
-                <input type="text" id="reason" name="reason" required>
-            </div>
-            <div class="form-group">
-                <label for="violation_type_id">Violation Type ID *</label>
-                <input type="text" id="violation_type_id" name="violation_type_id" required>
-            </div>
-            <div class="form-group">
                 <label for="user_id">User ID *</label>
-                <input type="text" id="user_id" name="user_id" required>
+                <input type="text" id="user_id" name="user_id" required readonly>
             </div>
             <div class="form-group">
                 <label for="email">Recipient Email *</label>
                 <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
+                <label for="plate_number">Plate Number *</label>
+                <input type="text" id="plate_number" name="plate_number" required>
+            </div>
+            <div class="form-group">
+                <label for="violation_type_id">Violation Type *</label>
+                <select id="violation_type_id" name="violation_type_id" required>
+                    <option value="">Select Violation Type</option>
+                    <?php foreach ($violation_types as $type): ?>
+                        <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                            <?php echo htmlspecialchars($type['violation_type']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason *</label>
+                <input type="text" id="reason" name="reason" required>
+            </div>
+            <div class="form-group">
                 <label>
-                    <input type="checkbox" name="has_license"> Has License
+                    <input type="checkbox" id="has_license" name="has_license"> Has License
                 </label>
             </div>
             <div class="form-group">
@@ -204,5 +262,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
             <p class="status"><?php echo htmlspecialchars($status); ?></p>
         <?php endif; ?>
     </div>
+
+    <script>
+        function updateViolationFields() {
+            const violationSelect = document.getElementById('violation_id');
+            const selectedOption = violationSelect.options[violationSelect.selectedIndex];
+            
+            // Reset fields if no violation is selected
+            if (!selectedOption.value) {
+                document.getElementById('violator_name').value = '';
+                document.getElementById('user_id').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('plate_number').value = '';
+                document.getElementById('violation_type_id').value = '';
+                document.getElementById('reason').value = '';
+                document.getElementById('has_license').checked = false;
+                document.getElementById('license_number').value = '';
+                return;
+            }
+
+            // Populate fields with selected violation data
+            document.getElementById('violator_name').value = selectedOption.getAttribute('data-violator-name') || '';
+            document.getElementById('user_id').value = selectedOption.getAttribute('data-user-id') || '';
+            document.getElementById('email').value = selectedOption.getAttribute('data-email') || '';
+            document.getElementById('plate_number').value = selectedOption.getAttribute('data-plate-number') || '';
+            document.getElementById('violation_type_id').value = selectedOption.getAttribute('data-violation-type-id') || '';
+            document.getElementById('reason').value = selectedOption.getAttribute('data-reason') || '';
+            document.getElementById('has_license').checked = selectedOption.getAttribute('data-has-license') === '1';
+            document.getElementById('license_number').value = selectedOption.getAttribute('data-license-number') || '';
+        }
+    </script>
 </body>
 </html>

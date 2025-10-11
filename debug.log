@@ -881,3 +881,484 @@ Session Data: Array
 )
 
 Login.php accessed: 2025-09-25 19:19:46
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-09-25 19:34:53
+Login.php accessed: 2025-10-09 05:09:18
+Login.php accessed: 2025-10-09 05:09:28
+Login.php accessed: 2025-10-09 05:09:30
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-10-09 05:09:34
+Login.php accessed: 2025-10-09 05:09:37
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 34634
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='Wla lng', violation_type_id='17', plate_image='../Uploads/68e72ddc0e730_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 6
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => Wla lng
+    [5] => 17
+    [6] => 0
+    [7] => 34634
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-09T05:36
+    [12] => Pending
+    [13] => 
+    [14] => 6
+    [15] => ../Uploads/68e72ddc0e730_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-09 05:38:36
+Login.php accessed: 2025-10-09 05:38:37
+Login.php accessed: 2025-10-09 05:39:43
+Login.php accessed: 2025-10-09 05:39:43
+Login.php accessed: 2025-10-09 05:39:44
+Login.php accessed: 2025-10-09 05:39:44
+Login.php accessed: 2025-10-09 05:39:44
+Login.php accessed: 2025-10-09 05:39:44
+Login.php accessed: 2025-10-09 05:39:44
+Login.php accessed: 2025-10-09 05:40:42
+Login.php accessed: 2025-10-09 05:42:44
+Login.php accessed: 2025-10-09 05:49:42
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-09 05:52:02
+Login.php accessed: 2025-10-09 09:59:40
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-10-10 02:32:16
+Login.php accessed: 2025-10-10 02:32:51
+Login.php accessed: 2025-10-10 02:33:32
+Login.php accessed: 2025-10-10 02:33:36
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-10-11 05:05:13
+Login.php accessed: 2025-10-11 05:05:17
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-10-11 05:05:25
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='', contact_number='09768678545', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='Wla lng', violation_type_id='17', plate_image='../Uploads/68e9d85b842c1_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 7
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => Wla lng
+    [5] => 17
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-11T06:08
+    [12] => Pending
+    [13] => 
+    [14] => 7
+    [15] => ../Uploads/68e9d85b842c1_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='Ff', violation_type_id='17', plate_image='../Uploads/68e9d8a7e75e8_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 8
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => Ff
+    [5] => 17
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 352342
+    [11] => 2025-10-11T06:09
+    [12] => Pending
+    [13] => FF
+    [14] => 8
+    [15] => ../Uploads/68e9d8a7e75e8_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='sdf', violation_type_id='14', plate_image='../Uploads/68e9d8f1a529f_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 9
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => sdf
+    [5] => 14
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 1
+    [11] => 2025-10-11T06:10
+    [12] => Pending
+    [13] => w
+    [14] => 9
+    [15] => ../Uploads/68e9d8f1a529f_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='1', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='erg', violation_type_id='17', plate_image='../Uploads/68e9da81a002f_68d5796f5fa09_2018_Philippine_new_plates.png'
+Create Violation Failed: Invalid user_id='1' or name mismatch.
+Offense Frequency for user_id='27': 10
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => erg
+    [5] => 17
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 09808
+    [11] => 2025-10-11T06:17
+    [12] => Pending
+    [13] => DRW
+    [14] => 10
+    [15] => ../Uploads/68e9da81a002f_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+

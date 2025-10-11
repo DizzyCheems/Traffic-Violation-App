@@ -437,7 +437,8 @@ try {
 
                 <!-- Dashboard Metrics -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-3">
+
+                    <!--<div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">System Health</h5>
@@ -445,7 +446,8 @@ try {
                                 <p class="card-text">API Status: <?php echo htmlspecialchars($api_status); ?> <span class="text-success">✅</span></p>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
+
                     <div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
@@ -475,7 +477,7 @@ try {
 
                 <!-- Analytics Section -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-6">
+                    <!--<div class="col-md-6">
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Revenue Collection Analytics</h5>
@@ -486,8 +488,8 @@ try {
                                 <a href="../pages/violation_report.php" class="btn btn-outline-primary btn-sm">📊 Generate Full Report</a>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
+                    </div>-->
+                    <!--<div class="col-md-6">
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Violation Heatmap</h5>
@@ -495,7 +497,7 @@ try {
                                 <a href="../pages/violation_heatmap.php" class="btn btn-outline-primary btn-sm">📍 View Interactive Map</a>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
 
                 <!-- Admin Actions and Rule Management -->

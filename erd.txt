@@ -1,0 +1,33 @@
++-------------------+       +------------------------+       +-----------------------+
+|      users        |       |     violations         |       |        types          |
+|-------------------|       |------------------------|       |-----------------------|
+| PK | id           |<----->| PK | id                |       | PK | id               |
+|    | username     |       |    | violator_name     |       |    | violation_type   |
+|    | password     |       |    | plate_number      |       |    | fine_amount      |
+|    | full_name    |       |    | remarks           |       |    | description       |
+|    | role         |       |    | reason            |       +-----------------------+
+|    | created_at   |       | FK | violation_type_id |------>|
+|    | officer_id   |       | FK | user_id           |       +-----------------------+
+|    | email        |       |    | issue_date        |       |      appeals          |
+|    | contact_number|      |    | has_license       |       |-----------------------|
++-------------------+       |    | license_number    |       | PK | id               |
+         ^                  |    | is_impounded      |       | FK | violation_id     |------+
+         |                  |    | is_paid           |       | FK | user_id          |      |
+         |                  |    | or_number         |       |    | appeal_reason    |      |
+         |                  |    | issued_date       |       |    | status           |      |
+         |                  |    | status            |       |    | notes            |      |
+         |                  |    | notes             |       |    | created_at       |      |
+         |                  |    | officer_id        |       |    | updated_at       |      |
+         |                  |    | offense_freq      |       +-----------------------+
+         |                  |    | plate_image       |
+         |                  +------------------------+
+         |
++-------------------+
+|     concerns      |
+|-------------------|
+| PK | id           |
+| FK | user_id      |
+|    | description  |
+|    | status       |
+|    | created_at   |
++-------------------+

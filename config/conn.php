@@ -1,7 +1,7 @@
 <?php
 $host = 'localhost';
 $dbname = 'traffic';
-$username = 'user';
+$username = 'root';
 $password = '';
 
 try {

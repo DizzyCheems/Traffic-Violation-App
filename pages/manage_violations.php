@@ -35,7 +35,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) ||
     exit;
 }
 
-
 // Initialize toastr messages
 $toastr_messages = [];
 
@@ -214,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                         $mail->Host = 'smtp.gmail.com';
                         $mail->SMTPAuth = true;
                         $mail->Username = 'stine6595@gmail.com';
-                        $mail->Password = 'qvkb ycan jd потенциальный рискij yffz';
+                        $mail->Password = 'qvkb ycan jdip yffz';
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
@@ -436,17 +435,6 @@ try {
     $types = [];
 }
 
-// Fetch users under the officer
-try {
-    $stmt = $pdo->prepare("SELECT id, username, full_name, contact_number, email FROM users WHERE officer_id = ? ORDER BY full_name");
-    $stmt->execute([$_SESSION['user_id']]);
-    $supervised_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $toastr_messages[] = "toastr.error('Error fetching supervised users: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-    file_put_contents('../debug.log', "Fetch Supervised Users Error: " . $e->getMessage() . "\n", FILE_APPEND);
-    $supervised_users = [];
-}
-
 // Fetch all violations issued by the officer
 try {
     $stmt = $pdo->prepare("
@@ -470,10 +458,7 @@ try {
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
-        
-    
-    
-    <!-- Toggle button for offcanvas sidebar (mobile only) -->
+        <!-- Toggle button for offcanvas sidebar (mobile only) -->
         <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <i class="fas fa-bars"></i> Menu
         </button>
@@ -483,7 +468,6 @@ try {
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            
 <?php if (isset($_SESSION['role']) && strtolower(trim($_SESSION['role'])) === 'admin'): ?>
     <a class="nav-link" href="../pages/admin_dashboard.php">
         <i class="fas fa-tachometer-alt me-2"></i>
@@ -495,8 +479,6 @@ try {
         Officer Dashboard
     </a>
 <?php endif; ?>
-
-
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" href="../pages/manage_violations.php">
@@ -504,7 +486,6 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>
@@ -804,35 +785,6 @@ try {
                                                 <label for="email" class="form-label">Email (Optional)</label>
                                                 <input type="email" class="form-control" name="email" id="email">
                                             </div>
-                                            <div class="mb-3">
-                                                <h6>Users Under Your Supervision</h6>
-                                                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                                                    <table class="table table-hover table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Username</th>
-                                                                <th>Full Name</th>
-                                                                <th>Contact</th>
-                                                                <th>Email</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php if (empty($supervised_users)): ?>
-                                                                <tr><td colspan="4" class="text-center text-muted">No users found</td></tr>
-                                                            <?php else: ?>
-                                                                <?php foreach ($supervised_users as $user): ?>
-                                                                    <tr class="user-row" data-user-id="<?php echo htmlspecialchars($user['id']); ?>" data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>" data-contact-number="<?php echo htmlspecialchars($user['contact_number']); ?>" data-email="<?php echo htmlspecialchars($user['email'] ?: ''); ?>" style="cursor: pointer;">
-                                                                        <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                                        <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                                                                        <td><?php echo htmlspecialchars($user['contact_number']); ?></td>
-                                                                        <td><?php echo htmlspecialchars($user['email'] ?: 'N/A'); ?></td>
-                                                                    </tr>
-                                                                <?php endforeach; ?>
-                                                            <?php endif; ?>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
                                         </div>
                                         <div class="col-md-8">
                                             <div class="row">
@@ -951,23 +903,84 @@ try {
 
         // Function to perform OCR on image and populate plate number
         function performOCR(file, inputId) {
-            if (!file) return;
+            if (!file) {
+                console.log('No file selected for OCR');
+                return;
+            }
             const ocrStatus = document.getElementById('ocr_status');
             ocrStatus.textContent = 'Processing image...';
             Tesseract.recognize(
                 file,
                 'eng',
                 {
-                    logger: m => console.log(m)
+                    logger: m => console.log('OCR Progress:', m)
                 }
             ).then(({ data: { text } }) => {
                 const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
                 document.getElementById(inputId).value = cleanedText;
                 ocrStatus.textContent = 'Text extracted successfully!';
                 console.log('OCR Result:', cleanedText);
+                // Trigger plate number lookup after OCR
+                fetchUserByPlateNumber(cleanedText);
             }).catch(error => {
                 ocrStatus.textContent = 'Error extracting text from image.';
                 console.error('OCR Error:', error);
+            });
+        }
+
+        // Function to fetch user details by plate number
+        function fetchUserByPlateNumber(plateNumber) {
+            if (!plateNumber) {
+                console.log('No plate number provided');
+                // Clear fields if plate number is empty
+                document.getElementById('violator_name').value = '';
+                document.getElementById('contact_number').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('user_id').value = '';
+                document.getElementById('has_license').checked = false;
+                document.getElementById('license_number').value = '';
+                return;
+            }
+            console.log('Fetching user data for plate:', plateNumber);
+            fetch('get_user_by_plate.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'plate_number=' + encodeURIComponent(plateNumber)
+            })
+            .then(response => {
+                console.log('Fetch response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetch response data:', data);
+                if (data.success) {
+                    document.getElementById('violator_name').value = data.violator_name || '';
+                    document.getElementById('contact_number').value = data.contact_number || '';
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('user_id').value = data.user_id || '';
+                    document.getElementById('has_license').checked = data.has_license == 1;
+                    document.getElementById('license_number').value = data.license_number || '';
+                    toastr.success('User details populated successfully.');
+                } else {
+                    // Clear fields if no data found
+                    document.getElementById('violator_name').value = '';
+                    document.getElementById('contact_number').value = '';
+                    document.getElementById('email').value = '';
+                    document.getElementById('user_id').value = '';
+                    document.getElementById('has_license').checked = false;
+                    document.getElementById('license_number').value = '';
+                    console.log('No user data found:', data.message);
+                    toastr.info(data.message || 'No previous violation found for this plate number.');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user by plate:', error);
+                toastr.error('Error fetching user details: ' + error.message);
             });
         }
 
@@ -1066,8 +1079,16 @@ try {
         document.getElementById('plate_image').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                console.log('Image selected for OCR:', file.name);
                 performOCR(file, 'plate_number');
             }
+        });
+
+        // Handle plate number input for auto-population
+        document.getElementById('plate_number').addEventListener('input', function() {
+            const plateNumber = this.value.trim();
+            console.log('Plate number input changed:', plateNumber);
+            fetchUserByPlateNumber(plateNumber);
         });
 
         // Handle image upload for OCR in Edit Violation Forms
@@ -1076,38 +1097,10 @@ try {
                 const file = e.target.files[0];
                 if (file) {
                     const inputId = this.id.replace('plate_image_', 'plate_number_');
+                    console.log('Image selected for OCR in edit form:', file.name);
                     performOCR(file, inputId);
                 }
             });
-        });
-
-        // Handle user selection from mini-table
-        document.querySelectorAll('.user-row').forEach(row => {
-            row.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                const fullName = this.getAttribute('data-full-name');
-                const contactNumber = this.getAttribute('data-contact-number');
-                const email = this.getAttribute('data-email');
-                document.getElementById('violator_name').value = fullName;
-                document.getElementById('contact_number').value = contactNumber;
-                document.getElementById('email').value = email;
-                document.getElementById('user_id').value = userId;
-                document.getElementById('violator_name').classList.remove('is-invalid');
-                document.getElementById('contact_number').classList.remove('is-invalid');
-                console.log(`Selected user: ID=${userId}, Full Name=${fullName}, Contact=${contactNumber}, Email=${email}`);
-                // Highlight selected row
-                document.querySelectorAll('.user-row').forEach(r => r.classList.remove('table-primary'));
-                this.classList.add('table-primary');
-            });
-        });
-
-        // Clear user_id and fields if violator_name is manually changed
-        document.getElementById('violator_name').addEventListener('input', function() {
-            document.getElementById('user_id').value = '';
-            document.getElementById('contact_number').value = '';
-            document.getElementById('email').value = '';
-            document.querySelectorAll('.user-row').forEach(row => row.classList.remove('table-primary'));
-            console.log('Violator name manually changed, cleared user_id, contact_number, and email');
         });
 
         // Client-side validation for Edit Violation Forms

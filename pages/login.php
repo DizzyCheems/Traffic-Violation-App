@@ -73,7 +73,7 @@ include $header_file;
                 <div class="col-sm-6 text-black">
                     <div class="px-5 ms-xl-4">
                         <i class="fas fa-crow fa-2x me-3 pt-5 mt-xl-4" style="color: #709085;"></i>
-                        <span class="h1 fw-bold mb-0">PRectioning - Violation Management System</span>
+                        <span class="h1 fw-bold mb-0">PRVN - Violation Management System</span>
                     </div>
 
                     <div class="d-flex align-items-center h-custom-2 px-5 ms-xl-4 mt-5 pt-5 pt-xl-0 mt-xl-n5">
@@ -104,7 +104,7 @@ include $header_file;
                     </div>
                 </div>
                 <div class="col-sm-6 px-0 d-none d-sm-block">
-                    <img src="../public/images/login_image.jpg" alt="Login image" class="w-100 vh-100 login-image">
+                    <img src="../public/images/tf.png" alt="Login image" class="w-100 vh-100 login-image">
                 </div>
             </div>
         </div>
