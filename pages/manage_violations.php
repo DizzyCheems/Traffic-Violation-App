@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\Exception;
 
 require '../vendor/autoload.php';
 
-// Debug: Log sessfion data
+// Debug: Log session data
 file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
 
 // Check session variables
@@ -195,6 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
             $success = $stmt->execute($params);
             if ($success) {
+                // Store the new violation ID
+                $violation_id = $pdo->lastInsertId();
+
                 // Update officer earnings
                 $week_start = date('Y-m-d', strtotime('monday this week'));
                 $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
@@ -204,60 +207,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                     file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
                 }
 
-                // Send email if email address is provided and valid
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    try {
-                        $mail = new PHPMailer(true);
-                        $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable debug output
-                        $mail->isSMTP();
-                        $mail->Host = 'smtp.gmail.com';
-                        $mail->SMTPAuth = true;
-                        $mail->Username = 'stine6595@gmail.com';
-                        $mail->Password = 'qvkb ycan jdip yffz';
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                        $mail->Port = 587;
-
-                        $mail->setFrom('stine6595@gmail.com', 'Traffic Violation System');
-                        $mail->addAddress($email, $violator_name);
-
-                        $mail->isHTML(true);
-                        $mail->Subject = 'Traffic Violation Recorded';
-                        $mail->Body = "
-                            <h3>Traffic Violation Notification</h3>
-                            <p>Dear " . htmlspecialchars($violator_name) . ",</p>
-                            <p>A traffic violation has been recorded with the following details:</p>
-                            <ul>
-                                <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
-                                <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
-                                <li><strong>Fine Amount:</strong> ₱" . number_format($fine_amount, 2) . "</li>
-                                <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
-                                <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
-                                <li><strong>Issue Date:</strong> " . htmlspecialchars($issued_date) . "</li>
-                                <li><strong>Offense Frequency:</strong> " . htmlspecialchars($offense_freq) . "</li>
-                            </ul>
-                            <p>Please address this violation promptly.</p>
-                            <p>Regards,<br>Traffic Violation System</p>
-                        ";
-                        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- Reason: $reason\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: $issued_date\n- Offense Frequency: $offense_freq\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
-
-                        ob_start();
-                        $mail->send();
-                        $debug_output = ob_get_clean();
-                        $toastr_messages[] = "toastr.success('Email sent successfully to " . htmlspecialchars($email) . "!');";
-                        file_put_contents('../debug.log', "Email sent successfully to $email\nDebug Output: $debug_output\n", FILE_APPEND);
-                    } catch (Exception $e) {
-                        $debug_output = ob_get_clean();
-                        $toastr_messages[] = "toastr.error('Failed to send email to " . htmlspecialchars($email) . ": " . addslashes(htmlspecialchars($e->getMessage())) . "');";
-                        file_put_contents('../debug.log', "Email sending failed: " . $e->getMessage() . "\nDebug Output: $debug_output\n", FILE_APPEND);
-                    }
-                } else {
-                    $toastr_messages[] = "toastr.warning('No valid email address provided for notification. Email: " . htmlspecialchars($email) . "');";
-                    file_put_contents('../debug.log', "No valid email address provided for violation notification. Email: '$email'\n", FILE_APPEND);
-                }
-
-                // Set success flag only after all operations
+                // Redirect to mail_test.php with the violation ID
                 $_SESSION['create_success'] = true;
-                header("Location: manage_violations.php");
+                header("Location: mail_test.php?violation_id=$violation_id");
                 exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create violation.');";
