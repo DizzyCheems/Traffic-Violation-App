@@ -561,8 +561,6 @@ try {
                                 Manage Violations
                             </a>
                         </li>
-
-
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/logout.php">
                                 <i class="fas fa-sign-out-alt me-2"></i>
@@ -645,9 +643,9 @@ try {
                     </div>
                 </div>
 
-                <!-- Violations and Create Violation -->
+                <!-- Violations and Patrol Zones -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="card shadow-sm h-100">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Recent Violations</h3>
@@ -698,17 +696,7 @@ try {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-primary text-white">
-                                <h3 class="mb-0">Create Violation</h3>
-                            </div>
-                            <div class="card-body">
-                                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createViolationModal">Open Create Violation Form</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Patrol Zones</h5>
@@ -742,7 +730,7 @@ try {
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                     <!--<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button> -->
+                            <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button> -->
                         </div>
 
                         <div class="table-responsive">
@@ -753,7 +741,7 @@ try {
                                         <th>Violation Type</th>
                                         <th>Fine Amount</th>
                                         <th>Description</th>
-    <!--                                    <th>Actions</th> -->
+                                        <!-- <th>Actions</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -766,14 +754,16 @@ try {
                                                 <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
                                                 <td>₱<?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
-<!--                                                <td>
+                                                <!--
+                                                <td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
                                                     <form method="POST" style="display: inline;" class="delete-violation-type-form">
                                                         <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
                                                         <input type="hidden" name="delete_violation_type" value="1">
                                                         <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                                     </form>
-                                                </td>-->
+                                                </td>
+                                                -->
                                             </tr>
                                             <!-- Edit Violation Type Modal -->
                                             <div class="modal fade" id="editViolationTypeModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="editViolationTypeModalLabel<?php echo $type['id']; ?>" aria-hidden="true">
@@ -813,291 +803,6 @@ try {
                         </div>
                     </div>
                 </div>
-
-      <!-- Create Violation Modal -->
-<div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
-                    <input type="hidden" name="create_violation" value="1">
-                    <input type="hidden" name="user_id" id="user_id">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="violator_name" class="form-label">Violator Name</label>
-                            <input type="text" class="form-control" name="violator_name" id="violator_name" required>
-                            <div class="invalid-feedback">Please enter a valid violator name.</div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="contact_number" class="form-label">Contact Number</label>
-                            <input type="text" class="form-control" name="contact_number" id="contact_number" required>
-                            <div class="invalid-feedback">Please enter a valid contact number.</div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="email" class="form-label">Email (Optional)</label>
-                            <input type="email" class="form-control" name="email" id="email">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="plate_number" class="form-label">License Plate</label>
-                            <input type="text" class="form-control" name="plate_number" id="plate_number" required>
-                            <div class="invalid-feedback">Please enter a valid license plate.</div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="plate_image" class="form-label">Upload Plate Image (Optional)</label>
-                            <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
-                            <div id="ocr_status" class="form-text"></div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="violation_type_id" class="form-label">Violation Type</label>
-                            <select class="form-select" name="violation_type_id" id="violation_type_id" required>
-                                <option value="" disabled selected>Select</option>
-                                <?php foreach ($types as $type): ?>
-                                    <option value="<?php echo htmlspecialchars($type['id']); ?>">
-                                        <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="invalid-feedback">Please select a violation type.</div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="reason" class="form-label">Reason</label>
-                            <input type="text" class="form-control" name="reason" id="reason" required>
-                            <div class="invalid-feedback">Please enter a valid reason.</div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="license_number" class="form-label">License Number</label>
-                            <input type="text" class="form-control" name="license_number" id="license_number">
-                            <div class="form-check mt-2">
-                                <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
-                                <label class="form-check-label" for="has_license">Has License</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="or_number" class="form-label">OR Number</label>
-                            <input type="text" class="form-control" name="or_number" id="or_number">
-                            <div class="form-check mt-2">
-                                <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
-                                <label class="form-check-label" for="is_impounded">Is Impounded</label>
-                            </div>
-                            <div class="form-check mt-2">
-                                <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
-                                <label class="form-check-label" for="is_paid">Is Paid</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="issued_date" class="form-label">Issued Date</label>
-                            <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" id="status">
-                                <option value="Pending" selected>Pending</option>
-                                <option value="Resolved">Resolved</option>
-                                <option value="Disputed">Disputed</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" name="notes" id="notes" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <h6>Users Under Your Supervision</h6>
-                        <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
-                            <table class="table table-hover table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Username</th>
-                                        <th>Full Name</th>
-                                        <th>Contact</th>
-                                        <th>Email</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($supervised_users)): ?>
-                                        <tr><td colspan="4" class="text-center text-muted">No users found</td></tr>
-                                    <?php else: ?>
-                                        <?php foreach ($supervised_users as $user): ?>
-                                            <tr class="user-row" data-user-id="<?php echo htmlspecialchars($user['id']); ?>" data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>" data-contact-number="<?php echo htmlspecialchars($user['contact_number']); ?>" data-email="<?php echo htmlspecialchars($user['email'] ?: ''); ?>" style="cursor: pointer;">
-                                                <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['full_name']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['contact_number']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['email'] ?: 'N/A'); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Violation</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    // Function to perform OCR on image and populate fields
-    function performOCR(file, inputId, ocrResultId) {
-        if (!file) return;
-        const ocrStatus = document.getElementById('ocr_status');
-        ocrStatus.textContent = 'Processing image...';
-        Tesseract.recognize(
-            file,
-            'eng',
-            {
-                logger: m => console.log(m)
-            }
-        ).then(({ data: { text } }) => {
-            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-            document.getElementById(inputId).value = cleanedText;
-            document.getElementById(ocrResultId).value = cleanedText;
-            ocrStatus.textContent = 'Text extracted successfully!';
-            console.log('OCR Result:', cleanedText);
-        }).catch(error => {
-            ocrStatus.textContent = 'Error extracting text from image.';
-            console.error('OCR Error:', error);
-        });
-    }
-
-    // Handle image upload for OCR in Create Violation Form
-    document.getElementById('plate_image').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            performOCR(file, 'plate_number', 'ocr_result');
-        }
-    });
-
-    // Handle user selection from mini-table
-    document.querySelectorAll('.user-row').forEach(row => {
-        row.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const fullName = this.getAttribute('data-full-name');
-            const contactNumber = this.getAttribute('data-contact-number');
-            const email = this.getAttribute('data-email');
-            document.getElementById('violator_name').value = fullName;
-            document.getElementById('contact_number').value = contactNumber;
-            document.getElementById('email').value = email;
-            document.getElementById('user_id').value = userId;
-            document.getElementById('violator_name').classList.remove('is-invalid');
-            document.getElementById('contact_number').classList.remove('is-invalid');
-            console.log(`Selected user: ID=${userId}, Full Name=${fullName}, Contact=${contactNumber}, Email=${email}`);
-            // Highlight selected row
-            document.querySelectorAll('.user-row').forEach(r => r.classList.remove('table-primary'));
-            this.classList.add('table-primary');
-        });
-    });
-
-    // Clear user_id and fields if violator_name is manually changed
-    document.getElementById('violator_name').addEventListener('input', function() {
-        document.getElementById('user_id').value = '';
-        document.getElementById('contact_number').value = '';
-        document.getElementById('email').value = '';
-        document.querySelectorAll('.user-row').forEach(row => row.classList.remove('table-primary'));
-        console.log('Violator name manually changed, cleared user_id, contact_number, and email');
-    });
-
-    // Client-side validation and SweetAlert for Create Violation Form
-    document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const violatorName = document.getElementById('violator_name').value.trim();
-        const contactNumber = document.getElementById('contact_number').value.trim();
-        const plateNumber = document.getElementById('plate_number').value.trim();
-        const reason = document.getElementById('reason').value.trim();
-        const violationTypeId = document.getElementById('violation_type_id').value;
-
-        let isValid = true;
-
-        document.getElementById('violator_name').classList.remove('is-invalid');
-        document.getElementById('contact_number').classList.remove('is-invalid');
-        document.getElementById('plate_number').classList.remove('is-invalid');
-        document.getElementById('reason').classList.remove('is-invalid');
-        document.getElementById('violation_type_id').classList.remove('is-invalid');
-
-        if (!violatorName) {
-            document.getElementById('violator_name').classList.add('is-invalid');
-            isValid = false;
-        }
-        if (!contactNumber) {
-            document.getElementById('contact_number').classList.add('is-invalid');
-            isValid = false;
-        }
-        if (!plateNumber) {
-            document.getElementById('plate_number').classList.add('is-invalid');
-            isValid = false;
-        }
-        if (!reason) {
-            document.getElementById('reason').classList.add('is-invalid');
-            isValid = false;
-        }
-        if (!violationTypeId) {
-            document.getElementById('violation_type_id').classList.add('is-invalid');
-            isValid = false;
-        }
-
-        if (!isValid) {
-            console.log('Client-side validation failed for create violation');
-            return;
-        }
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to create this violation?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, create it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                console.log('Create violation form submission confirmed');
-                fetch(this.action, {
-                    method: 'POST',
-                    body: new FormData(this)
-                }).then(response => {
-                    if (response.ok) {
-                        Swal.fire({
-                            title: 'Created!',
-                            text: 'Violation has been created successfully.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Failed to create violation.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                }).catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An error occurred while creating the violation.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                });
-            } else {
-                console.log('Create violation form submission canceled');
-            }
-        });
-    });
-</script>
 
                 <!-- Users with Violations -->
                 <div class="card mb-4 shadow-sm">
@@ -1205,7 +910,7 @@ try {
         </div>
     </div>
     <?php include '../layout/footer.php'; ?>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Initialize Toastr
         toastr.options = {
@@ -1219,156 +924,6 @@ try {
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
-
-        // Function to perform OCR on image and populate plate number
-        function performOCR(file, inputId) {
-            if (!file) return;
-            const ocrStatus = document.getElementById('ocr_status');
-            ocrStatus.textContent = 'Processing image...';
-            Tesseract.recognize(
-                file,
-                'eng',
-                {
-                    logger: m => console.log(m)
-                }
-            ).then(({ data: { text } }) => {
-                const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                document.getElementById(inputId).value = cleanedText;
-                ocrStatus.textContent = 'Text extracted successfully!';
-                console.log('OCR Result:', cleanedText);
-            }).catch(error => {
-                ocrStatus.textContent = 'Error extracting text from image.';
-                console.error('OCR Error:', error);
-            });
-        }
-
-        // Client-side validation for Create Violation Form
-        document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-            console.log('Create violation form submission attempted');
-            const violatorName = document.getElementById('violator_name').value.trim();
-            const contactNumber = document.getElementById('contact_number').value.trim();
-            const plateNumber = document.getElementById('plate_number').value.trim();
-            const reason = document.getElementById('reason').value.trim();
-            const violationTypeId = document.getElementById('violation_type_id').value;
-
-            let isValid = true;
-
-            document.getElementById('violator_name').classList.remove('is-invalid');
-            document.getElementById('contact_number').classList.remove('is-invalid');
-            document.getElementById('plate_number').classList.remove('is-invalid');
-            document.getElementById('reason').classList.remove('is-invalid');
-            document.getElementById('violation_type_id').classList.remove('is-invalid');
-
-            if (!violatorName) {
-                document.getElementById('violator_name').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!contactNumber) {
-                document.getElementById('contact_number').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!plateNumber) {
-                document.getElementById('plate_number').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!reason) {
-                document.getElementById('reason').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!violationTypeId) {
-                document.getElementById('violation_type_id').classList.add('is-invalid');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                console.log('Client-side validation failed for create violation');
-                e.preventDefault();
-                return;
-            }
-
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to create this violation?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, create it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Create violation form submission confirmed');
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: new FormData(this)
-                    }).then(response => {
-                        if (response.ok) {
-                            Swal.fire({
-                                title: 'Created!',
-                                text: 'Violation has been created successfully.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Failed to create violation.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    }).catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'An error occurred while creating the violation.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    });
-                } else {
-                    console.log('Create violation form submission canceled');
-                }
-            });
-        });
-
-        // Handle image upload for OCR in Create Violation Form
-        document.getElementById('plate_image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                performOCR(file, 'plate_number');
-            }
-        });
-
-        // Handle user selection from mini-table
-        document.querySelectorAll('.user-row').forEach(row => {
-            row.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                const fullName = this.getAttribute('data-full-name');
-                const contactNumber = this.getAttribute('data-contact-number');
-                const email = this.getAttribute('data-email');
-                document.getElementById('violator_name').value = fullName;
-                document.getElementById('contact_number').value = contactNumber;
-                document.getElementById('email').value = email;
-                document.getElementById('user_id').value = userId;
-                document.getElementById('violator_name').classList.remove('is-invalid');
-                document.getElementById('contact_number').classList.remove('is-invalid');
-                console.log(`Selected user: ID=${userId}, Full Name=${fullName}, Contact=${contactNumber}, Email=${email}`);
-                // Highlight selected row
-                document.querySelectorAll('.user-row').forEach(r => r.classList.remove('table-primary'));
-                this.classList.add('table-primary');
-            });
-        });
-
-        // Clear user_id and fields if violator_name is manually changed
-        document.getElementById('violator_name').addEventListener('input', function() {
-            document.getElementById('user_id').value = '';
-            document.getElementById('contact_number').value = '';
-            document.getElementById('email').value = '';
-            document.querySelectorAll('.user-row').forEach(row => row.classList.remove('table-primary'));
-            console.log('Violator name manually changed, cleared user_id, contact_number, and email');
-        });
 
         // Client-side validation for Create Violation Type Form
         document.getElementById('createViolationTypeForm').addEventListener('submit', function(e) {
