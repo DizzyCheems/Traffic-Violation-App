@@ -9,7 +9,7 @@ use PHPMailer\PHPMailer\Exception;
 
 require '../vendor/autoload.php';
 
-// Debug: Log session data
+// Debug: Log sessfion data
 file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
 
 // Check session variables

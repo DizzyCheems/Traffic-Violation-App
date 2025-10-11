@@ -1362,3 +1362,34 @@ Session Data: Array
     [role] => officer
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-11 08:37:59
+Login.php accessed: 2025-10-11 08:37:59
+Login.php accessed: 2025-10-11 08:37:59
+Login.php accessed: 2025-10-11 08:38:00
+Login.php accessed: 2025-10-11 08:38:00
+Login.php accessed: 2025-10-11 08:38:05
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
