@@ -556,7 +556,7 @@ try {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_violations.php">
+                            <a class="nav-link" href="manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>
                                 Manage Violations
                             </a>

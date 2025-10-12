@@ -1,6 +1,6 @@
 <?php
 // File: mail_test.php
-// Sends an email for the latest registered violation using PHPMailer with Gmail's SMTP server.
+// Automatically sends an email for the latest violation with email_sent = FALSE only once when called.
 // Assumes vendor folder is in C:\xampp\htdocs\Traffic-Violation-App and MySQL database is configured in XAMPP.
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -23,22 +23,27 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Fetch all violations
+    // Fetch all violations that have not had an email sent
     $stmt = $pdo->query("
         SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
-               v.has_license, v.license_number, t.violation_type, u.email 
+               v.has_license, v.license_number, v.email_sent, t.violation_type, u.email 
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
         LEFT JOIN users u ON v.user_id = u.id 
+        WHERE v.email_sent = FALSE
         ORDER BY v.violator_name, v.plate_number
     ");
     $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Fetch the latest violation ID
+    // Fetch the latest violation with email_sent = FALSE
     $stmt = $pdo->query("
-        SELECT id 
-        FROM violations 
-        ORDER BY issue_date DESC, id DESC 
+        SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
+               v.has_license, v.license_number, v.email_sent, t.violation_type, u.email 
+        FROM violations v 
+        JOIN types t ON v.violation_type_id = t.id 
+        LEFT JOIN users u ON v.user_id = u.id 
+        WHERE v.email_sent = FALSE
+        ORDER BY v.issue_date DESC, v.id DESC 
         LIMIT 1
     ");
     $latest_violation = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -51,13 +56,81 @@ try {
     // Fetch users
     $stmt = $pdo->query("SELECT id, full_name, email FROM users ORDER BY full_name");
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Automatically send email for the latest violation if it exists and hasn't been sent
+    if ($latest_violation && !$latest_violation['email_sent']) {
+        try {
+            // Extract violation data
+            $violation_id = $latest_violation['id'];
+            $violator_name = $latest_violation['violator_name'];
+            $plate_number = $latest_violation['plate_number'];
+            $reason = $latest_violation['reason'];
+            $violation_type_id = $latest_violation['violation_type_id'];
+            $user_id = $latest_violation['user_id'];
+            $has_license = $latest_violation['has_license'];
+            $license_number = $latest_violation['license_number'];
+            $email = $latest_violation['email'];
+            $violation_type_name = $latest_violation['violation_type'];
+
+            // Validate required fields
+            if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
+                throw new Exception('All required fields must be filled for the latest violation.');
+            }
+
+            // Send email using PHPMailer
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'stine6595@gmail.com';
+            $mail->Password = 'qvkb ycan jdij yffz';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom('stine6595@gmail.com', 'Traffic Violation System');
+            $mail->addAddress($email, $violator_name);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Traffic Violation Recorded';
+            $mail->Body = "
+                <h3>Traffic Violation Notification</h3>
+                <p>Dear " . htmlspecialchars($violator_name) . ",</p>
+                <p>A traffic violation has been recorded with the following details:</p>
+                <ul>
+                    <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
+                    <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
+                    <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
+                    <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
+                    <li><strong>Issue Date:</strong> " . date('Y-m-d H:i:s') . "</li>
+                </ul>
+                <p>Please address this violation promptly.</p>
+                <p>Regards,<br>Traffic Violation System</p>
+            ";
+            $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type: $violation_type_name\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: " . date('Y-m-d H:i:s') . "\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
+
+            $mail->send();
+
+            // Update the email_sent status in the database
+            $stmt = $pdo->prepare("UPDATE violations SET email_sent = TRUE WHERE id = ?");
+            $stmt->execute([$violation_id]);
+
+            $status = 'Violation email sent successfully to ' . htmlspecialchars($email) . '! Check the inbox or spam folder.';
+        } catch (Exception $e) {
+            $status = "Error sending email for violation ID $violation_id: " . $e->getMessage();
+        }
+    } else {
+        $status = $latest_violation ? 'Email already sent for the latest violation.' : 'No new violations found to send an email.';
+    }
+
 } catch (PDOException $e) {
     $status = "Failed to fetch data. Database Error: " . $e->getMessage();
 }
 
+// Handle manual form submission as a fallback
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) {
     try {
         // Get form data
+        $violation_id = $_POST['violation_id'] ?? '';
         $violator_name = $_POST['violator_name'] ?? '';
         $plate_number = $_POST['plate_number'] ?? '';
         $reason = $_POST['reason'] ?? '';
@@ -68,8 +141,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
         $email = $_POST['email'] ?? '';
 
         // Validate required fields
-        if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
+        if (empty($violation_id) || empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
             throw new Exception('All required fields must be filled.');
+        }
+
+        // Check if email has already been sent for this violation
+        $stmt = $pdo->prepare("SELECT email_sent FROM violations WHERE id = ?");
+        $stmt->execute([$violation_id]);
+        $violation = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($violation && $violation['email_sent']) {
+            throw new Exception('Email has already been sent for this violation.');
         }
 
         // Fetch violation type name for email
@@ -110,6 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
         $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type: $violation_type_name\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: " . date('Y-m-d H:i:s') . "\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
 
         $mail->send();
+
+        // Update the email_sent status in the database
+        $stmt = $pdo->prepare("UPDATE violations SET email_sent = TRUE WHERE id = ?");
+        $stmt->execute([$violation_id]);
+
         $status = 'Violation email sent successfully to ' . htmlspecialchars($email) . '! Check the inbox or spam folder.';
     } catch (PDOException $e) {
         $status = "Failed to send email. Database Error: " . $e->getMessage();
@@ -303,10 +389,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
         // Run updateViolationFields on page load to populate fields with the latest violation
         window.onload = function() {
             updateViolationFields();
-            // Uncomment the following line to enable auto-submit for the latest violation
-            // if (document.getElementById('violation_id').value) {
-            //     document.getElementById('violationForm').submit();
-            // }
         };
     </script>
 </body>
