@@ -2169,3 +2169,319 @@ Session Data: Array
     [role] => officer
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='rw', violation_type_id='14', plate_image='../Uploads/68eb7804b96fd_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 13
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => rw
+    [5] => 14
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 234
+    [11] => 2025-10-12T11:42
+    [12] => Pending
+    [13] => ww
+    [14] => 13
+    [15] => ../Uploads/68eb7804b96fd_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='fh', violation_type_id='14', plate_image='../Uploads/68eb79c94a13b_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 14
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => fh
+    [5] => 14
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-12T11:49
+    [12] => Pending
+    [13] => 
+    [14] => 14
+    [15] => ../Uploads/68eb79c94a13b_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='ewf', violation_type_id='14', plate_image='../Uploads/68eb7ab9df359_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 15
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => ewf
+    [5] => 14
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-12T11:53
+    [12] => Pending
+    [13] => 
+    [14] => 15
+    [15] => ../Uploads/68eb7ab9df359_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 144 to spiralsmoke903@gmail.com
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 27
+    [violator_name] => Juan Dela Cruz
+    [has_license] => 0
+    [license_number] => 93423413
+    [contact_number] => 2147483647
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Juan Dela Cruz', user_id='27', contact_number='2147483647', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='ryr', violation_type_id='115', plate_image='../Uploads/68eb7b0a5afcd_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='27': 16
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 27
+    [2] => Juan Dela Cruz
+    [3] => NBC1234
+    [4] => ryr
+    [5] => 115
+    [6] => 0
+    [7] => 93423413
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-12T11:55
+    [12] => Pending
+    [13] => 
+    [14] => 16
+    [15] => ../Uploads/68eb7b0a5afcd_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 145 to spiralsmoke903@gmail.com
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Delete Violation Input: id='145'
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+    [delete_success] => 1
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 143 to spiralsmoke903@gmail.com
+Email sent successfully for violation ID 142 to spiralsmoke903@gmail.com
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+

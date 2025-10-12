@@ -189,8 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
             $fine_amount = $violation_type['fine_amount'] ?? 0;
 
-            // Insert violation with user_id, offense_freq, and plate_image
-            $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq, plate_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            // Insert violation with user_id, offense_freq, plate_image, and email_sent = FALSE
+            $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq, plate_image, email_sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)");
             $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq, $plate_image];
             file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
             $success = $stmt->execute($params);
@@ -207,7 +207,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                     file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
                 }
 
-                // Redirect to mail_test.php with the violation ID
+                // Log redirect and redirect to mail_test.php to trigger email sending
+                file_put_contents('../debug.log', "Violation created successfully, redirecting to mail_test.php?violation_id=$violation_id\n", FILE_APPEND);
                 $_SESSION['create_success'] = true;
                 header("Location: mail_test.php?violation_id=$violation_id");
                 exit;

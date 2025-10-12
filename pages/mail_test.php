@@ -1,171 +1,58 @@
 <?php
-// File: mail_test.php
-// Automatically sends an email for the latest violation with email_sent = FALSE only once when called.
-// Assumes vendor folder is in C:\xampp\htdocs\Traffic-Violation-App and MySQL database is configured in XAMPP.
+session_start();
+require '../config/conn.php';
+require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require '../vendor/autoload.php';
+// Initialize variables
+$toastr_messages = [];
 
-// Database connection settings
-$host = 'localhost';
-$dbname = 'traffic';
-$username = 'root';
-$password = '';
-
-$status = ''; // To display success/error message
-$latest_violation_id = 0; // To store the ID of the latest violation
-
-try {
-    // Connect to the database
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Fetch all violations that have not had an email sent
-    $stmt = $pdo->query("
-        SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
-               v.has_license, v.license_number, v.email_sent, t.violation_type, u.email 
-        FROM violations v 
-        JOIN types t ON v.violation_type_id = t.id 
-        LEFT JOIN users u ON v.user_id = u.id 
-        WHERE v.email_sent = FALSE
-        ORDER BY v.violator_name, v.plate_number
-    ");
-    $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Fetch the latest violation with email_sent = FALSE
-    $stmt = $pdo->query("
-        SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
-               v.has_license, v.license_number, v.email_sent, t.violation_type, u.email 
-        FROM violations v 
-        JOIN types t ON v.violation_type_id = t.id 
-        LEFT JOIN users u ON v.user_id = u.id 
-        WHERE v.email_sent = FALSE
-        ORDER BY v.issue_date DESC, v.id DESC 
-        LIMIT 1
-    ");
-    $latest_violation = $stmt->fetch(PDO::FETCH_ASSOC);
-    $latest_violation_id = $latest_violation ? (int)$latest_violation['id'] : 0;
-
-    // Fetch violation types
-    $stmt = $pdo->query("SELECT id, violation_type FROM types ORDER BY violation_type");
-    $violation_types = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Fetch users
-    $stmt = $pdo->query("SELECT id, full_name, email FROM users ORDER BY full_name");
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Automatically send email for the latest violation if it exists and hasn't been sent
-    if ($latest_violation && !$latest_violation['email_sent']) {
-        try {
-            // Extract violation data
-            $violation_id = $latest_violation['id'];
-            $violator_name = $latest_violation['violator_name'];
-            $plate_number = $latest_violation['plate_number'];
-            $reason = $latest_violation['reason'];
-            $violation_type_id = $latest_violation['violation_type_id'];
-            $user_id = $latest_violation['user_id'];
-            $has_license = $latest_violation['has_license'];
-            $license_number = $latest_violation['license_number'];
-            $email = $latest_violation['email'];
-            $violation_type_name = $latest_violation['violation_type'];
-
-            // Validate required fields
-            if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
-                throw new Exception('All required fields must be filled for the latest violation.');
-            }
-
-            // Send email using PHPMailer
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'stine6595@gmail.com';
-            $mail->Password = 'qvkb ycan jdij yffz';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            $mail->setFrom('stine6595@gmail.com', 'Traffic Violation System');
-            $mail->addAddress($email, $violator_name);
-
-            $mail->isHTML(true);
-            $mail->Subject = 'Traffic Violation Recorded';
-            $mail->Body = "
-                <h3>Traffic Violation Notification</h3>
-                <p>Dear " . htmlspecialchars($violator_name) . ",</p>
-                <p>A traffic violation has been recorded with the following details:</p>
-                <ul>
-                    <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
-                    <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
-                    <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
-                    <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
-                    <li><strong>Issue Date:</strong> " . date('Y-m-d H:i:s') . "</li>
-                </ul>
-                <p>Please address this violation promptly.</p>
-                <p>Regards,<br>Traffic Violation System</p>
-            ";
-            $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type: $violation_type_name\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: " . date('Y-m-d H:i:s') . "\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
-
-            $mail->send();
-
-            // Update the email_sent status in the database
-            $stmt = $pdo->prepare("UPDATE violations SET email_sent = TRUE WHERE id = ?");
-            $stmt->execute([$violation_id]);
-
-            $status = 'Violation email sent successfully to ' . htmlspecialchars($email) . '! Check the inbox or spam folder.';
-        } catch (Exception $e) {
-            $status = "Error sending email for violation ID $violation_id: " . $e->getMessage();
-        }
-    } else {
-        $status = $latest_violation ? 'Email already sent for the latest violation.' : 'No new violations found to send an email.';
-    }
-
-} catch (PDOException $e) {
-    $status = "Failed to fetch data. Database Error: " . $e->getMessage();
-}
-
-// Handle manual form submission as a fallback
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) {
+// Function to send email for a specific violation
+function sendViolationEmail($pdo, $violation_id) {
     try {
-        // Get form data
-        $violation_id = $_POST['violation_id'] ?? '';
-        $violator_name = $_POST['violator_name'] ?? '';
-        $plate_number = $_POST['plate_number'] ?? '';
-        $reason = $_POST['reason'] ?? '';
-        $violation_type_id = $_POST['violation_type_id'] ?? '';
-        $user_id = $_POST['user_id'] ?? '';
-        $has_license = isset($_POST['has_license']) ? 1 : 0;
-        $license_number = $_POST['license_number'] ?? null;
-        $email = $_POST['email'] ?? '';
-
-        // Validate required fields
-        if (empty($violation_id) || empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
-            throw new Exception('All required fields must be filled.');
-        }
-
-        // Check if email has already been sent for this violation
-        $stmt = $pdo->prepare("SELECT email_sent FROM violations WHERE id = ?");
+        // Fetch the specific violation
+        $stmt = $pdo->prepare("
+            SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
+                   v.has_license, v.license_number, v.email_sent, v.issued_date, t.violation_type, t.fine_amount, u.email 
+            FROM violations v 
+            JOIN types t ON v.violation_type_id = t.id 
+            LEFT JOIN users u ON v.user_id = u.id 
+            WHERE v.id = ? AND v.email_sent = FALSE
+        ");
         $stmt->execute([$violation_id]);
         $violation = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($violation && $violation['email_sent']) {
-            throw new Exception('Email has already been sent for this violation.');
+
+        if (!$violation) {
+            return ['success' => false, 'message' => "No unsent violation found for ID $violation_id or email already sent."];
         }
 
-        // Fetch violation type name for email
-        $stmt = $pdo->prepare("SELECT violation_type FROM types WHERE id = ?");
-        $stmt->execute([$violation_type_id]);
-        $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
-        $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
+        // Extract violation data
+        $violator_name = $violation['violator_name'];
+        $plate_number = $violation['plate_number'];
+        $reason = $violation['reason'];
+        $violation_type_id = $violation['violation_type_id'];
+        $user_id = $violation['user_id'];
+        $email = $violation['email'];
+        $violation_type_name = $violation['violation_type'];
+        $fine_amount = $violation['fine_amount'];
+        $issued_date = $violation['issued_date'];
+        $license_number = $violation['license_number'] ?: 'N/A';
 
-        // Send email using PHPMailer
+        // Validate required fields
+        if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
+            return ['success' => false, 'message' => 'All required fields must be filled for violation ID ' . $violation_id . '.'];
+        }
+
+        // Initialize PHPMailer
         $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'stine6595@gmail.com';
-        $mail->Password = 'qvkb ycan jdij yffz';
+        $mail->Username = 'stine6595@gmail.com'; // Replace with your Gmail address
+        $mail->Password = 'qvkb ycan jdij yffz'; // Replace with your Gmail App Password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
@@ -182,214 +69,261 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) 
                 <li><strong>Plate Number:</strong> " . htmlspecialchars($plate_number) . "</li>
                 <li><strong>Reason:</strong> " . htmlspecialchars($reason) . "</li>
                 <li><strong>Violation Type:</strong> " . htmlspecialchars($violation_type_name) . "</li>
-                <li><strong>License Number:</strong> " . ($license_number ? htmlspecialchars($license_number) : 'N/A') . "</li>
-                <li><strong>Issue Date:</strong> " . date('Y-m-d H:i:s') . "</li>
+                <li><strong>Fine Amount:</strong> ₱" . number_format($fine_amount, 2) . "</li>
+                <li><strong>License Number:</strong> " . htmlspecialchars($license_number) . "</li>
+                <li><strong>Issue Date:</strong> " . htmlspecialchars($issued_date) . "</li>
             </ul>
             <p>Please address this violation promptly.</p>
             <p>Regards,<br>Traffic Violation System</p>
         ";
-        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type: $violation_type_name\n- License Number: " . ($license_number ?: 'N/A') . "\n- Issue Date: " . date('Y-m-d H:i:s') . "\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
+        $mail->AltBody = "Traffic Violation Notification\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Reason: $reason\n- Violation Type: $violation_type_name\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- License Number: $license_number\n- Issue Date: $issued_date\n\nPlease address this violation promptly.\n\nRegards,\nTraffic Violation System";
 
         $mail->send();
 
-        // Update the email_sent status in the database
+        // Update the email_sent status
         $stmt = $pdo->prepare("UPDATE violations SET email_sent = TRUE WHERE id = ?");
         $stmt->execute([$violation_id]);
 
-        $status = 'Violation email sent successfully to ' . htmlspecialchars($email) . '! Check the inbox or spam folder.';
-    } catch (PDOException $e) {
-        $status = "Failed to send email. Database Error: " . $e->getMessage();
+        file_put_contents('../debug.log', "Email sent successfully for violation ID $violation_id to $email\n", FILE_APPEND);
+        return ['success' => true, 'message' => "Violation email sent successfully to $email! Check the inbox or spam folder."];
     } catch (Exception $e) {
-        $status = "Error: " . $e->getMessage();
+        file_put_contents('../debug.log', "Error sending email for violation ID $violation_id: " . $e->getMessage() . "\n", FILE_APPEND);
+        return ['success' => false, 'message' => "Error sending email for violation ID $violation_id: " . $e->getMessage()];
     }
 }
-?>
 
+try {
+    // Check session
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || 
+        !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
+        header("Location: ../login.php");
+        exit;
+    }
+
+    // Check for violation_id in query parameter for automatic email sending
+    $violation_id = isset($_GET['violation_id']) ? (int)$_GET['violation_id'] : 0;
+    if ($violation_id) {
+        $result = sendViolationEmail($pdo, $violation_id);
+        $_SESSION['email_status'] = $result;
+        header("Location: manage_violations.php");
+        exit;
+    }
+
+    // Fetch violations with email_sent = FALSE for the form, ordered by id DESC to get latest first
+    $stmt = $pdo->prepare("
+        SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
+               v.has_license, v.license_number, v.email_sent, v.issued_date, t.violation_type, t.fine_amount, u.email 
+        FROM violations v 
+        JOIN types t ON v.violation_type_id = t.id 
+        LEFT JOIN users u ON v.user_id = u.id 
+        WHERE v.email_sent = FALSE AND v.officer_id = ?
+        ORDER BY v.id DESC
+    ");
+    $stmt->execute([$_SESSION['user_id']]);
+    $violations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get the latest violation ID (first in the list due to ORDER BY id DESC)
+    $latest_violation_id = !empty($violations) ? $violations[0]['id'] : 0;
+
+    // Fetch violation types
+    $stmt = $pdo->query("SELECT id, violation_type FROM types ORDER BY violation_type");
+    $violation_types = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch users
+    $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE officer_id = ? ORDER BY full_name");
+    $stmt->execute([$_SESSION['user_id']]);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Handle manual form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) {
+        $violation_id = (int)$_POST['violation_id'];
+        $result = sendViolationEmail($pdo, $violation_id);
+        if ($result['success']) {
+            $toastr_messages[] = "Swal.fire({
+                title: 'Email Sent!',
+                text: '" . addslashes($result['message']) . "',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'manage_violations.php';
+            });";
+        } else {
+            $toastr_messages[] = "toastr.error('" . addslashes($result['message']) . "');";
+        }
+    }
+
+    // Check for email status message from session (not used for Swal here, handled in manage_violations.php)
+    if (isset($_SESSION['email_status'])) {
+        // Session message will be handled in manage_violations.php
+    }
+
+} catch (PDOException $e) {
+    $toastr_messages[] = "toastr.error('Database error: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Database Error: " . $e->getMessage() . "\n", FILE_APPEND);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Violation Email</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            text-align: center;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px;
-            width: 100%;
-        }
-        h2 {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        input[type="checkbox"] {
-            margin-right: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .status {
-            margin-top: 20px;
-            color: <?php echo strpos($status, 'successfully') !== false ? 'green' : 'red'; ?>;
-        }
-    </style>
-</head>
+<?php include '../layout/header.php'; ?>
 <body>
-    <div class="container">
-        <h2>Send Traffic Violation Email</h2>
-        <form method="post" id="violationForm">
-            <input type="hidden" name="submit_violation" value="1">
-            <div class="form-group">
-                <label for="violation_id">Select Existing Violation *</label>
-                <select id="violation_id" name="violation_id" onchange="updateViolationFields()">
-                    <option value="">Select a Violation</option>
-                    <?php foreach ($violations as $violation): ?>
-                        <option value="<?php echo htmlspecialchars($violation['id']); ?>" 
-                                data-violator-name="<?php echo htmlspecialchars($violation['violator_name']); ?>"
-                                data-plate-number="<?php echo htmlspecialchars($violation['plate_number']); ?>"
-                                data-reason="<?php echo htmlspecialchars($violation['reason']); ?>"
-                                data-violation-type-id="<?php echo htmlspecialchars($violation['violation_type_id']); ?>"
-                                data-violation-type="<?php echo htmlspecialchars($violation['violation_type']); ?>"
-                                data-user-id="<?php echo htmlspecialchars($violation['user_id']); ?>"
-                                data-email="<?php echo htmlspecialchars($violation['email'] ?: ''); ?>"
-                                data-has-license="<?php echo htmlspecialchars($violation['has_license']); ?>"
-                                data-license-number="<?php echo htmlspecialchars($violation['license_number'] ?: ''); ?>"
-                                <?php echo ($violation['id'] == $latest_violation_id) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($violation['violator_name'] . ' - ' . $violation['plate_number'] . ' - ' . $violation['violation_type']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+    <?php include '../layout/navbar.php'; ?>
+    <div class="container-fluid">
+        <!-- Toggle button for offcanvas sidebar (mobile only) -->
+        <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="row">
+            <!-- Sidebar (visible on desktop, offcanvas on mobile) -->
+            <nav class="col-lg-2 d-none d-lg-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/officer_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Officer Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_violations.php">
+                                <i class="fas fa-list-alt me-2"></i>
+                                Manage Violations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/mail_test.php">
+                                <i class="fas fa-envelope me-2"></i>
+                                Send Email
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="offcanvas offcanvas-start sidebar d-lg-none" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="sidebarMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/officer_dashboard.php">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Officer Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/manage_violations.php">
+                                <i class="fas fa-list-alt me-2"></i>
+                                Manage Violations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="../pages/mail_test.php">
+                                <i class="fas fa-envelope me-2"></i>
+                                Send Email
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../pages/logout.php">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="violator_name">Violator Name *</label>
-                <input type="text" id="violator_name" name="violator_name" readonly>
-            </div>
-            <div class="form-group">
-                <label for="plate_number">Plate Number *</label>
-                <input type="text" id="plate_number" name="plate_number" readonly>
-            </div>
-            <div class="form-group">
-                <label for="reason">Reason *</label>
-                <input type="text" id="reason" name="reason" readonly>
-            </div>
-            <div class="form-group">
-                <label for="violation_type_id">Violation Type *</label>
-                <select id="violation_type_id" name="violation_type_id" readonly>
-                    <option value="">Select Violation Type</option>
-                    <?php foreach ($violation_types as $type): ?>
-                        <option value="<?php echo htmlspecialchars($type['id']); ?>">
-                            <?php echo htmlspecialchars($type['violation_type']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="user_id">User ID *</label>
-                <input type="text" id="user_id" name="user_id" readonly>
-            </div>
-            <div class="form-group">
-                <label for="email">Email *</label>
-                <input type="email" id="email" name="email" readonly>
-            </div>
-            <div class="form-group">
-                <label for="has_license">Has License</label>
-                <input type="checkbox" id="has_license" name="has_license" disabled>
-            </div>
-            <div class="form-group">
-                <label for="license_number">License Number</label>
-                <input type="text" id="license_number" name="license_number" readonly>
-            </div>
-            <button type="submit">Send Violation Email</button>
-            <?php if ($status): ?>
-                <div class="status"><?php echo htmlspecialchars($status); ?></div>
-            <?php endif; ?>
-        </form>
-        <div>
-            <a href="manage_violations.php" style="margin-top: 20px; display: inline-block;">Back to Manage Violations</a>
+            <!-- Main content -->
+            <main class="col-12 col-md-9 col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                    <h1 class="h2 text-primary">Send Violation Email</h1>
+                    <div>
+                        <a href="../pages/manage_violations.php" class="btn btn-outline-primary">Back to Violations</a>
+                    </div>
+                </div>
+
+                <!-- Email Form -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Send Email for Unsent Violations</h3>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($violations)): ?>
+                            <p class="text-muted">No unsent violations found.</p>
+                        <?php else: ?>
+                            <form method="POST" id="emailForm">
+                                <input type="hidden" name="submit_violation" value="1">
+                                <div class="mb-3">
+                                    <label for="violation_id" class="form-label">Select Violation</label>
+                                    <select class="form-select" name="violation_id" id="violation_id" required>
+                                        <option value="" disabled>Select a violation</option>
+                                        <?php foreach ($violations as $violation): ?>
+                                            <option value="<?php echo htmlspecialchars($violation['id']); ?>" 
+                                                <?php echo $violation['id'] == $latest_violation_id ? 'selected' : ''; ?>>
+                                                ID: <?php echo htmlspecialchars($violation['id']); ?> - 
+                                                <?php echo htmlspecialchars($violation['violator_name']); ?> - 
+                                                Plate: <?php echo htmlspecialchars($violation['plate_number']); ?> - 
+                                                <?php echo htmlspecialchars($violation['violation_type']); ?> - 
+                                                Issued: <?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($violation['issued_date']))); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a violation.</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Send Email</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
-
+    <?php include '../layout/footer.php'; ?>
     <script>
-        function updateViolationFields() {
-            const violationSelect = document.getElementById('violation_id');
-            const selectedOption = violationSelect.options[violationSelect.selectedIndex];
+        // Initialize Toastr
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            timeOut: 5000
+        };
 
-            // Get form fields
-            const violatorName = document.getElementById('violator_name');
-            const plateNumber = document.getElementById('plate_number');
-            const reason = document.getElementById('reason');
-            const violationTypeId = document.getElementById('violation_type_id');
-            const userId = document.getElementById('user_id');
-            const email = document.getElementById('email');
-            const hasLicense = document.getElementById('has_license');
-            const licenseNumber = document.getElementById('license_number');
+        // Display Toastr/Swal messages
+        <?php foreach ($toastr_messages as $msg): ?>
+            <?php echo $msg; ?>
+        <?php endforeach; ?>
 
-            // Clear fields if no violation is selected
-            if (!selectedOption.value) {
-                violatorName.value = '';
-                plateNumber.value = '';
-                reason.value = '';
-                violationTypeId.value = '';
-                userId.value = '';
-                email.value = '';
-                hasLicense.checked = false;
-                licenseNumber.value = '';
+        // Client-side validation for Email Form
+        document.getElementById('emailForm')?.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            const violationId = document.getElementById('violation_id').value;
+            if (!violationId) {
+                document.getElementById('violation_id').classList.add('is-invalid');
+                toastr.error('Please select a violation.');
                 return;
             }
+            document.getElementById('violation_id').classList.remove('is-invalid');
 
-            // Populate fields with selected violation data
-            violatorName.value = selectedOption.getAttribute('data-violator-name') || '';
-            plateNumber.value = selectedOption.getAttribute('data-plate-number') || '';
-            reason.value = selectedOption.getAttribute('data-reason') || '';
-            violationTypeId.value = selectedOption.getAttribute('data-violation-type-id') || '';
-            userId.value = selectedOption.getAttribute('data-user-id') || '';
-            email.value = selectedOption.getAttribute('data-email') || '';
-            hasLicense.checked = selectedOption.getAttribute('data-has-license') == '1';
-            licenseNumber.value = selectedOption.getAttribute('data-license-number') || '';
-        }
-
-        // Run updateViolationFields on page load to populate fields with the latest violation
-        window.onload = function() {
-            updateViolationFields();
-        };
+            // Submit form via fetch
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            }).then(data => {
+                // PHP will handle Swal for success
+            }).catch(error => {
+                toastr.error('Error sending email: ' + error.message);
+            });
+        });
     </script>
 </body>
 </html>
