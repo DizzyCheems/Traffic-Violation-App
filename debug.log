@@ -2485,3 +2485,23 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-10-13 03:49:43
+Login.php accessed: 2025-10-13 03:49:45
+Login successful for user_id: 1, role: admin
+Login.php accessed: 2025-10-13 03:49:54
+Login.php accessed: 2025-10-13 03:49:57
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 135 to spiralsmoke903@gmail.com
+Email sent successfully for violation ID 134 to spiralsmoke903@gmail.com
