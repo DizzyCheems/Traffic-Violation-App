@@ -67,182 +67,69 @@ function sendViolationEmail($pdo, $violation_id) {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body, table, td, p, div { 
+                        font-family: Arial, sans-serif; 
+                        color: #444444; 
+                        font-size: 13px; 
+                        line-height: 20px; 
+                    }
+                    .container { 
+                        width: 100%; 
+                        max-width: 450px; 
+                        margin: 0 auto; 
+                        background-color: #ffffff; 
+                        padding: 20px; 
+                    }
+                    .header { 
+                        color: #003087; 
+                        font-size: 18px; 
+                        font-weight: normal; 
+                        padding: 15px 0; 
+                    }
+                    .footer { 
+                        background-color: #f5f5f5; 
+                        padding: 10px; 
+                        text-align: center; 
+                        border-top: 1px solid #e3e3e3; 
+                        margin-top: 20px; 
+                    }
+                    .footer a { 
+                        color: #003087; 
+                        text-decoration: none; 
+                    }
+                </style>
             </head>
-            <body>
-                <table width="100%" height="100%" bgcolor="#E4E6E9" cellspacing="0" cellpadding="0" border="0">
+            <body style="background-color: #E4E6E9; margin: 0; padding: 20px;">
+                <table class="container" bgcolor="#FFFFFF">
                     <tbody>
                         <tr>
-                            <td width="100%" align="center" valign="top" bgcolor="#E4E6E9" style="background-color:#E4E6E9; min-height: 200px;">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td class="table-td-wrap" align="center" width="458">
-                                                <table class="table-space" height="18" style="height: 18px; font-size: 0px; line-height: 0; width: 450px; background-color: #e4e6e9;" width="450" bgcolor="#E4E6E9" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="18" style="height: 18px; width: 450px; background-color: #e4e6e9;" width="450" bgcolor="#E4E6E9" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <table class="table-space" height="8" style="height: 8px; font-size: 0px; line-height: 0; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="8" style="height: 8px; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table class="table-row" width="450" bgcolor="#FFFFFF" style="table-layout: fixed; background-color: #ffffff;" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-row-td" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; padding-left: 36px; padding-right: 36px;" valign="top" align="left">
-                                                                <table class="table-col" align="left" width="378" cellspacing="0" cellpadding="0" border="0" style="table-layout: fixed;">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td class="table-col-td" width="378" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; width: 378px;" valign="top" align="left">
-                                                                                <table class="header-row" width="378" cellspacing="0" cellpadding="0" border="0" style="table-layout: fixed;">
-                                                                                    <tbody>
-                                                                                        <tr>
-                                                                                            <td class="header-row-td" width="378" style="font-family: Arial, sans-serif; font-weight: normal; line-height: 19px; color: #003087; margin: 0px; font-size: 18px; padding-bottom: 10px; padding-top: 15px;" valign="top" align="left">Traffic Violation Notice</td>
-                                                                                        </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                                <div style="font-family: Arial, sans-serif; line-height: 20px; color: #444444; font-size: 13px;">
-                                                                                    <b style="color: #777777;">Dear ' . htmlspecialchars($violator_name) . ',</b>
-                                                                                    <br>We regret to inform you that a traffic violation has been recorded under your name. Please review the details below and address this matter promptly.
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table class="table-space" height="12" style="height: 12px; font-size: 0px; line-height: 0; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="12" style="height: 12px; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <table class="table-row" width="450" bgcolor="#FFFFFF" style="table-layout: fixed; background-color: #ffffff;" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-row-td" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; padding-left: 36px; padding-right: 36px;" valign="top" align="left">
-                                                                <table class="table-col" align="left" width="378" cellspacing="0" cellpadding="0" border="0" style="table-layout: fixed;">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td class="table-col-td" width="378" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; width: 378px;" valign="top" align="left">
-                                                                                <div style="font-family: Arial, sans-serif; line-height: 20px; color: #444444; font-size: 13px;">
-                                                                                    <b style="color: #003087;">Violation Details:</b><br>
-                                                                                    <b>Plate Number:</b> ' . htmlspecialchars($plate_number) . '<br>
-                                                                                    <b>Violation Type:</b> ' . htmlspecialchars($violation_type_name) . '<br>
-                                                                                    <b>Reason:</b> ' . htmlspecialchars($reason) . '<br>
-                                                                                    <b>Fine Amount:</b> ₱' . number_format($fine_amount, 2) . '<br>
-                                                                                    <b>License Number:</b> ' . htmlspecialchars($license_number) . '<br>
-                                                                                    <b>Issue Date:</b> ' . htmlspecialchars(date('F j, Y, g:i A', strtotime($issued_date))) . '
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table class="table-space" height="16" style="height: 16px; font-size: 0px; line-height: 0; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="16" style="height: 16px; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table class="table-row" width="450" bgcolor="#FFFFFF" style="table-layout: fixed; background-color: #ffffff;" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-row-td" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; padding-left: 36px; padding-right: 36px;" valign="top" align="left">
-                                                                <table class="table-col" align="left" width="378" cellspacing="0" cellpadding="0" border="0" style="table-layout: fixed;">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td class="table-col-td" width="378" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; width: 378px;" valign="top" align="left">
-                                                                                <div style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; text-align: center;">
-                                                                                    <a href="https://example.com/violations" style="color: #ffffff; text-decoration: none; margin: 0px; text-align: center; vertical-align: baseline; border: 4px solid #003087; padding: 4px 9px; font-size: 15px; line-height: 21px; background-color: #003087;">&nbsp; View Violation Details &nbsp;</a>
-                                                                                </div>
-                                                                                <table class="table-space" height="16" style="height: 16px; font-size: 0px; line-height: 0; width: 378px; background-color: #ffffff;" width="378" bgcolor="#FFFFFF" cellspacing="0" cellpadding="0" border="0">
-                                                                                    <tbody>
-                                                                                        <tr>
-                                                                                            <td class="table-space-td" valign="middle" height="16" style="height: 16px; width: 378px; background-color: #ffffff;" width="378" bgcolor="#FFFFFF" align="left">&nbsp;</td>
-                                                                                        </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table class="table-space" height="6" style="height: 6px; font-size: 0px; line-height: 0; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="6" style="height: 6px; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <table class="table-row-fixed" width="450" bgcolor="#FFFFFF" style="table-layout: fixed; background-color: #ffffff;" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-row-fixed-td" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal; padding-left: 1px; padding-right: 1px;" valign="top" align="left">
-                                                                <table class="table-col" align="left" width="448" cellspacing="0" cellpadding="0" border="0" style="table-layout: fixed;">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td class="table-col-td" width="448" style="font-family: Arial, sans-serif; line-height: 19px; color: #444444; font-size: 13px; font-weight: normal;" valign="top" align="left">
-                                                                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="table-layout: fixed;">
-                                                                                    <tbody>
-                                                                                        <tr>
-                                                                                            <td width="100%" align="center" bgcolor="#f5f5f5" style="font-family: Arial, sans-serif; line-height: 24px; color: #bbbbbb; font-size: 13px; font-weight: normal; text-align: center; padding: 9px; border-width: 1px 0px 0px; border-style: solid; border-color: #e3e3e3; background-color: #f5f5f5;" valign="top">
-                                                                                                <a href="https://example.com" style="color: #003087; text-decoration: none; background-color: transparent;">Traffic Violation System &copy; ' . date('Y') . '</a>
-                                                                                                <br>
-                                                                                                <a href="https://example.com/support" style="color: #003087; text-decoration: none; background-color: transparent;">Contact Support</a> .
-                                                                                                <a href="mailto:support@trafficviolationsystem.com" style="color: #003087; text-decoration: none; background-color: transparent;">support@trafficviolationsystem.com</a> .
-                                                                                                <a href="tel:1234567890" style="color: #003087; text-decoration: none; background-color: transparent;">(123) 456-7890</a>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <table class="table-space" height="1" style="height: 1px; font-size: 0px; line-height: 0; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="1" style="height: 1px; width: 450px; background-color: #ffffff;" width="450" bgcolor="#FFFFFF" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <table class="table-space" height="36" style="height: 36px; font-size: 0px; line-height: 0; width: 450px; background-color: #e4e6e9;" width="450" bgcolor="#E4E6E9" cellspacing="0" cellpadding="0" border="0">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td class="table-space-td" valign="middle" height="36" style="height: 36px; width: 450px; background-color: #e4e6e9;" width="450" bgcolor="#E4E6E9" align="left">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <td>
+                                <div class="header">Traffic Violation Notice</div>
+                                <div>
+                                    <b style="color: #777777;">Dear ' . htmlspecialchars($violator_name) . ',</b>
+                                    <p>We regret to inform you that a traffic violation has been recorded under your name. The complete details of the violation are provided below. Please address this matter promptly.</p>
+                                </div>
+                                <div style="margin-top: 12px;">
+                                    <b style="color: #003087;">Violation Details:</b><br>
+                                    <b>Plate Number:</b> ' . htmlspecialchars($plate_number) . '<br>
+                                    <b>Violation Type:</b> ' . htmlspecialchars($violation_type_name) . '<br>
+                                    <b>Reason:</b> ' . htmlspecialchars($reason) . '<br>
+                                    <b>Fine Amount:</b> ₱' . number_format($fine_amount, 2) . '<br>
+                                    <b>License Number:</b> ' . htmlspecialchars($license_number) . '<br>
+                                    <b>Issue Date:</b> ' . htmlspecialchars(date('F j, Y, g:i A', strtotime($issued_date))) . '
+                                </div>
+                                <div style="margin-top: 16px;">
+                                    <p>Please contact our support team for further information or to resolve this violation.</p>
+                                </div>
+                                <div class="footer">
+                                    <p>
+                                        Traffic Violation System &copy; ' . date('Y') . '<br>
+                                        <a href="https://example.com/support">Contact Support</a> | 
+                                        <a href="mailto:support@trafficviolationsystem.com">support@trafficviolationsystem.com</a> | 
+                                        <a href="tel:1234567890">(123) 456-7890</a>
+                                    </p>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -250,7 +137,7 @@ function sendViolationEmail($pdo, $violation_id) {
             </body>
             </html>
         ';
-        $mail->AltBody = "Traffic Violation Notice\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Reason: $reason\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- License Number: $license_number\n- Issue Date: " . date('F j, Y, g:i A', strtotime($issued_date)) . "\n\nFor further information or to resolve this violation, please visit: https://example.com/violations\n\nTraffic Violation System\nsupport@trafficviolationsystem.com\n(123) 456-7890";
+        $mail->AltBody = "Traffic Violation Notice\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Reason: $reason\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- License Number: $license_number\n- Issue Date: " . date('F j, Y, g:i A', strtotime($issued_date)) . "\n\nPlease contact our support team for further information or to resolve this violation.\n\nTraffic Violation System\nsupport@trafficviolationsystem.com\n(123) 456-7890";
 
         $mail->send();
 
@@ -326,9 +213,22 @@ try {
         }
     }
 
-    // Check for email status message from session (not used for Swal here, handled in manage_violations.php)
+    // Check for email status message from session
     if (isset($_SESSION['email_status'])) {
-        // Session message will be handled in manage_violations.php
+        $email_status = $_SESSION['email_status'];
+        if ($email_status['success']) {
+            $toastr_messages[] = "Swal.fire({
+                title: 'Email Sent!',
+                text: '" . addslashes($email_status['message']) . "',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'manage_violations.php';
+            });";
+        } else {
+            $toastr_messages[] = "toastr.error('" . addslashes($email_status['message']) . "');";
+        }
+        unset($_SESSION['email_status']);
     }
 
 } catch (PDOException $e) {
