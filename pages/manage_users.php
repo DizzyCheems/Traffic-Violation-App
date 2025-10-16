@@ -2,7 +2,7 @@
 session_start();
 include '../config/conn.php';
 
-// Check if user is logged in and has a valid role
+// Check if user is logged in and has a vdalid role
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'officer', 'user'])) {
     header("Location: ../login.php");
     exit;
