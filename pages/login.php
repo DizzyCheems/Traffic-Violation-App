@@ -4,7 +4,7 @@ session_start();
 // Debug: Log session start
 file_put_contents('../debug.log', "Login.php accessed: " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
 
-// Check for file existence before including
+// Check for file existence before includding
 $conn_file = '../config/conn.php';
 $header_file = '../layout/header.php';
 $navbar_file = '../layout/navbar.php';
@@ -73,7 +73,7 @@ include $header_file;
                 <div class="col-sm-6 text-black">
                     <div class="px-5 ms-xl-4">
                         <img src="../public/images/PRVN.png" alt="PRVN Logo" class="img-fluid" style="max-width: 150px; margin-bottom: 10px;">
-                        <span class="h1 fw-bold mb-0">PRVN - Violation Management System</span>
+                        <span class="h1 fw-bold mb-0">PNRVRS - Violation Management System</span>
                     </div>
 
                     <div class="d-flex align-items-center h-custom-2 px-5 ms-xl-4 mt-5 pt-5 pt-xl-0 mt-xl-n5">
