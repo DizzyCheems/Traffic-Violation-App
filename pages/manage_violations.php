@@ -208,9 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 }
 
                 // Log redirect and redirect to mail_test.php to trigger email sending
-                file_put_contents('../debug.log', "Violation created successfully, redirecting to mail_test.php?violation_id=$violation_id\n", FILE_APPEND);
+                file_put_contents('../debug.log', "Violation created successfully, redirecting to send_mail.php?violation_id=$violation_id\n", FILE_APPEND);
                 $_SESSION['create_success'] = true;
-                header("Location: mail_test.php?violation_id=$violation_id");
+                header("Location: send_mail.php?violation_id=$violation_id");
                 exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create violation.');";
