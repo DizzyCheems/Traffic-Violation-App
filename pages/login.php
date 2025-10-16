@@ -73,7 +73,7 @@ include $header_file;
                 <div class="col-sm-6 text-black">
                     <div class="px-5 ms-xl-4">
                         <img src="../public/images/PRVN.png" alt="PRVN Logo" class="img-fluid" style="max-width: 150px; margin-bottom: 10px;">
-                        <span class="h1 fw-bold mb-0">PNRVRS - Violation Management System</span>
+                            <span class="h1 fw-bold mb-0" style="font-size: 23px;;">PNRVRS - Violation Management System</span>
                     </div>
 
                     <div class="d-flex align-items-center h-custom-2 px-5 ms-xl-4 mt-5 pt-5 pt-xl-0 mt-xl-n5">
