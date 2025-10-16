@@ -411,6 +411,11 @@ try {
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
+
+<!--        <div class="px-3 py-2">
+            <img src="../public/images/PRVN.png" alt="PRVN Logo" class="img-fluid" style="max-width: 150px; margin-bottom: 10px;">
+        </div>-->
+
         <!-- Toggle button for offcanvas sidebar (mobile only) -->
         <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <i class="fas fa-bars"></i> Menu
@@ -615,7 +620,7 @@ try {
                                                                         <input type="email" class="form-control" name="email" id="email_<?php echo $violation['id']; ?>" value="<?php echo htmlspecialchars($user_contact['email'] ?: ''); ?>">
                                                                     </div>
                                                                     <div class="col-md-6 mb-3">
-                                                                        <label for="plate_number_<?php echo $violation['id']; ?>" class="form-label">License Plate</label>
+                                                                        <label for="plate_number_<?php echo $violation['id']; ?>" class="form-label">Plate Number</label>
                                                                         <input type="text" class="form-control" name="plate_number" id="plate_number_<?php echo $violation['id']; ?>" required value="<?php echo htmlspecialchars($violation['plate_number']); ?>">
                                                                         <div class="invalid-feedback">Please enter a valid license plate.</div>
                                                                     </div>
@@ -768,7 +773,7 @@ try {
                                                 <div class="row">
                                                     <div class="col-md-12 mb-3">
                                                         <label for="reason" class="form-label">Reason</label>
-                                                        <input type="text" class="form-control" name="reason" id="reason" required>
+                                                        <input type="text" class="form-control" name="reason" id="reason" >
                                                         <div class="invalid-feedback">Please enter a valid reason.</div>
                                                     </div>
                                                 </div>

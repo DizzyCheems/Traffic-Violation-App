@@ -3993,3 +3993,34 @@ Query result: Array
     [email] => spiralsmoke903@gmail.com
 )
 
+Login.php accessed: 2025-10-16 12:30:25
+Login.php accessed: 2025-10-16 12:32:34
+Login.php accessed: 2025-10-16 12:32:35
+Login.php accessed: 2025-10-16 12:32:36
+Login.php accessed: 2025-10-16 12:37:26
+Login.php accessed: 2025-10-16 12:37:34
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
