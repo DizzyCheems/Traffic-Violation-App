@@ -104,7 +104,7 @@ include $header_file;
                     </div>
                 </div>
                 <div class="col-sm-6 px-0 d-none d-sm-block">
-                    <img src="../public/images/tf.png" alt="Login image" class="w-100 vh-100 login-image">
+                    <img src="../public/images/tf.jpg" alt="Login image" class="w-100 vh-100 login-image">
                 </div>
             </div>
         </div>

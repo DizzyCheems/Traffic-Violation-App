@@ -4024,3 +4024,25 @@ Session Data: Array
     [role] => officer
 )
 
+Login.php accessed: 2025-10-16 14:03:41
+Login.php accessed: 2025-10-16 14:03:43
+Login.php accessed: 2025-10-16 14:03:44
+Login.php accessed: 2025-10-16 14:03:44
+Login.php accessed: 2025-10-16 14:03:55
+Login.php accessed: 2025-10-16 14:03:57
+Login.php accessed: 2025-10-16 14:03:57
+Login.php accessed: 2025-10-16 14:04:29
+Login.php accessed: 2025-10-16 14:04:36
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+

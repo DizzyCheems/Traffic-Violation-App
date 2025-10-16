@@ -679,7 +679,7 @@ try {
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-6 mb-3">
-                                                                        <label for="or_number_<?php echo $violation['id']; ?>" class="form-label">OR Number</label>
+                                                                        <label for="or_number_<?php echo $violation['id']; ?>" class="form-label">CR Number</label>
                                                                         <input type="text" class="form-control" name="or_number" id="or_number_<?php echo $violation['id']; ?>" value="<?php echo htmlspecialchars($violation['or_number'] ?: ''); ?>">
                                                                     </div>
                                                                 </div>
