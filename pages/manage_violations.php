@@ -412,10 +412,6 @@ try {
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
 
-<!--        <div class="px-3 py-2">
-            <img src="../public/images/PRVN.png" alt="PRVN Logo" class="img-fluid" style="max-width: 150px; margin-bottom: 10px;">
-        </div>-->
-
         <!-- Toggle button for offcanvas sidebar (mobile only) -->
         <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <i class="fas fa-bars"></i> Menu
@@ -499,6 +495,24 @@ try {
                     <h1 class="h2 text-primary">Manage Violations - <?php echo htmlspecialchars($officer['full_name']); ?></h1>
                     <div>
                         <a href="../pages/officer_dashboard.php" class="btn btn-outline-primary">Back to Dashboard</a>
+                    </div>
+                </div>
+
+                <!-- Plate Number Search -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Search Violations by Plate Number</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" id="searchPlate" class="form-control" placeholder="Enter plate number (e.g. ABC123)" />
+                            </div>
+                            <div class="col-md-4">
+                                <button id="searchBtn" class="btn btn-primary w-100">Search</button>
+                            </div>
+                        </div>
+                        <div id="searchResult" class="mt-3"></div>
                     </div>
                 </div>
 
@@ -859,38 +873,68 @@ try {
             <?php echo $msg; ?>
         <?php endforeach; ?>
 
-        // Function to perform OCR on image and populate plate number
-        function performOCR(file, inputId) {
-            if (!file) {
-                console.log('No file selected for OCR');
+        // Search Violations by Plate Number
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const plate = document.getElementById('searchPlate').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('searchResult');
+            if (!plate) {
+                resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a plate number.</div>';
                 return;
             }
+
+            fetch('search_violations_by_plate.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'plate_number=' + encodeURIComponent(plate)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.types.length > 0) {
+                    let typesList = data.types.map(t => `<li class="list-group-item">${t.violation_type} (₱${parseFloat(t.fine_amount).toFixed(2)})</li>`).join('');
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>${data.count} violation(s) found for plate <strong>${plate}</strong></strong>
+                            <ul class="list-group mt-2">
+                                ${typesList}
+                            </ul>
+                        </div>`;
+                } else {
+                    resultDiv.innerHTML = '<div class="alert alert-info">No violations found for plate <strong>' + plate + '</strong>.</div>';
+                }
+            })
+            .catch(err => {
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
+            });
+        });
+
+        // Allow pressing Enter in search input
+        document.getElementById('searchPlate').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // Function to perform OCR on image and populate plate number
+        function performOCR(file, inputId) {
+            if (!file) return;
             const ocrStatus = document.getElementById('ocr_status');
             ocrStatus.textContent = 'Processing image...';
-            Tesseract.recognize(
-                file,
-                'eng',
-                {
-                    logger: m => console.log('OCR Progress:', m)
-                }
-            ).then(({ data: { text } }) => {
-                const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                document.getElementById(inputId).value = cleanedText;
-                ocrStatus.textContent = 'Text extracted successfully!';
-                console.log('OCR Result:', cleanedText);
-                // Trigger plate number lookup after OCR
-                fetchUserByPlateNumber(cleanedText);
-            }).catch(error => {
-                ocrStatus.textContent = 'Error extracting text from image.';
-                console.error('OCR Error:', error);
-            });
+            Tesseract.recognize(file, 'eng', { logger: m => console.log(m) })
+                .then(({ data: { text } }) => {
+                    const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                    document.getElementById(inputId).value = cleanedText;
+                    ocrStatus.textContent = 'Text extracted successfully!';
+                    fetchUserByPlateNumber(cleanedText);
+                })
+                .catch(error => {
+                    ocrStatus.textContent = 'Error extracting text.';
+                    console.error('OCR Error:', error);
+                });
         }
 
         // Function to fetch user details by plate number
         function fetchUserByPlateNumber(plateNumber) {
             if (!plateNumber) {
-                console.log('No plate number provided');
-                // Clear fields if plate number is empty
                 document.getElementById('violator_name').value = '';
                 document.getElementById('contact_number').value = '';
                 document.getElementById('email').value = '';
@@ -899,23 +943,13 @@ try {
                 document.getElementById('license_number').value = '';
                 return;
             }
-            console.log('Fetching user data for plate:', plateNumber);
             fetch('get_user_by_plate.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'plate_number=' + encodeURIComponent(plateNumber)
             })
-            .then(response => {
-                console.log('Fetch response status:', response.status);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Fetch response data:', data);
                 if (data.success) {
                     document.getElementById('violator_name').value = data.violator_name || '';
                     document.getElementById('contact_number').value = data.contact_number || '';
@@ -923,139 +957,40 @@ try {
                     document.getElementById('user_id').value = data.user_id || '';
                     document.getElementById('has_license').checked = data.has_license == 1;
                     document.getElementById('license_number').value = data.license_number || '';
-                    toastr.success('User details populated successfully.');
+                    toastr.success('User details populated.');
                 } else {
-                    // Clear fields if no data found
                     document.getElementById('violator_name').value = '';
                     document.getElementById('contact_number').value = '';
                     document.getElementById('email').value = '';
                     document.getElementById('user_id').value = '';
                     document.getElementById('has_license').checked = false;
                     document.getElementById('license_number').value = '';
-                    console.log('No user data found:', data.message);
-                    toastr.info(data.message || 'No previous violation found for this plate number.');
+                    toastr.info(data.message || 'No previous record.');
                 }
             })
             .catch(error => {
-                console.error('Error fetching user by plate:', error);
-                toastr.error('Error fetching user details: ' + error.message);
+                console.error('Error:', error);
+                toastr.error('Failed to fetch user.');
             });
         }
 
-        // Client-side validation for Create Violation Form
-        document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-            console.log('Create violation form submission attempted');
-            const violatorName = document.getElementById('violator_name').value.trim();
-            const contactNumber = document.getElementById('contact_number').value.trim();
-            const plateNumber = document.getElementById('plate_number').value.trim();
-            const reason = document.getElementById('reason').value.trim();
-            const violationTypeId = document.getElementById('violation_type_id').value;
-
-            let isValid = true;
-
-            document.getElementById('violator_name').classList.remove('is-invalid');
-            document.getElementById('contact_number').classList.remove('is-invalid');
-            document.getElementById('plate_number').classList.remove('is-invalid');
-            document.getElementById('reason').classList.remove('is-invalid');
-            document.getElementById('violation_type_id').classList.remove('is-invalid');
-
-            if (!violatorName) {
-                document.getElementById('violator_name').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!contactNumber) {
-                document.getElementById('contact_number').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!plateNumber) {
-                document.getElementById('plate_number').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!reason) {
-                document.getElementById('reason').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!violationTypeId) {
-                document.getElementById('violation_type_id').classList.add('is-invalid');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                console.log('Client-side validation failed for create violation');
-                e.preventDefault();
-                return;
-            }
-
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to create this violation?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, create it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Create violation form submission confirmed');
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: new FormData(this)
-                    }).then(response => {
-                        if (response.ok) {
-                            Swal.fire({
-                                title: 'Created!',
-                                text: 'Violation has been created successfully.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Failed to create violation.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    }).catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'An error occurred while creating the violation.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    });
-                } else {
-                    console.log('Create violation form submission canceled');
-                }
-            });
-        });
-
-        // Handle image upload for OCR in Create Violation Form
+        // OCR on image upload
         document.getElementById('plate_image').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) {
-                console.log('Image selected for OCR:', file.name);
-                performOCR(file, 'plate_number');
-            }
+            if (file) performOCR(file, 'plate_number');
         });
 
-        // Handle plate number input for auto-population
+        // Auto-fetch on plate input
         document.getElementById('plate_number').addEventListener('input', function() {
-            const plateNumber = this.value.trim();
-            console.log('Plate number input changed:', plateNumber);
-            fetchUserByPlateNumber(plateNumber);
+            fetchUserByPlateNumber(this.value.trim());
         });
 
-        // Handle image upload for OCR in Edit Violation Forms
+        // Edit form OCR
         document.querySelectorAll('input[name="plate_image"]').forEach(input => {
             input.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
                     const inputId = this.id.replace('plate_image_', 'plate_number_');
-                    console.log('Image selected for OCR in edit form:', file.name);
                     performOCR(file, inputId);
                 }
             });
