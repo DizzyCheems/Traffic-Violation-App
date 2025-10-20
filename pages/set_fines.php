@@ -77,7 +77,7 @@ try {
                                         <th>Violation Type</th>
                                         <th>Fine Amount</th>
                                         <th>Description</th>
-                                        <th>Actions</th>
+                                        <!--<th>Actions</th>-->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -90,9 +90,9 @@ try {
                                                 <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
                                                 <td><?php echo '₱' . number_format($type['fine_amount'], 2); ?></td>
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
-                                                <td>
+                                                <!--<td>
                                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editFineModal<?php echo $type['id']; ?>">Edit Fine</button>
-                                                </td>
+                                                </td>-->
                                             </tr>
                                             <!-- Edit Fine Modal -->
                                             <div class="modal fade" id="editFineModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="editFineModalLabel<?php echo $type['id']; ?>" aria-hidden="true">

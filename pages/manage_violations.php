@@ -526,7 +526,7 @@ try {
                                         <th>License</th>
                                         <th>Impounded</th>
                                         <th>Paid</th>
-                                        <th>OR Number</th>
+                                        <th>CR Number</th>
                                         <th>Date</th>
                                         <th>Status</th>
                                         <th>Notes</th>
@@ -806,7 +806,7 @@ try {
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
-                                                    <label for="or_number" class="form-label">OR Number</label>
+                                                    <label for="or_number" class="form-label">CR Number</label>
                                                     <input type="text" class="form-control" name="or_number" id="or_number">
                                                 </div>
                                                 <div class="col-md-6 mb-3">
