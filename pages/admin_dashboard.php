@@ -638,7 +638,7 @@ try {
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button>
+                            <!--<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button>-->
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
@@ -648,7 +648,7 @@ try {
                                         <th>Violation Type</th>
                                         <th>Fine Amount</th>
                                         <th>Description</th>
-                                        <th>Actions</th>
+                                        <!--<th>Actions</th>-->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -661,14 +661,14 @@ try {
                                                 <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
                                                 <td>₱<?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
-                                                <td>
+                                                <!--<td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
                                                     <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteViolationTypeModal<?php echo $type['id']; ?>">Delete</button>
                                                     <form method="POST" style="display: none;" class="delete-violation-type-form" id="deleteViolationTypeForm<?php echo $type['id']; ?>">
                                                         <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
                                                         <input type="hidden" name="delete_violation_type" value="1">
                                                     </form>
-                                                </td>
+                                                </td>-->
                                             </tr>
                                             <!-- Edit Violation Type Modal -->
                                             <div class="modal fade" id="editViolationTypeModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="editViolationTypeModalLabel<?php echo $type['id']; ?>" aria-hidden="true">

@@ -858,8 +858,6 @@ try {
                                                 </div>
                                                 <div class="col-md-6 mb-3">
                                                     <div class="form-check">
-                                                       露
-
                                                         <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
                                                         <label class="form-check-label" for="is_paid">Is Paid</label>
                                                     </div>
@@ -1167,23 +1165,88 @@ document.addEventListener('DOMContentLoaded', function() {
 
     clearHistoryAndResetTables();
 
-    function performOCR(file, inputId) {
-        const ocrStatus = document.getElementById('ocr_status');
-        ocrStatus.textContent = 'Processing image...';
-        Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
-        .then(({ data: { text } }) => {
-            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-            const input = document.getElementById(inputId);
-            input.value = cleanedText;
-            ocrStatus.textContent = `Plate detected: ${cleanedText}`;
+function performOCR(file, inputId) {
+    const ocrStatus = document.getElementById('ocr_status');
+    ocrStatus.textContent = 'Processing image...';
+    
+    Tesseract.recognize(file, 'eng', { 
+        logger: m => console.log('OCR Progress:', m) 
+    })
+    .then(({ data: { text } }) => {
+        console.log('Raw OCR text:', text); // Debug log
+        
+        // NEW: Smart Plate Number Extraction
+        const plateNumber = extractPlateNumber(text);
+        
+        const input = document.getElementById(inputId);
+        input.value = plateNumber;
+        ocrStatus.textContent = `Plate detected: ${plateNumber || 'None found'}`;
+        
+        if (plateNumber) {
             input.dispatchEvent(new Event('input'));
-            fetchUserByPlateNumber(cleanedText);
-        }).catch(error => {
-            ocrStatus.textContent = 'Error extracting text from image.';
-            console.error('OCR Error:', error);
-        });
-    }
+            fetchUserByPlateNumber(plateNumber);
+        }
+    })
+    .catch(error => {
+        ocrStatus.textContent = 'Error extracting text from image.';
+        console.error('OCR Error:', error);
+    });
+}
 
+// NEW: Smart Plate Number Extraction Function
+function extractPlateNumber(ocrText) {
+    // Clean and split the text into lines and words
+    const lines = ocrText.split('\n').map(line => 
+        line.trim().replace(/[^A-Za-z0-9\s]/g, '').toUpperCase()
+    ).filter(line => line.length > 0);
+    
+    console.log('Processed lines:', lines); // Debug log
+    
+    let bestPlate = '';
+    let bestScore = 0;
+    
+    // Common plate patterns (3 letters + 3 numbers)
+    const platePattern = /^[A-Z]{3}[0-9]{3}$/;
+    
+    // Check each line for plate pattern
+    for (let line of lines) {
+        // Exact match for ABC123 pattern
+        if (platePattern.test(line)) {
+            return line; // Perfect match found!
+        }
+        
+        // Score words based on plate-like characteristics
+        const words = line.split(/\s+/);
+        for (let word of words) {
+            if (word.length >= 6 && word.length <= 8) {
+                let score = 0;
+                
+                // +3 for exact 3 letters + 3 numbers pattern
+                if (/^[A-Z]{3}[0-9]{3}$/.test(word)) score += 10;
+                
+                // +2 for mixed letters/numbers (6-8 chars)
+                const letterCount = (word.match(/[A-Z]/g) || []).length;
+                const numberCount = (word.match(/[0-9]/g) || []).length;
+                if (letterCount >= 3 && numberCount >= 3) score += 8;
+                
+                // +1 for all uppercase alphanumeric
+                if (/^[A-Z0-9]+$/.test(word)) score += 2;
+                
+                // Block common brand words
+                const blockedWords = ['YAMAHA', 'HONDA', 'TOYOTA', 'SUZUKI', 'SWAG', 'BMW', 'MERCEDES', 'AUDI', 'FORD', 'CHEVROLET'];
+                if (blockedWords.includes(word)) score = 0;
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestPlate = word;
+                }
+            }
+        }
+    }
+    
+    // If no perfect match, return best scored candidate
+    return bestScore >= 5 ? bestPlate : '';
+}
     function fetchUserByPlateNumber(plateNumber) {
         if (!plateNumber) return;
         fetch('get_user_by_plate.php', {

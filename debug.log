@@ -8581,3 +8581,69 @@ Session Data at start: Array
     [role] => officer
 )
 
+Session Data: Array
+(
+    [last_activity] => 1761032556
+    [User] => 3849
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [last_activity] => 1761032556
+    [User] => 3849
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [last_activity] => 1761032556
+    [User] => 3849
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [last_activity] => 1761032556
+    [User] => 3849
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+Session Data: Array
+(
+    [last_activity] => 1761032556
+    [User] => 3849
+    [user_role] => admin
+    [backup_started] => 1
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-21 11:14:50
+Login.php accessed: 2025-10-21 11:14:58
+Login successful for user_id: 1, role: admin
