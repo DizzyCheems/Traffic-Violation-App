@@ -15,21 +15,12 @@ file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . 
 // Check session variables
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || 
     !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
-    
     $reason = "Redirecting to login.php. ";
-    
-    if (!isset($_SESSION['user_id'])) {
-        $reason .= "user_id not set. ";
-    }
-    
-    if (!isset($_SESSION['role'])) {
-        $reason .= "role not set. ";
-    }
-    
+    if (!isset($_SESSION['user_id'])) $reason .= "user_id not set. ";
+    if (!isset($_SESSION['role'])) $reason .= "role not set. ";
     if (isset($_SESSION['role']) && !in_array(strtolower(trim($_SESSION['role'])), ['officer', 'admin'])) {
         $reason .= "role is '" . $_SESSION['role'] . "' instead of 'officer' or 'admin'.";
     }
-
     file_put_contents('../debug.log', $reason . "\n", FILE_APPEND);
     header("Location: ../login.php");
     exit;
@@ -44,7 +35,7 @@ if (!$pdo) {
     file_put_contents('../debug.log', "Database connection failed.\n", FILE_APPEND);
 }
 
-// Check for success messages in session
+// Success messages handling (unchanged)
 if (isset($_SESSION['create_success']) && $_SESSION['create_success']) {
     $toastr_messages[] = "Swal.fire({
         title: 'Created!',
@@ -128,7 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                     file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
                     $user_id = null;
                 } else {
-                    // Use email from users table if not provided in form
                     $email = $email ?: $existing_user['email'];
                 }
             }
@@ -140,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($existing_user) {
                     $user_id = $existing_user['id'];
-                    // Update existing user's contact number and email
                     $stmt = $pdo->prepare("UPDATE users SET contact_number = ?, email = ? WHERE id = ?");
                     $success = $stmt->execute([$contact_number, $email, $user_id]);
                     if (!$success) {
@@ -148,12 +137,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                         file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
                     }
                 } else {
-                    // Create new user
                     $username = substr(strtolower(str_replace(' ', '_', $violator_name)), 0, 50);
                     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE LOWER(username) = LOWER(?)");
                     $stmt->execute([$username]);
                     if ($stmt->fetchColumn() > 0) {
-                        $username .= '_' . rand(1000, 9999); // Append random number if username exists
+                        $username .= '_' . rand(1000, 9999);
                     }
                     $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id, contact_number, email) VALUES (?, 'x', ?, 'user', ?, ?, ?)");
                     $success = $stmt->execute([$username, $violator_name, $_SESSION['user_id'], $contact_number, $email]);
@@ -168,14 +156,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             }
 
             // Calculate offense_freq
-            $offense_freq = 1; // Default to 1 for the first offense
+            $offense_freq = 1;
             if ($user_id) {
                 $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE user_id = ? AND officer_id = ?");
                 $stmt->execute([$user_id, $_SESSION['user_id']]);
                 $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
                 file_put_contents('../debug.log', "Offense Frequency for user_id='$user_id': $offense_freq\n", FILE_APPEND);
             } else {
-                // Fallback: count violations by violator_name if user_id is not set
                 $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE LOWER(violator_name) = LOWER(?) AND officer_id = ?");
                 $stmt->execute([$violator_name, $_SESSION['user_id']]);
                 $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
@@ -183,31 +170,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             }
 
             // Fetch violation type details for email
-            $stmt = $pdo->prepare("SELECT violation_type, fine_amount FROM types WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT violation_type, fine_amount, base_offense FROM types WHERE id = ?");
             $stmt->execute([$violation_type_id]);
             $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
             $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
             $fine_amount = $violation_type['fine_amount'] ?? 0;
+            $base_offense = $violation_type['base_offense'] ?? 'N/A';
 
-            // Insert violation with user_id, offense_freq, plate_image, and email_sent = FALSE
-            $stmt = $pdo->prepare("INSERT INTO violations (officer_id, user_id, violator_name, plate_number, reason, violation_type_id, has_license, license_number, is_impounded, is_paid, or_number, issued_date, status, notes, offense_freq, plate_image, email_sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)");
-            $params = [$_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes, $offense_freq, $plate_image];
+            // Insert violation
+            $stmt = $pdo->prepare("
+                INSERT INTO violations (
+                    officer_id, user_id, violator_name, plate_number, reason, violation_type_id, 
+                    has_license, license_number, is_impounded, is_paid, or_number, issued_date, 
+                    status, notes, offense_freq, plate_image, email_sent
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
+            ");
+            $params = [
+                $_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id,
+                $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date,
+                $status, $notes, $offense_freq, $plate_image
+            ];
             file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
             $success = $stmt->execute($params);
             if ($success) {
-                // Store the new violation ID
                 $violation_id = $pdo->lastInsertId();
-
-                // Update officer earnings
                 $week_start = date('Y-m-d', strtotime('monday this week'));
-                $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, week_start, total_fines) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
+                $stmt = $pdo->prepare("
+                    INSERT INTO officer_earnings (officer_id, week_start, total_fines) 
+                    VALUES (?, ?, ?) 
+                    ON DUPLICATE KEY UPDATE total_fines = total_fines + ?
+                ");
                 $success_earnings = $stmt->execute([$_SESSION['user_id'], $week_start, $fine_amount, $fine_amount]);
                 if (!$success_earnings) {
                     $toastr_messages[] = "toastr.error('Failed to update officer earnings.');";
                     file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
                 }
-
-                // Log redirect and redirect to mail_test.php to trigger email sending
                 file_put_contents('../debug.log', "Violation created successfully, redirecting to send_mail.php?violation_id=$violation_id\n", FILE_APPEND);
                 $_SESSION['create_success'] = true;
                 header("Location: send_mail.php?violation_id=$violation_id");
@@ -269,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $toastr_messages[] = "toastr.error('Violation not found or you lack permission.');";
                 file_put_contents('../debug.log', "Edit Violation Failed: Violation ID='$id' not found or unauthorized.\n", FILE_APPEND);
             } else {
-                // Update user contact information if user_id exists and is supervised by the officer
+                // Update user contact information
                 if ($violation['user_id']) {
                     $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ? AND officer_id = ?");
                     $stmt->execute([$violation['user_id'], $_SESSION['user_id']]);
@@ -286,14 +283,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                     }
                 }
 
-                // If a new image is uploaded, delete the old one
+                // Delete old image if new one is uploaded
                 if ($plate_image && $violation['plate_image'] && file_exists($violation['plate_image'])) {
                     unlink($violation['plate_image']);
                 }
 
                 // Prepare update query
-                $query = "UPDATE violations SET violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, or_number = ?, issued_date = ?, status = ?, notes = ?";
-                $params = [$violator_name, $plate_number, $reason, $violation_type_id, $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date, $status, $notes];
+                $query = "
+                    UPDATE violations SET 
+                    violator_name = ?, plate_number = ?, reason = ?, violation_type_id = ?, 
+                    has_license = ?, license_number = ?, is_impounded = ?, is_paid = ?, 
+                    or_number = ?, issued_date = ?, status = ?, notes = ?
+                ";
+                $params = [
+                    $violator_name, $plate_number, $reason, $violation_type_id,
+                    $has_license, $license_number, $is_impounded, $is_paid,
+                    $or_number, $issued_date, $status, $notes
+                ];
                 if ($plate_image) {
                     $query .= ", plate_image = ?";
                     $params[] = $plate_image;
@@ -306,12 +312,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $success = $stmt->execute($params);
                 if ($success) {
                     $_SESSION['edit_success'] = true;
-                    // Update officer earnings if violation type changed
                     $week_start = date('Y-m-d', strtotime('monday this week'));
                     $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
                     $stmt->execute([$violation_type_id]);
                     $fine = $stmt->fetch(PDO::FETCH_ASSOC)['fine_amount'] ?? 0;
-                    $stmt = $pdo->prepare("INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_fines = total_fines + ?");
+                    $stmt = $pdo->prepare("
+                        INSERT INTO officer_earnings (officer_id, plate_number, week_start, total_fines) 
+                        VALUES (?, ?, ?, ?) 
+                        ON DUPLICATE KEY UPDATE total_fines = total_fines + ?
+                    ");
                     $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
                 } else {
                     $toastr_messages[] = "toastr.error('Failed to update violation or you lack permission.');";
@@ -325,7 +334,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
     }
 }
 
-// Handle delete violation
+// Handle delete violation (unchanged)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) {
     try {
         $id = trim($_POST['id'] ?? '');
@@ -334,16 +343,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) 
         if (empty($id)) {
             $toastr_messages[] = "toastr.error('Violation ID is required.');";
         } else {
-            // Verify violation belongs to the officer
             $stmt = $pdo->prepare("SELECT plate_image FROM violations WHERE id = ? AND officer_id = ?");
             $stmt->execute([$id, $_SESSION['user_id']]);
             $violation = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($violation) {
-                // Delete associated image
                 if ($violation['plate_image'] && file_exists($violation['plate_image'])) {
                     unlink($violation['plate_image']);
                 }
-
                 $stmt = $pdo->prepare("DELETE FROM violations WHERE id = ? AND officer_id = ?");
                 $params = [$id, $_SESSION['user_id']];
                 $success = $stmt->execute($params);
@@ -380,7 +386,7 @@ try {
 
 // Fetch violation types
 try {
-    $stmt = $pdo->query("SELECT id, violation_type, fine_amount FROM types ORDER BY violation_type");
+    $stmt = $pdo->query("SELECT id, violation_type, fine_amount, base_offense FROM types ORDER BY violation_type");
     $types = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching violation types: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
@@ -391,7 +397,10 @@ try {
 // Fetch all violations issued by the officer
 try {
     $stmt = $pdo->prepare("
-        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, v.or_number, v.issued_date, v.status, v.notes, v.offense_freq, v.plate_image, t.violation_type, t.fine_amount 
+        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, 
+               v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, 
+               v.or_number, v.issued_date, v.status, v.notes, v.offense_freq, v.plate_image, 
+               t.violation_type, t.fine_amount, t.base_offense 
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
         WHERE v.officer_id = ? 
@@ -406,46 +415,33 @@ try {
 }
 ?>
 
-<style>
-    <style>
-    #violation_type_id option:disabled {
-        color: #ccc !important;
-        font-style: italic;
-    }
-</style>
-
 <!DOCTYPE html>
 <html lang="en">
 <?php include '../layout/header.php'; ?>
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
-
-<!--        <div class="px-3 py-2">
-            <img src="../public/images/PRVN.png" alt="PRVN Logo" class="img-fluid" style="max-width: 150px; margin-bottom: 10px;">
-        </div>-->
-
         <!-- Toggle button for offcanvas sidebar (mobile only) -->
         <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <i class="fas fa-bars"></i> Menu
         </button>
         <div class="row">
-            <!-- Sidebar (visible on desktop, offcanvas on mobile) -->
+            <!-- Sidebar (unchanged) -->
             <nav class="col-lg-2 d-none d-lg-block bg-light sidebar">
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-<?php if (isset($_SESSION['role']) && strtolower(trim($_SESSION['role'])) === 'admin'): ?>
-    <a class="nav-link" href="../pages/admin_dashboard.php">
-        <i class="fas fa-tachometer-alt me-2"></i>
-        Home
-    </a>
-<?php else: ?>
-    <a class="nav-link" href="../pages/officer_dashboard.php">
-        <i class="fas fa-tachometer-alt me-2"></i>
-        Officer Dashboard
-    </a>
-<?php endif; ?>
+                            <?php if (isset($_SESSION['role']) && strtolower(trim($_SESSION['role'])) === 'admin'): ?>
+                                <a class="nav-link" href="../pages/admin_dashboard.php">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    Home
+                                </a>
+                            <?php else: ?>
+                                <a class="nav-link" href="../pages/officer_dashboard.php">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    Officer Dashboard
+                                </a>
+                            <?php endif; ?>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" href="../pages/manage_violations.php">
@@ -479,18 +475,6 @@ try {
                             <a class="nav-link active" href="../pages/manage_violations.php">
                                 <i class="fas fa-list-alt me-2"></i>
                                 Manage Violations
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_users.php">
-                                <i class="fas fa-users me-2"></i>
-                                Manage Users
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../index.php">
-                                <i class="fas fa-home me-2"></i>
-                                Home
                             </a>
                         </li>
                         <li class="nav-item">
@@ -530,6 +514,7 @@ try {
                                         <th>Plate</th>
                                         <th>Plate Image</th>
                                         <th>Type</th>
+                                        <th>Base Offense</th>
                                         <th>Fine</th>
                                         <th>Reason</th>
                                         <th>License</th>
@@ -545,11 +530,10 @@ try {
                                 </thead>
                                 <tbody>
                                     <?php if (empty($violations)): ?>
-                                        <tr><td colspan="17" class="text-center text-muted">No violations found</td></tr>
+                                        <tr><td colspan="18" class="text-center text-muted">No violations found</td></tr>
                                     <?php else: ?>
                                         <?php foreach ($violations as $violation): ?>
                                             <?php
-                                                // Fetch user contact info for edit modal
                                                 $user_contact = ['contact_number' => '', 'email' => ''];
                                                 if ($violation['user_id']) {
                                                     $stmt = $pdo->prepare("SELECT contact_number, email FROM users WHERE id = ? AND officer_id = ?");
@@ -572,6 +556,7 @@ try {
                                                     <?php endif; ?>
                                                 </td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
+                                                <td><?php echo htmlspecialchars($violation['base_offense'] ?: 'N/A'); ?></td>
                                                 <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['reason']); ?></td>
                                                 <td><?php echo $violation['has_license'] ? htmlspecialchars($violation['license_number'] ?: 'Yes') : 'No'; ?></td>
@@ -644,15 +629,16 @@ try {
                                                                     </div>
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="violation_type_id_<?php echo $violation['id']; ?>" class="form-label">Violation Type</label>
-<select class="form-select" name="violation_type_id" id="violation_type_id" required>
-    <option value="" disabled selected>Select</option>
-    <?php foreach ($types as $type): ?>
-        <option value="<?php echo htmlspecialchars($type['id']); ?>" 
-                data-original-text="<?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)">
-            <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
-        </option>
-    <?php endforeach; ?>
-</select>
+                                                                        <select class="form-select" name="violation_type_id" id="violation_type_id_<?php echo $violation['id']; ?>" required>
+                                                                            <option value="" disabled>Select</option>
+                                                                            <?php foreach ($types as $type): ?>
+                                                                                <option value="<?php echo htmlspecialchars($type['id']); ?>" 
+                                                                                        <?php echo $violation['violation_type_id'] == $type['id'] ? 'selected' : ''; ?>
+                                                                                        data-original-text="<?php echo htmlspecialchars($type['violation_type'] . ' (' . ($type['base_offense'] ?: 'N/A') . ') - ₱' . number_format($type['fine_amount'], 2)); ?>">
+                                                                                    <?php echo htmlspecialchars($type['violation_type'] . ' (' . ($type['base_offense'] ?: 'N/A') . ') - ₱' . number_format($type['fine_amount'], 2)); ?>
+                                                                                </option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
                                                                         <div class="invalid-feedback">Please select a violation type.</div>
                                                                     </div>
                                                                 </div>
@@ -725,488 +711,452 @@ try {
                     </div>
                 </div>
 
-<!-- Create Violation Modal -->
-<div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data" action="create_violation.php">
-                    <input type="hidden" name="create_violation" value="1">
-                    <input type="hidden" name="user_id" id="user_id">
-                    <input type="hidden" name="violation_type_id" id="selected_violation_type_id">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="violator_name" class="form-label">Violator Name</label>
-                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
-                                <div class="invalid-feedback">Please enter a valid violator name.</div>
+                <!-- Create Violation Modal -->
+                <div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="mb-3">
-                                <label for="contact_number" class="form-label">Contact Number</label>
-                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
-                                <div class="invalid-feedback">Please enter a valid contact number.</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email (Optional)</label>
-                                <input type="email" class="form-control" name="email" id="email">
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
-                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
-                                    <div id="ocr_status" class="form-text"></div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="plate_number" class="form-label">License Plate</label>
-                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required>
-                                    <div class="invalid-feedback">Please enter a valid license plate.</div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="reason" class="form-label">Reason</label>
-                                    <input type="text" class="form-control" name="reason" id="reason" required>
-                                    <div class="invalid-feedback">Please enter a valid reason.</div>
-                                </div>
-                            </div>
-                            <!-- Selected Violation Display -->
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <div id="selectedViolationDisplay" class="alert alert-info d-none" role="alert">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        <strong>Selected Violation:</strong> <span id="selectedViolationText"></span>
+                            <div class="modal-body">
+                                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
+                                    <input type="hidden" name="create_violation" value="1">
+                                    <input type="hidden" name="user_id" id="user_id">
+                                    <input type="hidden" name="selected_violation_type_id" id="selected_violation_type_id">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="violator_name" class="form-label">Violator Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
+                                                <div class="invalid-feedback">Please enter violator name.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
+                                                <div class="invalid-feedback">Please enter contact number.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email (Optional)</label>
+                                                <input type="email" class="form-control" name="email" id="email">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
+                                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
+                                                    <div id="ocr_status" class="form-text"></div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required>
+                                                    <div class="invalid-feedback">Please enter plate number.</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="reason" id="reason" required>
+                                                    <div class="invalid-feedback">Please enter reason.</div>
+                                                </div>
+                                            </div>
+                                            <!-- Selected Violation Display -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <div id="selectedViolationDisplay" class="alert alert-success d-none" role="alert">
+                                                        <i class="fas fa-check-circle me-2"></i>
+                                                        <strong>Selected:</strong> <span id="selectedViolationText"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Violation Type Selection Table -->
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <h6>Available Violation Types</h6>
+                                                    <div id="violationTypeTable" class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Select</th>
+                                                                    <th>Violation Type</th>
+                                                                    <th>Base Offense</th>
+                                                                    <th>Fine Amount</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="violationTypeBody">
+                                                                <tr>
+                                                                    <td colspan="4" class="text-center">Enter a plate number to view available violation types</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Violation History Table -->
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <h6>Violation History</h6>
+                                                    <div id="violationHistoryTable" class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Violation Type</th>
+                                                                    <th>Base Offense</th>
+                                                                    <th>Fine Amount</th>
+                                                                    <th>Issued Date</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="violationHistoryBody">
+                                                                <tr>
+                                                                    <td colspan="5" class="text-center">Enter a plate number to view violation history</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Rest of the form fields -->
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
+                                                        <label class="form-check-label" for="has_license">Has License</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="license_number" class="form-label">License Number</label>
+                                                    <input type="text" class="form-control" name="license_number" id="license_number">
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
+                                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="form-check">
+                                                       露
+
+                                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
+                                                        <label class="form-check-label" for="is_paid">Is Paid</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="or_number" class="form-label">CR Number</label>
+                                                    <input type="text" class="form-control" name="or_number" id="or_number">
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="issued_date" class="form-label">Issued Date</label>
+                                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="status" class="form-label">Status</label>
+                                                    <select class="form-select" name="status" id="status">
+                                                        <option value="Pending" selected>Pending</option>
+                                                        <option value="Resolved">Resolved</option>
+                                                        <option value="Disputed">Disputed</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="notes" class="form-label">Notes</label>
+                                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <!-- Violation Type Selection Table -->
-                            <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <h6>Available Violation Types</h6>
-                                    <div id="violationTypeTable" class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>Select</th>
-                                                    <th>Violation Type</th>
-                                                    <th>Fine Amount</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="violationTypeBody">
-                                                <tr>
-                                                    <td colspan="3" class="text-center">Enter a plate number to view available violation types</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Violation History Table -->
-                            <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <h6>Violation History for Plate Number</h6>
-                                    <div id="violationHistoryTable" class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>Violation Type</th>
-                                                    <th>Fine Amount</th>
-                                                    <th>Issued Date</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="violationHistoryBody">
-                                                <tr>
-                                                    <td colspan="4" class="text-center">Enter a plate number to view violation history</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
-                                        <label class="form-check-label" for="has_license">Has License</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="license_number" class="form-label">License Number</label>
-                                    <input type="text" class="form-control" name="license_number" id="license_number">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
-                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
-                                        <label class="form-check-label" for="is_paid">Is Paid</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="or_number" class="form-label">CR Number</label>
-                                    <input type="text" class="form-control" name="or_number" id="or_number">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="issued_date" class="form-label">Issued Date</label>
-                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-select" name="status" id="status">
-                                        <option value="Pending" selected>Pending</option>
-                                        <option value="Resolved">Resolved</option>
-                                        <option value="Disputed">Disputed</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="notes" class="form-label">Notes</label>
-                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                                        <i class="fas fa-plus me-2"></i>Create Violation
-                                    </button>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-.selected-row {
-    background-color: #d4edda !important;
-    border-left: 4px solid #28a745;
-}
-
-.selected-btn {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-    color: white !important;
-}
-
-.unselect-btn {
-    background-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    color: white !important;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const plateNumberInput = document.getElementById('plate_number');
-    const violationHistoryBody = document.getElementById('violationHistoryBody');
-    const violationTypeBody = document.getElementById('violationTypeBody');
-    const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
-    const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
-    const selectedViolationText = document.getElementById('selectedViolationText');
-    const submitBtn = document.getElementById('submitBtn');
-
-    if (!plateNumberInput || !violationHistoryBody || !violationTypeBody || !selectedViolationTypeId) {
-        console.error('Required elements not found');
-        return;
-    }
-
-    // Store original types from PHP
-    const originalTypes = <?php echo json_encode($types); ?> || [];
-    let currentlySelectedRow = null;
-
-    plateNumberInput.addEventListener('input', function() {
-        const plateNumber = this.value.trim();
-        console.log('Plate number changed to:', plateNumber);
-
-        if (plateNumber.length > 0) {
-            fetchViolationHistory(plateNumber);
-        } else {
-            clearHistoryAndResetTables();
-        }
-    });
-
-    function fetchViolationHistory(plateNumber) {
-        console.log('Fetching violation history for:', plateNumber);
-        fetch('fetch_violation_history.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'plate_number=' + encodeURIComponent(plateNumber)
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Network error: ' + response.statusText);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            violationHistoryBody.innerHTML = '';
-            populateAvailableTypes(data);
-
-            const usedTypeIds = new Set();
-            if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
-                data.violations.forEach(violation => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${violation.violation_type || 'N/A'}</td>
-                        <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
-                        <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
-                        <td><span class="badge bg-${violation.status === 'Resolved' ? 'success' : violation.status === 'Pending' ? 'warning' : 'secondary'}">${violation.status || 'N/A'}</span></td>
-                    `;
-                    violationHistoryBody.appendChild(row);
-                    if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id.toString());
-                });
-
-                violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
-            } else {
-                violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
-            violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center">Enter a plate number to view available violation types</td></tr>';
-        });
-    }
-
-    function populateAvailableTypes(data) {
-        violationTypeBody.innerHTML = '';
-        const usedTypeIds = new Set(data.violations ? data.violations.map(v => v.violation_type_id.toString()) : []);
-        const availableTypes = originalTypes.filter(type => !usedTypeIds.has(type.id.toString()));
-
-        if (availableTypes.length > 0) {
-            availableTypes.forEach(type => {
-                const row = document.createElement('tr');
-                row.className = currentlySelectedRow === type.id.toString() ? 'selected-row' : '';
-                row.innerHTML = `
-                    <td>
-                        <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'selected-btn' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                            ${currentlySelectedRow === type.id.toString() ? '✓ Selected' : 'Select'}
-                        </button>
-                    </td>
-                    <td>${type.violation_type}</td>
-                    <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
-                `;
-                violationTypeBody.appendChild(row);
-            });
-
-            // Add click events to new buttons
-            document.querySelectorAll('.select-violation').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const id = this.getAttribute('data-id');
-                    
-                    // Remove previous selection
-                    if (currentlySelectedRow) {
-                        const prevRow = document.querySelector(`[data-id="${currentlySelectedRow}"]`).closest('tr');
-                        if (prevRow) prevRow.classList.remove('selected-row');
-                        const prevButton = document.querySelector(`button[data-id="${currentlySelectedRow}"]`);
-                        if (prevButton) {
-                            prevButton.className = 'btn btn-sm btn-outline-primary select-violation';
-                            prevButton.textContent = 'Select';
-                        }
-                    }
-
-                    // Set new selection
-                    currentlySelectedRow = id;
-                    selectedViolationTypeId.value = id;
-                    
-                    // Highlight new row and button
-                    const newRow = this.closest('tr');
-                    newRow.classList.add('selected-row');
-                    this.className = 'btn btn-sm selected-btn select-violation';
-                    this.textContent = '✓ Selected';
-                    
-                    // Show selected violation display
-                    const selectedType = originalTypes.find(t => t.id.toString() === id);
-                    selectedViolationText.textContent = `${selectedType.violation_type} (₱${parseFloat(selectedType.fine_amount).toFixed(2)})`;
-                    selectedViolationDisplay.classList.remove('d-none');
-                    
-                    // Enable submit button
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                    
-                    toastr.success(`Selected: ${selectedType.violation_type}`);
-                });
-            });
-        } else {
-            violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No available violation types</td></tr>';
-        }
-    }
-
-    function clearHistoryAndResetTables() {
-        violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view violation history</td></tr>';
-        violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center">Enter a plate number to view available violation types</td></tr>';
-        selectedViolationTypeId.value = '';
-        currentlySelectedRow = null;
-        selectedViolationDisplay.classList.add('d-none');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type';
-    }
-
-    // Initialize
-    clearHistoryAndResetTables();
-});
-</script>
-
-<?php include '../layout/footer.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
-<script>
-    // Initialize Toastr
-    toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        positionClass: 'toast-top-right',
-        timeOut: 5000
-    };
-
-    // Display Toastr/SweetAlert messages
-    <?php foreach ($toastr_messages as $msg): ?>
-        <?php echo $msg; ?>
-    <?php endforeach; ?>
-
-    // Function to perform OCR on image and populate plate number
-    function performOCR(file, inputId) {
-        const ocrStatus = document.getElementById('ocr_status');
-        ocrStatus.textContent = 'Processing image...';
-        Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
-        .then(({ data: { text } }) => {
-            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-            const input = document.getElementById(inputId);
-            input.value = cleanedText;
-            ocrStatus.textContent = `Plate detected: ${cleanedText}`;
-            input.dispatchEvent(new Event('input'));
-            fetchUserByPlateNumber(cleanedText);
-        }).catch(error => {
-            ocrStatus.textContent = 'Error extracting text from image.';
-            console.error('OCR Error:', error);
-        });
-    }
-
-    // Function to fetch user details by plate number
-    function fetchUserByPlateNumber(plateNumber) {
-        if (!plateNumber) return;
-        fetch('get_user_by_plate.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'plate_number=' + encodeURIComponent(plateNumber)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('violator_name').value = data.violator_name || '';
-                document.getElementById('contact_number').value = data.contact_number || '';
-                document.getElementById('email').value = data.email || '';
-                document.getElementById('user_id').value = data.user_id || '';
-                document.getElementById('has_license').checked = data.has_license == 1;
-                document.getElementById('license_number').value = data.license_number || '';
-                toastr.success('User details populated successfully.');
-            } else {
-                // Clear fields
-                ['violator_name', 'contact_number', 'email', 'user_id', 'license_number'].forEach(id => 
-                    document.getElementById(id).value = ''
-                );
-                document.getElementById('has_license').checked = false;
-                toastr.info(data.message || 'No previous violation found for this plate number.');
-            }
-        })
-        .catch(error => toastr.error('Error fetching user details: ' + error.message));
-    }
-
-    // Handle image upload for OCR
-    document.getElementById('plate_image').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) performOCR(file, 'plate_number');
-    });
-
-    // Client-side validation for Create Violation Form
-    document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const requiredFields = {
-            violator_name: document.getElementById('violator_name'),
-            contact_number: document.getElementById('contact_number'),
-            plate_number: document.getElementById('plate_number'),
-            reason: document.getElementById('reason'),
-            selected_violation_type_id: document.getElementById('selected_violation_type_id')
-        };
-
-        let isValid = true;
-        Object.values(requiredFields).forEach(field => {
-            field.classList.remove('is-invalid');
-            if (!field.value.trim()) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            }
-        });
-
-        if (!isValid) {
-            toastr.error('Please fill all required fields.');
-            return;
-        }
-
-        Swal.fire({
-            title: 'Confirm Violation',
-            html: `
-                <div class="text-left">
-                    <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
-                    <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
-                    <p><strong>Violation:</strong> ${document.getElementById('selectedViolationText').textContent}</p>
-                    <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
                 </div>
-            `,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, create violation!',
-            cancelButtonText: 'Cancel'
-        }).then(result => {
-            if (result.isConfirmed) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
-                
-                fetch(this.action, { 
-                    method: 'POST', 
-                    body: new FormData(this) 
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Violation created successfully!',
-                            icon: 'success'
-                        }).then(() => window.location.reload());
-                    } else {
-                        toastr.error(data.message || 'Failed to create violation.');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+
+                <style>
+                    .selected-row {
+                        background-color: #d4edda !important;
+                        border-left: 4px solid #28a745 !important;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    toastr.error('Network error occurred.');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                });
-            }
-        });
-    });
-</script>
-</body>
-</html>
+                    .selected-btn {
+                        background-color: #28a745 !important;
+                        border-color: #28a745 !important;
+                        color: white !important;
+                    }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: 'toast-top-right',
+                            timeOut: 5000
+                        };
+
+                        <?php foreach ($toastr_messages as $msg): ?>
+                            <?php echo $msg; ?>
+                        <?php endforeach; ?>
+
+                        const plateNumberInput = document.getElementById('plate_number');
+                        const violationHistoryBody = document.getElementById('violationHistoryBody');
+                        const violationTypeBody = document.getElementById('violationTypeBody');
+                        const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
+                        const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
+                        const selectedViolationText = document.getElementById('selectedViolationText');
+                        const submitBtn = document.getElementById('submitBtn');
+
+                        const originalTypes = <?php echo json_encode($types); ?> || [];
+                        let currentlySelectedRow = null;
+
+                        plateNumberInput.addEventListener('input', function() {
+                            const plateNumber = this.value.trim();
+                            console.log('Plate number changed to:', plateNumber);
+
+                            if (plateNumber.length > 0) {
+                                fetchViolationHistory(plateNumber);
+                            } else {
+                                clearHistoryAndResetTables();
+                            }
+                        });
+
+                        function fetchViolationHistory(plateNumber) {
+                            console.log('Fetching violation history for:', plateNumber);
+                            fetch('fetch_violation_history.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'plate_number=' + encodeURIComponent(plateNumber)
+                            })
+                            .then(response => {
+                                if (!response.ok) throw new Error('Network error: ' + response.statusText);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Response data:', data);
+                                violationHistoryBody.innerHTML = '';
+                                populateAvailableTypes(data);
+
+                                const usedTypeIds = new Set();
+                                if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
+                                    data.violations.forEach(violation => {
+                                        const row = document.createElement('tr');
+                                        row.innerHTML = `
+                                            <td>${violation.violation_type || 'N/A'}</td>
+                                            <td>${violation.base_offense || 'N/A'}</td>
+                                            <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
+                                            <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
+                                            <td><span class="badge bg-${violation.status === 'Resolved' ? 'success' : violation.status === 'Pending' ? 'warning' : 'secondary'}">${violation.status || 'N/A'}</span></td>
+                                        `;
+                                        violationHistoryBody.appendChild(row);
+                                        if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id.toString());
+                                    });
+                                } else {
+                                    violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No violations found for this plate number</td></tr>';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
+                                violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
+                            });
+                        }
+
+                        function populateAvailableTypes(data) {
+                            violationTypeBody.innerHTML = '';
+                            const usedTypeIds = new Set(data.violations ? data.violations.map(v => v.violation_type_id.toString()) : []);
+                            const availableTypes = originalTypes.filter(type => !usedTypeIds.has(type.id.toString()));
+
+                            if (availableTypes.length > 0) {
+                                availableTypes.forEach(type => {
+                                    const row = document.createElement('tr');
+                                    row.className = currentlySelectedRow === type.id.toString() ? 'selected-row' : '';
+                                    row.innerHTML = `
+                                        <td>
+                                            <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'selected-btn' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                                                ${currentlySelectedRow === type.id.toString() ? '✓ Selected' : 'Select'}
+                                            </button>
+                                        </td>
+                                        <td>${type.violation_type}</td>
+                                        <td>${type.base_offense || 'N/A'}</td>
+                                        <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+                                    `;
+                                    violationTypeBody.appendChild(row);
+                                });
+
+                                document.querySelectorAll('.select-violation').forEach(button => {
+                                    button.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        const id = this.getAttribute('data-id');
+                                        
+                                        if (currentlySelectedRow) {
+                                            const prevRow = document.querySelector(`[data-id="${currentlySelectedRow}"]`).closest('tr');
+                                            if (prevRow) prevRow.classList.remove('selected-row');
+                                            const prevButton = document.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                                            if (prevButton) {
+                                                prevButton.className = 'btn btn-sm btn-outline-primary select-violation';
+                                                prevButton.textContent = 'Select';
+                                            }
+                                        }
+
+                                        currentlySelectedRow = id;
+                                        selectedViolationTypeId.value = id;
+                                        
+                                        const newRow = this.closest('tr');
+                                        newRow.classList.add('selected-row');
+                                        this.className = 'btn btn-sm selected-btn select-violation';
+                                        this.textContent = '✓ Selected';
+                                        
+                                        const selectedType = originalTypes.find(t => t.id.toString() === id);
+                                        selectedViolationText.textContent = `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'}) - ₱${parseFloat(selectedType.fine_amount).toFixed(2)}`;
+                                        selectedViolationDisplay.classList.remove('d-none');
+                                        
+                                        submitBtn.disabled = false;
+                                        submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                                        
+                                        toastr.success(`Selected: ${selectedType.violation_type}`);
+                                    });
+                                });
+                            } else {
+                                violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
+                            }
+                        }
+
+                        function clearHistoryAndResetTables() {
+                            violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center">Enter a plate number to view violation history</td></tr>';
+                            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
+                            selectedViolationTypeId.value = '';
+                            currentlySelectedRow = null;
+                            selectedViolationDisplay.classList.add('d-none');
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type';
+                        }
+
+                        document.getElementById('createViolationForm').addEventListener('submit', function(e) {
+                            const hiddenInput = document.getElementById('selected_violation_type_id');
+                            hiddenInput.name = 'violation_type_id';
+                            
+                            const requiredFields = {
+                                violator_name: document.getElementById('violator_name'),
+                                contact_number: document.getElementById('contact_number'),
+                                plate_number: document.getElementById('plate_number'),
+                                reason: document.getElementById('reason'),
+                                violation_type_id: hiddenInput
+                            };
+
+                            let isValid = true;
+                            Object.values(requiredFields).forEach(field => {
+                                field.classList.remove('is-invalid');
+                                if (!field.value.trim()) {
+                                    field.classList.add('is-invalid');
+                                    isValid = false;
+                                }
+                            });
+
+                            if (!isValid) {
+                                hiddenInput.name = 'selected_violation_type_id';
+                                e.preventDefault();
+                                toastr.error('Please fill all required fields.');
+                                return;
+                            }
+
+                            e.preventDefault();
+                            const selectedType = originalTypes.find(t => t.id.toString() === hiddenInput.value);
+                            const fineAmount = selectedType ? parseFloat(selectedType.fine_amount).toFixed(2) : '0.00';
+                            
+                            Swal.fire({
+                                title: 'Confirm Violation',
+                                html: `
+                                    <div class="text-left">
+                                        <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
+                                        <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
+                                        <p><strong>Violation:</strong> ${selectedType ? `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'})` : 'N/A'}</p>
+                                        <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
+                                        <p><strong>Fine:</strong> ₱${fineAmount}</p>
+                                    </div>
+                                `,
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Yes, create violation!',
+                                cancelButtonText: 'Cancel'
+                            }).then(result => {
+                                if (result.isConfirmed) {
+                                    submitBtn.disabled = true;
+                                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
+                                    document.getElementById('createViolationForm').submit();
+                                } else {
+                                    hiddenInput.name = 'selected_violation_type_id';
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                                }
+                            });
+                        });
+
+                        document.getElementById('plate_image').addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (file) performOCR(file, 'plate_number');
+                        });
+
+                        clearHistoryAndResetTables();
+
+                        function performOCR(file, inputId) {
+                            const ocrStatus = document.getElementById('ocr_status');
+                            ocrStatus.textContent = 'Processing image...';
+                            Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
+                            .then(({ data: { text } }) => {
+                                const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                                const input = document.getElementById(inputId);
+                                input.value = cleanedText;
+                                ocrStatus.textContent = `Plate detected: ${cleanedText}`;
+                                input.dispatchEvent(new Event('input'));
+                                fetchUserByPlateNumber(cleanedText);
+                            }).catch(error => {
+                                ocrStatus.textContent = 'Error extracting text from image.';
+                                console.error('OCR Error:', error);
+                            });
+                        }
+
+                        function fetchUserByPlateNumber(plateNumber) {
+                            if (!plateNumber) return;
+                            fetch('get_user_by_plate.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'plate_number=' + encodeURIComponent(plateNumber)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    document.getElementById('violator_name').value = data.violator_name || '';
+                                    document.getElementById('contact_number').value = data.contact_number || '';
+                                    document.getElementById('email').value = data.email || '';
+                                    document.getElementById('user_id').value = data.user_id || '';
+                                    document.getElementById('has_license').checked = data.has_license == 1;
+                                    document.getElementById('license_number').value = data.license_number || '';
+                                    toastr.success('User details populated successfully.');
+                                } else {
+                                    ['violator_name', 'contact_number', 'email', 'user_id', 'license_number'].forEach(id => 
+                                        document.getElementById(id).value = ''
+                                    );
+                                    document.getElementById('has_license').checked = false;
+                                    toastr.info(data.message || 'No previous violation found for this plate number.');
+                                }
+                            })
+                            .catch(error => toastr.error('Error fetching user details: ' + error.message));
+                        }
+                    });
+                </script>
+                <?php include '../layout/footer.php'; ?>
+                <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+            </body>
+        </html>

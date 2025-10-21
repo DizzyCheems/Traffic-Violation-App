@@ -7127,3 +7127,299 @@ Query result: Array
     [email] => spiralsmoke903@gmail.com
 )
 
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='912312412', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='', violation_type_id='', plate_image='../Uploads/68f71e83ccc88_68d5796f5fa09_2018_Philippine_new_plates.png'
+Create Violation Failed: Missing required fields.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='912312412', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='', violation_type_id='', plate_image='../Uploads/68f71e8b5d77e_68d5796f5fa09_2018_Philippine_new_plates.png'
+Create Violation Failed: Missing required fields.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='912312412', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='', violation_type_id='', plate_image='../Uploads/68f71e8cc51f7_68d5796f5fa09_2018_Philippine_new_plates.png'
+Create Violation Failed: Missing required fields.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='912312412', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='', violation_type_id='', plate_image='../Uploads/68f71e8e3aee8_68d5796f5fa09_2018_Philippine_new_plates.png'
+Create Violation Failed: Missing required fields.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='912312412', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='', violation_type_id='', plate_image='../Uploads/68f71e8f3960a_68d5796f5fa09_2018_Philippine_new_plates.png'
+Create Violation Failed: Missing required fields.
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='912312412', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='[', violation_type_id='117', plate_image='../Uploads/68f7206961389_68d5796f5fa09_2018_Philippine_new_plates.png'
+Offense Frequency for user_id='163': 7
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => [
+    [5] => 117
+    [6] => 0
+    [7] => 123
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-21T07:55
+    [12] => Pending
+    [13] => 
+    [14] => 7
+    [15] => ../Uploads/68f7206961389_68d5796f5fa09_2018_Philippine_new_plates.png
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
