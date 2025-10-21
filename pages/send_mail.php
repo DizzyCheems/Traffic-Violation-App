@@ -94,9 +94,22 @@ function sendViolationEmail($pdo, $violation_id) {
                         border-top: 1px solid #e3e3e3; 
                         margin-top: 20px; 
                     }
-                    .footer a { 
+                    .footer a, .view-details { 
                         color: #003087; 
                         text-decoration: none; 
+                    }
+                    .view-details {
+                        display: inline-block;
+                        padding: 10px 20px;
+                        background-color: #003087;
+                        color: #ffffff !important;
+                        border-radius: 5px;
+                        margin-top: 10px;
+                        font-weight: 500;
+                    }
+                    .view-details:hover {
+                        background-color: #002060;
+                        color: #ffffff !important;
                     }
                 </style>
             </head>
@@ -120,7 +133,8 @@ function sendViolationEmail($pdo, $violation_id) {
                                     <b>Issue Date:</b> ' . htmlspecialchars(date('F j, Y, g:i A', strtotime($issued_date))) . '
                                 </div>
                                 <div style="margin-top: 16px;">
-                                    <p>Please contact our support team for further information or to resolve this violation.</p>
+                                    <p>Please review the full details of your violation or contact our support team for further information.</p>
+                                    <a href="http://178.128.93.220:74/pages/user_violations_portal.php?plate_number=' . urlencode($plate_number) . '" class="view-details">View Details</a>
                                 </div>
                                 <div class="footer">
                                     <p>
@@ -137,7 +151,7 @@ function sendViolationEmail($pdo, $violation_id) {
             </body>
             </html>
         ';
-        $mail->AltBody = "Traffic Violation Notice\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Reason: $reason\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- License Number: $license_number\n- Issue Date: " . date('F j, Y, g:i A', strtotime($issued_date)) . "\n\nPlease contact our support team for further information or to resolve this violation.\n\nTraffic Violation System\nsupport@trafficviolationsystem.com\n(123) 456-7890";
+        $mail->AltBody = "Traffic Violation Notice\n\nDear $violator_name,\n\nA traffic violation has been recorded:\n- Plate Number: $plate_number\n- Violation Type: $violation_type_name\n- Reason: $reason\n- Fine Amount: ₱" . number_format($fine_amount, 2) . "\n- License Number: $license_number\n- Issue Date: " . date('F j, Y, g:i A', strtotime($issued_date)) . "\n\nPlease review the full details at: http://178.128.93.220:74/pages/user_violations_portal.php?plate_number=" . urlencode($plate_number) . "\n\nContact our support team for further information.\n\nTraffic Violation System\nsupport@trafficviolationsystem.com\n(123) 456-7890";
 
         $mail->send();
 

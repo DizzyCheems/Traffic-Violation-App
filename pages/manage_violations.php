@@ -737,6 +737,7 @@ try {
                 <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
                     <input type="hidden" name="create_violation" value="1">
                     <input type="hidden" name="user_id" id="user_id">
+                    <input type="hidden" name="violation_type_id" id="selected_violation_type_id">
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
@@ -768,23 +769,32 @@ try {
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="violation_type_id" class="form-label">Violation Type</label>
-                                    <select class="form-select" name="violation_type_id" id="violation_type_id" required>
-                                        <option value="" disabled selected>Select</option>
-                                        <?php foreach ($types as $type): ?>
-                                            <option value="<?php echo htmlspecialchars($type['id']); ?>"
-                                                    data-original-text="<?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)">
-                                                <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="invalid-feedback">Please select a violation type.</div>
-                                </div>
                                 <div class="col-md-12 mb-3">
                                     <label for="reason" class="form-label">Reason</label>
                                     <input type="text" class="form-control" name="reason" id="reason">
                                     <div class="invalid-feedback">Please enter a valid reason.</div>
+                                </div>
+                            </div>
+                            <!-- Violation Type Selection Table -->
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <h6>Available Violation Types</h6>
+                                    <div id="violationTypeTable" class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Violation Type</th>
+                                                    <th>Fine Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="violationTypeBody">
+                                                <tr>
+                                                    <td colspan="3" class="text-center">Enter a plate number to view available violation types</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Violation History Table -->
@@ -877,19 +887,16 @@ try {
 document.addEventListener('DOMContentLoaded', function() {
     const plateNumberInput = document.getElementById('plate_number');
     const violationHistoryBody = document.getElementById('violationHistoryBody');
-    const violationTypeSelect = document.getElementById('violation_type_id');
+    const violationTypeBody = document.getElementById('violationTypeBody');
+    const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
 
-    if (!plateNumberInput || !violationHistoryBody || !violationTypeSelect) {
-        console.error('Required elements not found:', { plateNumberInput, violationHistoryBody, violationTypeSelect });
+    if (!plateNumberInput || !violationHistoryBody || !violationTypeBody || !selectedViolationTypeId) {
+        console.error('Required elements not found:', { plateNumberInput, violationHistoryBody, violationTypeBody, selectedViolationTypeId });
         return;
     }
 
-    // Store original options for reset
-    const originalOptions = Array.from(violationTypeSelect.options).map(opt => ({
-        value: opt.value,
-        text: opt.textContent,
-        disabled: opt.disabled
-    }));
+    // Store original types from PHP (simulated client-side for now)
+    const originalTypes = <?php echo json_encode($types); ?> || [];
 
     plateNumberInput.addEventListener('input', function() {
         const plateNumber = this.value.trim();
@@ -898,7 +905,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (plateNumber.length > 0) {
             fetchViolationHistory(plateNumber);
         } else {
-            clearHistoryAndResetDropdown();
+            clearHistoryAndResetTables();
         }
     });
 
@@ -906,9 +913,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Fetching violation history for:', plateNumber);
         fetch('fetch_violation_history.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'plate_number=' + encodeURIComponent(plateNumber)
         })
         .then(response => {
@@ -919,15 +924,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             console.log('Response data:', data);
             violationHistoryBody.innerHTML = '';
+            violationTypeBody.innerHTML = '';
 
-            // Reset dropdown first
-            resetViolationTypeDropdown();
-
+            const usedTypeIds = new Set();
             if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
-                const usedTypeIds = new Set(data.violations.map(v => v.violation_type_id));
-
                 data.violations.forEach(violation => {
-                    // Add row to table
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${violation.violation_type || 'N/A'}</td>
@@ -936,66 +937,61 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td><span class="badge bg-warning text-dark">${violation.status || 'N/A'}</span></td>
                     `;
                     violationHistoryBody.appendChild(row);
+                    if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id);
                 });
 
-                // Exclude used types from dropdown
-                filterViolationTypes(usedTypeIds);
+                // Populate available violation types
+                populateAvailableTypes(usedTypeIds);
             } else {
                 violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
+                populateAvailableTypes(usedTypeIds);
             }
         })
         .catch(error => {
             console.error('Error:', error);
             violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
-            resetViolationTypeDropdown();
+            violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center">Enter a plate number to view available violation types</td></tr>';
         });
     }
 
-    function filterViolationTypes(usedTypeIds) {
-        violationTypeSelect.innerHTML = '<option value="" disabled selected>Select</option>';
-        originalOptions.forEach(opt => {
-            if (opt.value && !usedTypeIds.has(opt.value)) {
-                const option = document.createElement('option');
-                option.value = opt.value;
-                option.textContent = opt.text;
-                option.disabled = opt.disabled;
-                if (opt.value) {
-                    option.dataset.originalText = opt.text;
-                }
-                violationTypeSelect.appendChild(option);
-            }
-        });
-        if (violationTypeSelect.options.length <= 1) {
-            violationTypeSelect.innerHTML = '<option value="" disabled selected>No available violation types</option>';
+    function populateAvailableTypes(usedTypeIds) {
+        violationTypeBody.innerHTML = '';
+        const availableTypes = originalTypes.filter(type => !usedTypeIds.has(type.id.toString()));
+        if (availableTypes.length > 0) {
+            availableTypes.forEach(type => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><button type="button" class="btn btn-sm btn-outline-primary select-violation" data-id="${type.id}">Select</button></td>
+                    <td>${type.violation_type}</td>
+                    <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+                `;
+                violationTypeBody.appendChild(row);
+            });
+        } else {
+            violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No available violation types</td></tr>';
         }
-    }
 
-    function resetViolationTypeDropdown() {
-        violationTypeSelect.innerHTML = '<option value="" disabled selected>Select</option>';
-        originalOptions.forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt.value;
-            option.textContent = opt.text;
-            option.disabled = opt.disabled;
-            if (opt.value) {
-                option.dataset.originalText = opt.text;
-            }
-            violationTypeSelect.appendChild(option);
+        // Add click event to select buttons
+        document.querySelectorAll('.select-violation').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                selectedViolationTypeId.value = id;
+                console.log('Selected violation type ID:', id);
+                toastr.success('Violation type selected: ' + originalTypes.find(t => t.id == id).violation_type);
+            });
         });
-        violationTypeSelect.selectedIndex = 0;
     }
 
-    function clearHistoryAndResetDropdown() {
+    function clearHistoryAndResetTables() {
         violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view violation history</td></tr>';
-        resetViolationTypeDropdown();
+        violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center">Enter a plate number to view available violation types</td></tr>';
+        selectedViolationTypeId.value = '';
     }
 
-    // Initialize: store original text in dataset
-    document.querySelectorAll('#violation_type_id option').forEach(opt => {
-        if (opt.value) {
-            opt.dataset.originalText = opt.textContent;
-        }
-    });
+    // Initialize table with all types if no plate number
+    if (plateNumberInput.value.trim().length > 0) {
+        fetchViolationHistory(plateNumberInput.value.trim());
+    }
 });
 </script>
 </main>
@@ -1031,7 +1027,6 @@ document.addEventListener('DOMContentLoaded', function() {
             input.value = cleanedText;
             ocrStatus.textContent = 'Text extracted successfully!';
             console.log('OCR Result:', cleanedText);
-            // Manually trigger the input event to fetch violation history
             input.dispatchEvent(new Event('input'));
             fetchUserByPlateNumber(cleanedText);
         }).catch(error => {
@@ -1097,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const contactNumber = document.getElementById('contact_number').value.trim();
         const plateNumber = document.getElementById('plate_number').value.trim();
         const reason = document.getElementById('reason').value.trim();
-        const violationTypeId = document.getElementById('violation_type_id').value;
+        const violationTypeId = document.getElementById('selected_violation_type_id').value;
 
         let isValid = true;
 
@@ -1105,13 +1100,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('contact_number').classList.remove('is-invalid');
         document.getElementById('plate_number').classList.remove('is-invalid');
         document.getElementById('reason').classList.remove('is-invalid');
-        document.getElementById('violation_type_id').classList.remove('is-invalid');
 
         if (!violatorName) { document.getElementById('violator_name').classList.add('is-invalid'); isValid = false; }
         if (!contactNumber) { document.getElementById('contact_number').classList.add('is-invalid'); isValid = false; }
         if (!plateNumber) { document.getElementById('plate_number').classList.add('is-invalid'); isValid = false; }
         if (!reason) { document.getElementById('reason').classList.add('is-invalid'); isValid = false; }
-        if (!violationTypeId) { document.getElementById('violation_type_id').classList.add('is-invalid'); isValid = false; }
+        if (!violationTypeId) {
+            toastr.error('Please select a violation type from the table.');
+            isValid = false;
+        }
 
         if (!isValid) {
             console.log('Client-side validation failed for create violation');
