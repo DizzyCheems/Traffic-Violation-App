@@ -734,7 +734,7 @@ try {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
+                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data" action="create_violation.php">
                     <input type="hidden" name="create_violation" value="1">
                     <input type="hidden" name="user_id" id="user_id">
                     <input type="hidden" name="violation_type_id" id="selected_violation_type_id">
@@ -771,8 +771,17 @@ try {
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <label for="reason" class="form-label">Reason</label>
-                                    <input type="text" class="form-control" name="reason" id="reason">
+                                    <input type="text" class="form-control" name="reason" id="reason" required>
                                     <div class="invalid-feedback">Please enter a valid reason.</div>
+                                </div>
+                            </div>
+                            <!-- Selected Violation Display -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div id="selectedViolationDisplay" class="alert alert-info d-none" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Selected Violation:</strong> <span id="selectedViolationText"></span>
+                                    </div>
                                 </div>
                             </div>
                             <!-- Violation Type Selection Table -->
@@ -872,7 +881,9 @@ try {
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <button type="submit" class="btn btn-primary">Create Violation</button>
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <i class="fas fa-plus me-2"></i>Create Violation
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -883,20 +894,43 @@ try {
     </div>
 </div>
 
+<style>
+.selected-row {
+    background-color: #d4edda !important;
+    border-left: 4px solid #28a745;
+}
+
+.selected-btn {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: white !important;
+}
+
+.unselect-btn {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const plateNumberInput = document.getElementById('plate_number');
     const violationHistoryBody = document.getElementById('violationHistoryBody');
     const violationTypeBody = document.getElementById('violationTypeBody');
     const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
+    const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
+    const selectedViolationText = document.getElementById('selectedViolationText');
+    const submitBtn = document.getElementById('submitBtn');
 
     if (!plateNumberInput || !violationHistoryBody || !violationTypeBody || !selectedViolationTypeId) {
-        console.error('Required elements not found:', { plateNumberInput, violationHistoryBody, violationTypeBody, selectedViolationTypeId });
+        console.error('Required elements not found');
         return;
     }
 
     // Store original types from PHP
     const originalTypes = <?php echo json_encode($types); ?> || [];
+    let currentlySelectedRow = null;
 
     plateNumberInput.addEventListener('input', function() {
         const plateNumber = this.value.trim();
@@ -917,14 +951,13 @@ document.addEventListener('DOMContentLoaded', function() {
             body: 'plate_number=' + encodeURIComponent(plateNumber)
         })
         .then(response => {
-            console.log('Response status:', response.status);
             if (!response.ok) throw new Error('Network error: ' + response.statusText);
             return response.json();
         })
         .then(data => {
             console.log('Response data:', data);
             violationHistoryBody.innerHTML = '';
-            violationTypeBody.innerHTML = '';
+            populateAvailableTypes(data);
 
             const usedTypeIds = new Set();
             if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
@@ -934,17 +967,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${violation.violation_type || 'N/A'}</td>
                         <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
                         <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
-                        <td><span class="badge bg-warning text-dark">${violation.status || 'N/A'}</span></td>
+                        <td><span class="badge bg-${violation.status === 'Resolved' ? 'success' : violation.status === 'Pending' ? 'warning' : 'secondary'}">${violation.status || 'N/A'}</span></td>
                     `;
                     violationHistoryBody.appendChild(row);
                     if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id.toString());
                 });
 
-                // Populate available violation types, excluding used ones
-                populateAvailableTypes(usedTypeIds);
+                violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
             } else {
                 violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
-                populateAvailableTypes(usedTypeIds);
             }
         })
         .catch(error => {
@@ -954,26 +985,64 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function populateAvailableTypes(usedTypeIds) {
+    function populateAvailableTypes(data) {
         violationTypeBody.innerHTML = '';
+        const usedTypeIds = new Set(data.violations ? data.violations.map(v => v.violation_type_id.toString()) : []);
         const availableTypes = originalTypes.filter(type => !usedTypeIds.has(type.id.toString()));
+
         if (availableTypes.length > 0) {
             availableTypes.forEach(type => {
                 const row = document.createElement('tr');
+                row.className = currentlySelectedRow === type.id.toString() ? 'selected-row' : '';
                 row.innerHTML = `
-                    <td><button type="button" class="btn btn-sm btn-outline-primary select-violation" data-id="${type.id}">Select</button></td>
+                    <td>
+                        <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'selected-btn' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                            ${currentlySelectedRow === type.id.toString() ? '✓ Selected' : 'Select'}
+                        </button>
+                    </td>
                     <td>${type.violation_type}</td>
                     <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
                 `;
                 violationTypeBody.appendChild(row);
             });
-            // Add click event to select buttons
+
+            // Add click events to new buttons
             document.querySelectorAll('.select-violation').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const id = this.getAttribute('data-id');
+                    
+                    // Remove previous selection
+                    if (currentlySelectedRow) {
+                        const prevRow = document.querySelector(`[data-id="${currentlySelectedRow}"]`).closest('tr');
+                        if (prevRow) prevRow.classList.remove('selected-row');
+                        const prevButton = document.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                        if (prevButton) {
+                            prevButton.className = 'btn btn-sm btn-outline-primary select-violation';
+                            prevButton.textContent = 'Select';
+                        }
+                    }
+
+                    // Set new selection
+                    currentlySelectedRow = id;
                     selectedViolationTypeId.value = id;
-                    console.log('Selected violation type ID:', id);
-                    toastr.success('Violation type selected: ' + originalTypes.find(t => t.id == id).violation_type);
+                    
+                    // Highlight new row and button
+                    const newRow = this.closest('tr');
+                    newRow.classList.add('selected-row');
+                    this.className = 'btn btn-sm selected-btn select-violation';
+                    this.textContent = '✓ Selected';
+                    
+                    // Show selected violation display
+                    const selectedType = originalTypes.find(t => t.id.toString() === id);
+                    selectedViolationText.textContent = `${selectedType.violation_type} (₱${parseFloat(selectedType.fine_amount).toFixed(2)})`;
+                    selectedViolationDisplay.classList.remove('d-none');
+                    
+                    // Enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                    
+                    toastr.success(`Selected: ${selectedType.violation_type}`);
                 });
             });
         } else {
@@ -985,17 +1054,17 @@ document.addEventListener('DOMContentLoaded', function() {
         violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view violation history</td></tr>';
         violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center">Enter a plate number to view available violation types</td></tr>';
         selectedViolationTypeId.value = '';
+        currentlySelectedRow = null;
+        selectedViolationDisplay.classList.add('d-none');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type';
     }
 
-    // Initialize table with all types if no plate number
-    if (plateNumberInput.value.trim().length > 0) {
-        fetchViolationHistory(plateNumberInput.value.trim());
-    }
+    // Initialize
+    clearHistoryAndResetTables();
 });
 </script>
-</main>
-</div>
-</div>
+
 <?php include '../layout/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
 <script>
@@ -1016,16 +1085,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function performOCR(file, inputId) {
         const ocrStatus = document.getElementById('ocr_status');
         ocrStatus.textContent = 'Processing image...';
-        Tesseract.recognize(
-            file,
-            'eng',
-            { logger: m => console.log('OCR Progress:', m) }
-        ).then(({ data: { text } }) => {
+        Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
+        .then(({ data: { text } }) => {
             const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
             const input = document.getElementById(inputId);
             input.value = cleanedText;
-            ocrStatus.textContent = 'Text extracted successfully!';
-            console.log('OCR Result:', cleanedText);
+            ocrStatus.textContent = `Plate detected: ${cleanedText}`;
             input.dispatchEvent(new Event('input'));
             fetchUserByPlateNumber(cleanedText);
         }).catch(error => {
@@ -1036,29 +1101,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to fetch user details by plate number
     function fetchUserByPlateNumber(plateNumber) {
-        if (!plateNumber) {
-            console.log('No plate number provided');
-            document.getElementById('violator_name').value = '';
-            document.getElementById('contact_number').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('user_id').value = '';
-            document.getElementById('has_license').checked = false;
-            document.getElementById('license_number').value = '';
-            return;
-        }
-        console.log('Fetching user data for plate:', plateNumber);
+        if (!plateNumber) return;
         fetch('get_user_by_plate.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'plate_number=' + encodeURIComponent(plateNumber)
         })
-        .then(response => {
-            console.log('Fetch response status:', response.status);
-            if (!response.ok) throw new Error('Network response was not ok: ' + response.statusText);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('Fetch response data:', data);
             if (data.success) {
                 document.getElementById('violator_name').value = data.violator_name || '';
                 document.getElementById('contact_number').value = data.contact_number || '';
@@ -1068,212 +1118,93 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('license_number').value = data.license_number || '';
                 toastr.success('User details populated successfully.');
             } else {
-                document.getElementById('violator_name').value = '';
-                document.getElementById('contact_number').value = '';
-                document.getElementById('email').value = '';
-                document.getElementById('user_id').value = '';
+                // Clear fields
+                ['violator_name', 'contact_number', 'email', 'user_id', 'license_number'].forEach(id => 
+                    document.getElementById(id).value = ''
+                );
                 document.getElementById('has_license').checked = false;
-                document.getElementById('license_number').value = '';
-                console.log('No user data found:', data.message);
                 toastr.info(data.message || 'No previous violation found for this plate number.');
             }
         })
-        .catch(error => {
-            console.error('Error fetching user by plate:', error);
-            toastr.error('Error fetching user details: ' + error.message);
-        });
+        .catch(error => toastr.error('Error fetching user details: ' + error.message));
     }
+
+    // Handle image upload for OCR
+    document.getElementById('plate_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) performOCR(file, 'plate_number');
+    });
 
     // Client-side validation for Create Violation Form
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-        console.log('Create violation form submission attempted');
-        const violatorName = document.getElementById('violator_name').value.trim();
-        const contactNumber = document.getElementById('contact_number').value.trim();
-        const plateNumber = document.getElementById('plate_number').value.trim();
-        const reason = document.getElementById('reason').value.trim();
-        const violationTypeId = document.getElementById('selected_violation_type_id').value;
+        e.preventDefault();
+        
+        const requiredFields = {
+            violator_name: document.getElementById('violator_name'),
+            contact_number: document.getElementById('contact_number'),
+            plate_number: document.getElementById('plate_number'),
+            reason: document.getElementById('reason'),
+            selected_violation_type_id: document.getElementById('selected_violation_type_id')
+        };
 
         let isValid = true;
-
-        document.getElementById('violator_name').classList.remove('is-invalid');
-        document.getElementById('contact_number').classList.remove('is-invalid');
-        document.getElementById('plate_number').classList.remove('is-invalid');
-        document.getElementById('reason').classList.remove('is-invalid');
-
-        if (!violatorName) { document.getElementById('violator_name').classList.add('is-invalid'); isValid = false; }
-        if (!contactNumber) { document.getElementById('contact_number').classList.add('is-invalid'); isValid = false; }
-        if (!plateNumber) { document.getElementById('plate_number').classList.add('is-invalid'); isValid = false; }
-        if (!reason) { document.getElementById('reason').classList.add('is-invalid'); isValid = false; }
-        if (!violationTypeId) {
-            toastr.error('Please select a violation type from the table.');
-            isValid = false;
-        }
+        Object.values(requiredFields).forEach(field => {
+            field.classList.remove('is-invalid');
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            }
+        });
 
         if (!isValid) {
-            console.log('Client-side validation failed for create violation');
-            e.preventDefault();
+            toastr.error('Please fill all required fields.');
             return;
         }
 
-        e.preventDefault();
         Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to create this violation?',
+            title: 'Confirm Violation',
+            html: `
+                <div class="text-left">
+                    <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
+                    <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
+                    <p><strong>Violation:</strong> ${document.getElementById('selectedViolationText').textContent}</p>
+                    <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
+                </div>
+            `,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Yes, create it!',
+            confirmButtonText: 'Yes, create violation!',
             cancelButtonText: 'Cancel'
-        }).then((result) => {
+        }).then(result => {
             if (result.isConfirmed) {
-                console.log('Create violation form submission confirmed');
-                fetch(this.action, { method: 'POST', body: new FormData(this) })
-                .then(response => {
-                    if (response.ok) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
+                
+                fetch(this.action, { 
+                    method: 'POST', 
+                    body: new FormData(this) 
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
                         Swal.fire({
-                            title: 'Created!',
-                            text: 'Violation has been created successfully.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
+                            title: 'Success!',
+                            text: 'Violation created successfully!',
+                            icon: 'success'
                         }).then(() => window.location.reload());
                     } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Failed to create violation.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
+                        toastr.error(data.message || 'Failed to create violation.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
                     }
-                }).catch(error => {
+                })
+                .catch(error => {
                     console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An error occurred while creating the violation.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
+                    toastr.error('Network error occurred.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
                 });
-            } else console.log('Create violation form submission canceled');
-        });
-    });
-
-    // Handle image upload for OCR in Create Violation Form
-    document.getElementById('plate_image').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            console.log('Image selected for OCR:', file.name);
-            performOCR(file, 'plate_number');
-        }
-    });
-
-    // Handle plate number input for auto-population
-    document.getElementById('plate_number').addEventListener('input', function() {
-        const plateNumber = this.value.trim();
-        console.log('Plate number input changed:', plateNumber);
-        fetchUserByPlateNumber(plateNumber);
-    });
-
-    // Handle image upload for OCR in Edit Violation Forms
-    document.querySelectorAll('input[name="plate_image"]').forEach(input => {
-        input.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const inputId = this.id.replace('plate_image_', 'plate_number_');
-                console.log('Image selected for OCR in edit form:', file.name);
-                performOCR(file, inputId);
             }
-        });
-    });
-
-    // Client-side validation for Edit Violation Forms
-    document.querySelectorAll('.edit-violation-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            console.log('Edit violation form submission attempted');
-            const violatorName = this.querySelector('input[name="violator_name"]').value.trim();
-            const contactNumber = this.querySelector('input[name="contact_number"]').value.trim();
-            const plateNumber = this.querySelector('input[name="plate_number"]').value.trim();
-            const reason = this.querySelector('input[name="reason"]').value.trim();
-            const violationTypeId = this.querySelector('select[name="violation_type_id"]').value;
-
-            let isValid = true;
-
-            this.querySelector('input[name="violator_name"]').classList.remove('is-invalid');
-            this.querySelector('input[name="contact_number"]').classList.remove('is-invalid');
-            this.querySelector('input[name="plate_number"]').classList.remove('is-invalid');
-            this.querySelector('input[name="reason"]').classList.remove('is-invalid');
-            this.querySelector('select[name="violation_type_id"]').classList.remove('is-invalid');
-
-            if (!violatorName) { this.querySelector('input[name="violator_name"]').classList.add('is-invalid'); isValid = false; }
-            if (!contactNumber) { this.querySelector('input[name="contact_number"]').classList.add('is-invalid'); isValid = false; }
-            if (!plateNumber) { this.querySelector('input[name="plate_number"]').classList.add('is-invalid'); isValid = false; }
-            if (!reason) { this.querySelector('input[name="reason"]').classList.add('is-invalid'); isValid = false; }
-            if (!violationTypeId) { this.querySelector('select[name="violation_type_id"]').classList.add('is-invalid'); isValid = false; }
-
-            if (!isValid) {
-                console.log('Client-side validation failed for edit violation');
-                e.preventDefault();
-                return;
-            }
-
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to update this violation?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, update it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Edit violation form submission confirmed');
-                    fetch(this.action, { method: 'POST', body: new FormData(this) })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire({
-                                title: 'Updated!',
-                                text: 'Violation has been updated successfully.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => window.location.reload());
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Failed to update violation.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    }).catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'An error occurred while updating the violation.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    });
-                } else console.log('Edit violation form submission canceled');
-            });
-        });
-    });
-
-    // Client-side validation and confirmation for Delete Violation Forms
-    document.querySelectorAll('.delete-violation-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            console.log('Delete violation form submission attempted');
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to delete this violation? This action cannot be undone.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Delete violation form submission confirmed');
-                    this.submit();
-                } else console.log('Delete violation form submission canceled');
-            });
         });
     });
 </script>

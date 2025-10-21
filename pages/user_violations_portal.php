@@ -36,178 +36,271 @@ if ($plate_number) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Violations Portal</title>
+    <title>User Portal - Violation Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/dashboards.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        /* Navigation link styles for sidebar and modules */
+        .nav-link {
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 5px 0;
         }
+
+        /* Hover effect: float, black background, white bold text */
+        .nav-link:hover {
+            background-color: #000000;
+            color: #ffffff !important;
+            font-weight: bold;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Active link style to maintain consistency */
+        .nav-link.active {
+            background-color: #007bff;
+            color: #ffffff !important;
+            font-weight: bold;
+        }
+
+        /* Ensure modal trigger links also get the style */
+        a[data-bs-toggle="modal"] {
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            padding: 8px 12px;
+            display: inline-block;
+        }
+
+        a[data-bs-toggle="modal"]:hover {
+            background-color: #000000;
+            color: #ffffff !important;
+            font-weight: bold;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Portal specific styles */
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
         .container {
             max-width: 1200px;
         }
+
         .card {
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             background: #ffffff;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
             overflow: hidden;
         }
+
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         }
+
         .card-header {
-            background: linear-gradient(90deg, #007bff 0%, #00b7eb 100%);
+            background: #4dabf7;
             color: white;
-            border-radius: 12px 12px 0 0;
-            padding: 1.5rem;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            padding: 1.25rem;
             font-weight: 600;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
         }
+
         .card-body {
-            padding: 1.5rem;
+            padding: 1.25rem;
         }
+
         .card-body p {
             margin-bottom: 0.75rem;
-            font-size: 0.95rem;
-            color: #333;
+            font-size: 0.9rem;
+            color: #495057;
         }
+
         .card-body strong {
-            color: #1a1a1a;
+            color: #212529;
             font-weight: 600;
         }
+
         .badge {
-            padding: 0.5em 1em;
-            border-radius: 20px;
+            padding: 0.4em 0.8em;
+            border-radius: 12px;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
+
         .search-card {
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-        .form-control {
             border-radius: 8px;
-            border: 1px solid #ced4da;
-            padding: 0.75rem;
-            transition: border-color 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
         }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
         .form-control:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
+
+        /* Button styling to match dashboard */
         .btn-primary {
-            border-radius: 8px;
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
             padding: 0.75rem 1.5rem;
             font-weight: 500;
-            background: linear-gradient(90deg, #007bff 0%, #00b7eb 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #000000;
+            border-color: #000000;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert {
+            border-radius: 5px;
             border: none;
         }
-        .btn-primary:hover {
-            background: linear-gradient(90deg, #0056b3 0%, #0098c7 100%);
+
+        .display-4 {
+            font-weight: 700;
         }
-        .alert {
-            border-radius: 8px;
+
+        .lead {
+            font-weight: 400;
         }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .card-header {
-                font-size: 1.1rem;
+                font-size: 1rem;
+                padding: 1rem;
+            }
+            .card-body {
+                padding: 1rem;
             }
             .card-body p {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h1 class="display-4 text-primary fw-bold">Violations Portal</h1>
+    <div class="container py-4 py-md-5">
+        <div class="text-center mb-4 mb-md-5">
+            <h1 class="display-4 text-primary">Violations Portal</h1>
             <p class="lead text-muted">Check your vehicle violations by entering your plate number</p>
         </div>
 
         <!-- Search Form -->
-        <div class="search-card mb-5 p-4">
+        <div class="search-card p-4">
             <form method="POST" class="row g-3 justify-content-center">
                 <div class="col-md-6">
                     <input type="text" class="form-control" name="plate_number" id="plate_number" 
                            placeholder="Enter Plate Number (e.g., ABC123)" 
                            value="<?php echo htmlspecialchars($plate_number); ?>" required>
-                    <label for="plate_number" class="form-label visually-hidden">Plate Number</label>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" name="search_violations" class="btn btn-primary w-100">Search</button>
+                    <button type="submit" name="search_violations" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
                 </div>
             </form>
         </div>
 
         <!-- Violations Display -->
-        <div class="row g-4">
-            <?php if (!empty($violations)): ?>
+        <?php if (!empty($violations)): ?>
+            <div class="row g-3 g-md-4">
                 <?php foreach ($violations as $violation): ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100">
                             <div class="card-header">
-                                <h5 class="mb-0"><?php echo htmlspecialchars($violation['violation_type']); ?></h5>
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <?php echo htmlspecialchars($violation['violation_type']); ?>
                             </div>
                             <div class="card-body">
-                                <p><strong>Violation ID:</strong> <?php echo htmlspecialchars($violation['id']); ?></p>
+                                <p><strong>ID:</strong> <?php echo htmlspecialchars($violation['id']); ?></p>
                                 <p><strong>Violator:</strong> <?php echo htmlspecialchars($violation['violator_name']); ?></p>
-                                <p><strong>Plate Number:</strong> <?php echo htmlspecialchars($violation['plate_number']); ?></p>
+                                <p><strong>Plate:</strong> <?php echo htmlspecialchars($violation['plate_number']); ?></p>
                                 <p><strong>Reason:</strong> <?php echo htmlspecialchars($violation['reason']); ?></p>
-                                <p><strong>Fine Amount:</strong> ₱<?php echo number_format($violation['fine_amount'], 2); ?></p>
-                                <p><strong>Issued Date:</strong> <?php echo htmlspecialchars($violation['issued_date']); ?></p>
-                                <p><strong>License:</strong> 
-                                    <span class="badge <?php echo $violation['has_license'] ? 'bg-success' : 'bg-danger'; ?>">
-                                        <?php echo $violation['has_license'] ? 'Yes' : 'No'; ?>
-                                    </span>
-                                </p>
-                                <p><strong>Impounded:</strong> 
-                                    <span class="badge <?php echo $violation['is_impounded'] ? 'bg-warning' : 'bg-success'; ?>">
-                                        <?php echo $violation['is_impounded'] ? 'Yes' : 'No'; ?>
-                                    </span>
-                                </p>
-                                <p><strong>Payment Status:</strong> 
-                                    <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
-                                        <?php echo $violation['is_paid'] ? 'Paid' : 'Unpaid'; ?>
-                                    </span>
-                                </p>
-                                <p><strong>Status:</strong> 
-                                    <span class="badge <?php 
-                                        echo $violation['status'] === 'Pending' ? 'bg-warning' : 
-                                            ($violation['status'] === 'Resolved' ? 'bg-success' : 'bg-danger'); ?>">
-                                        <?php echo htmlspecialchars($violation['status']); ?>
-                                    </span>
-                                </p>
+                                <p><strong>Fine:</strong> ₱<?php echo number_format($violation['fine_amount'], 2); ?></p>
+                                <p><strong>Date:</strong> <?php echo htmlspecialchars($violation['issued_date']); ?></p>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <p><strong>License:</strong><br>
+                                            <span class="badge <?php echo $violation['has_license'] ? 'bg-success' : 'bg-danger'; ?>">
+                                                <?php echo $violation['has_license'] ? 'Yes' : 'No'; ?>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Impounded:</strong><br>
+                                            <span class="badge <?php echo $violation['is_impounded'] ? 'bg-warning' : 'bg-success'; ?>">
+                                                <?php echo $violation['is_impounded'] ? 'Yes' : 'No'; ?>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <p><strong>Paid:</strong><br>
+                                            <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
+                                                <?php echo $violation['is_paid'] ? 'Paid' : 'Unpaid'; ?>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Status:</strong><br>
+                                            <span class="badge <?php 
+                                                echo $violation['status'] === 'Pending' ? 'bg-warning' : 
+                                                    ($violation['status'] === 'Resolved' ? 'bg-success' : 'bg-danger'); ?>">
+                                                <?php echo htmlspecialchars($violation['status']); ?>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
                                 <p><strong>Notes:</strong> <?php echo htmlspecialchars($violation['notes'] ?: 'N/A'); ?></p>
                             </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
-            <?php elseif ($plate_number): ?>
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        No violations found for the provided plate number.
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php elseif ($plate_number): ?>
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                No violations found for plate number: <strong><?php echo htmlspecialchars($plate_number); ?></strong>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         toastr.options = {
             closeButton: true,
