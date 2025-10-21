@@ -8647,3 +8647,56 @@ Session Data: Array
 Login.php accessed: 2025-10-21 11:14:50
 Login.php accessed: 2025-10-21 11:14:58
 Login successful for user_id: 1, role: admin
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Login.php accessed: 2025-10-21 11:21:54
+Login.php accessed: 2025-10-21 11:21:58
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 123
+    [contact_number] => 912312412
+    [email] => spiralsmoke903@gmail.com
+)
+
