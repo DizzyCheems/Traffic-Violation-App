@@ -895,7 +895,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Store original types from PHP (simulated client-side for now)
+    // Store original types from PHP
     const originalTypes = <?php echo json_encode($types); ?> || [];
 
     plateNumberInput.addEventListener('input', function() {
@@ -937,10 +937,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td><span class="badge bg-warning text-dark">${violation.status || 'N/A'}</span></td>
                     `;
                     violationHistoryBody.appendChild(row);
-                    if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id);
+                    if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id.toString());
                 });
 
-                // Populate available violation types
+                // Populate available violation types, excluding used ones
                 populateAvailableTypes(usedTypeIds);
             } else {
                 violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
@@ -967,19 +967,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 violationTypeBody.appendChild(row);
             });
+            // Add click event to select buttons
+            document.querySelectorAll('.select-violation').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    selectedViolationTypeId.value = id;
+                    console.log('Selected violation type ID:', id);
+                    toastr.success('Violation type selected: ' + originalTypes.find(t => t.id == id).violation_type);
+                });
+            });
         } else {
             violationTypeBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No available violation types</td></tr>';
         }
-
-        // Add click event to select buttons
-        document.querySelectorAll('.select-violation').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                selectedViolationTypeId.value = id;
-                console.log('Selected violation type ID:', id);
-                toastr.success('Violation type selected: ' + originalTypes.find(t => t.id == id).violation_type);
-            });
-        });
     }
 
     function clearHistoryAndResetTables() {
