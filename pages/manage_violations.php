@@ -412,6 +412,10 @@ try {
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
 
+<!--        <div class="px-3 py-2">
+            <img src="../public/images/PRVN.png" alt="PRVN Logo" class="img-fluid" style="max-width: 150px; margin-bottom: 10px;">
+        </div>-->
+
         <!-- Toggle button for offcanvas sidebar (mobile only) -->
         <button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <i class="fas fa-bars"></i> Menu
@@ -495,24 +499,6 @@ try {
                     <h1 class="h2 text-primary">Manage Violations - <?php echo htmlspecialchars($officer['full_name']); ?></h1>
                     <div>
                         <a href="../pages/officer_dashboard.php" class="btn btn-outline-primary">Back to Dashboard</a>
-                    </div>
-                </div>
-
-                <!-- Plate Number Search -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">Search Violations by Plate Number</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <input type="text" id="searchPlate" class="form-control" placeholder="Enter plate number (e.g. ABC123)" />
-                            </div>
-                            <div class="col-md-4">
-                                <button id="searchBtn" class="btn btn-primary w-100">Search</button>
-                            </div>
-                        </div>
-                        <div id="searchResult" class="mt-3"></div>
                     </div>
                 </div>
 
@@ -729,134 +715,218 @@ try {
                     </div>
                 </div>
 
-                <!-- Create Violation Modal -->
-                <div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Create Violation Modal -->
+<div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
+                    <input type="hidden" name="create_violation" value="1">
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="violator_name" class="form-label">Violator Name</label>
+                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
+                                <div class="invalid-feedback">Please enter a valid violator name.</div>
                             </div>
-                            <div class="modal-body">
-                                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
-                                    <input type="hidden" name="create_violation" value="1">
-                                    <input type="hidden" name="user_id" id="user_id">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="violator_name" class="form-label">Violator Name</label>
-                                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
-                                                <div class="invalid-feedback">Please enter a valid violator name.</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="contact_number" class="form-label">Contact Number</label>
-                                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
-                                                <div class="invalid-feedback">Please enter a valid contact number.</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email (Optional)</label>
-                                                <input type="email" class="form-control" name="email" id="email">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
-                                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
-                                                    <div id="ocr_status" class="form-text"></div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="plate_number" class="form-label">License Plate</label>
-                                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required>
-                                                    <div class="invalid-feedback">Please enter a valid license plate.</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="violation_type_id" class="form-label">Violation Type</label>
-                                                    <select class="form-select" name="violation_type_id" id="violation_type_id" required>
-                                                        <option value="" disabled selected>Select</option>
-                                                        <?php foreach ($types as $type): ?>
-                                                            <option value="<?php echo htmlspecialchars($type['id']); ?>">
-                                                                <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                    <div class="invalid-feedback">Please select a violation type.</div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-12 mb-3">
-                                                        <label for="reason" class="form-label">Reason</label>
-                                                        <input type="text" class="form-control" name="reason" id="reason" >
-                                                        <div class="invalid-feedback">Please enter a valid reason.</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
-                                                        <label class="form-check-label" for="has_license">Has License</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="license_number" class="form-label">License Number</label>
-                                                    <input type="text" class="form-control" name="license_number" id="license_number">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
-                                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
-                                                        <label class="form-check-label" for="is_paid">Is Paid</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="or_number" class="form-label">CR Number</label>
-                                                    <input type="text" class="form-control" name="or_number" id="or_number">
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="issued_date" class="form-label">Issued Date</label>
-                                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="status" class="form-label">Status</label>
-                                                    <select class="form-select" name="status" id="status">
-                                                        <option value="Pending" selected>Pending</option>
-                                                        <option value="Resolved">Resolved</option>
-                                                        <option value="Disputed">Disputed</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="notes" class="form-label">Notes</label>
-                                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <button type="submit" class="btn btn-primary">Create Violation</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="mb-3">
+                                <label for="contact_number" class="form-label">Contact Number</label>
+                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
+                                <div class="invalid-feedback">Please enter a valid contact number.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email (Optional)</label>
+                                <input type="email" class="form-control" name="email" id="email">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
+                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
+                                    <div id="ocr_status" class="form-text"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="plate_number" class="form-label">License Plate</label>
+                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required>
+                                    <div class="invalid-feedback">Please enter a valid license plate.</div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="violation_type_id" class="form-label">Violation Type</label>
+                                    <select class="form-select" name="violation_type_id" id="violation_type_id" required>
+                                        <option value="" disabled selected>Select</option>
+                                        <?php foreach ($types as $type): ?>
+                                            <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                                                <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a violation type.</div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <input type="text" class="form-control" name="reason" id="reason">
+                                    <div class="invalid-feedback">Please enter a valid reason.</div>
+                                </div>
+                            </div>
+                            <!-- Violation History Table -->
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <h6>Violation History for Plate Number</h6>
+                                    <div id="violationHistoryTable" class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Violation Type</th>
+                                                    <th>Fine Amount</th>
+                                                    <th>Issued Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="violationHistoryBody">
+                                                <tr>
+                                                    <td colspan="4" class="text-center">Enter a plate number to view violation history</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                </form>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
+                                        <label class="form-check-label" for="has_license">Has License</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="license_number" class="form-label">License Number</label>
+                                    <input type="text" class="form-control" name="license_number" id="license_number">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
+                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
+                                        <label class="form-check-label" for="is_paid">Is Paid</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="or_number" class="form-label">CR Number</label>
+                                    <input type="text" class="form-control" name="or_number" id="or_number">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="issued_date" class="form-label">Issued Date</label>
+                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="status">
+                                        <option value="Pending" selected>Pending</option>
+                                        <option value="Resolved">Resolved</option>
+                                        <option value="Disputed">Disputed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="notes" class="form-label">Notes</label>
+                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary">Create Violation</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </main>
+                </form>
+            </div>
         </div>
     </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const plateNumberInput = document.getElementById('plate_number');
+    const violationHistoryBody = document.getElementById('violationHistoryBody');
+
+    if (!plateNumberInput || !violationHistoryBody) {
+        console.error('Required elements not found:', { plateNumberInput, violationHistoryBody });
+        return;
+    }
+
+    plateNumberInput.addEventListener('input', function() {
+        const plateNumber = this.value.trim();
+        console.log('Plate number changed to:', plateNumber);
+
+        if (plateNumber.length > 0) {
+            fetchViolationHistory(plateNumber);
+        } else {
+            violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view violation history</td></tr>';
+        }
+    });
+
+  function fetchViolationHistory(plateNumber) {
+        console.log('Fetching violation history for:', plateNumber);
+        fetch('fetch_violation_history.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'plate_number=' + encodeURIComponent(plateNumber)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            violationHistoryBody.innerHTML = '';
+            if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
+                data.violations.forEach(violation => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${violation.violation_type || 'N/A'}</td>
+                        <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
+                        <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
+                        <td>${violation.status || 'N/A'}</td>
+                    `;
+                    violationHistoryBody.appendChild(row);
+                });
+            } else {
+                violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">No violations found for this plate number</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching violation history:', error);
+            violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Error loading violation history: ' + error.message + '</td></tr>';
+        });
+    }
+});
+</script>
+</main>
+</div>
+</div>
     <?php include '../layout/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
     <script>
@@ -873,68 +943,34 @@ try {
             <?php echo $msg; ?>
         <?php endforeach; ?>
 
-        // Search Violations by Plate Number
-        document.getElementById('searchBtn').addEventListener('click', function() {
-            const plate = document.getElementById('searchPlate').value.trim().toUpperCase();
-            const resultDiv = document.getElementById('searchResult');
-            if (!plate) {
-                resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a plate number.</div>';
-                return;
-            }
-
-            fetch('search_violations_by_plate.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'plate_number=' + encodeURIComponent(plate)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.types.length > 0) {
-                    let typesList = data.types.map(t => `<li class="list-group-item">${t.violation_type} (₱${parseFloat(t.fine_amount).toFixed(2)})</li>`).join('');
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <strong>${data.count} violation(s) found for plate <strong>${plate}</strong></strong>
-                            <ul class="list-group mt-2">
-                                ${typesList}
-                            </ul>
-                        </div>`;
-                } else {
-                    resultDiv.innerHTML = '<div class="alert alert-info">No violations found for plate <strong>' + plate + '</strong>.</div>';
-                }
-            })
-            .catch(err => {
-                resultDiv.innerHTML = '<div class="alert alert-danger">Error: ' + err.message + '</div>';
-            });
-        });
-
-        // Allow pressing Enter in search input
-        document.getElementById('searchPlate').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('searchBtn').click();
-            }
-        });
-
         // Function to perform OCR on image and populate plate number
         function performOCR(file, inputId) {
-            if (!file) return;
-            const ocrStatus = document.getElementById('ocr_status');
-            ocrStatus.textContent = 'Processing image...';
-            Tesseract.recognize(file, 'eng', { logger: m => console.log(m) })
-                .then(({ data: { text } }) => {
+                const ocrStatus = document.getElementById('ocr_status');
+                ocrStatus.textContent = 'Processing image...';
+                Tesseract.recognize(
+                    file,
+                    'eng',
+                    { logger: m => console.log('OCR Progress:', m) }
+                ).then(({ data: { text } }) => {
                     const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                    document.getElementById(inputId).value = cleanedText;
+                    const input = document.getElementById(inputId);
+                    input.value = cleanedText;
                     ocrStatus.textContent = 'Text extracted successfully!';
+                    console.log('OCR Result:', cleanedText);
+                    // Manually trigger the input event to fetch violation history
+                    input.dispatchEvent(new Event('input'));
                     fetchUserByPlateNumber(cleanedText);
-                })
-                .catch(error => {
-                    ocrStatus.textContent = 'Error extracting text.';
+                }).catch(error => {
+                    ocrStatus.textContent = 'Error extracting text from image.';
                     console.error('OCR Error:', error);
                 });
-        }
+            }
 
         // Function to fetch user details by plate number
         function fetchUserByPlateNumber(plateNumber) {
             if (!plateNumber) {
+                console.log('No plate number provided');
+                // Clear fields if plate number is empty
                 document.getElementById('violator_name').value = '';
                 document.getElementById('contact_number').value = '';
                 document.getElementById('email').value = '';
@@ -943,13 +979,23 @@ try {
                 document.getElementById('license_number').value = '';
                 return;
             }
+            console.log('Fetching user data for plate:', plateNumber);
             fetch('get_user_by_plate.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
                 body: 'plate_number=' + encodeURIComponent(plateNumber)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Fetch response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Fetch response data:', data);
                 if (data.success) {
                     document.getElementById('violator_name').value = data.violator_name || '';
                     document.getElementById('contact_number').value = data.contact_number || '';
@@ -957,40 +1003,139 @@ try {
                     document.getElementById('user_id').value = data.user_id || '';
                     document.getElementById('has_license').checked = data.has_license == 1;
                     document.getElementById('license_number').value = data.license_number || '';
-                    toastr.success('User details populated.');
+                    toastr.success('User details populated successfully.');
                 } else {
+                    // Clear fields if no data found
                     document.getElementById('violator_name').value = '';
                     document.getElementById('contact_number').value = '';
                     document.getElementById('email').value = '';
                     document.getElementById('user_id').value = '';
                     document.getElementById('has_license').checked = false;
                     document.getElementById('license_number').value = '';
-                    toastr.info(data.message || 'No previous record.');
+                    console.log('No user data found:', data.message);
+                    toastr.info(data.message || 'No previous violation found for this plate number.');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                toastr.error('Failed to fetch user.');
+                console.error('Error fetching user by plate:', error);
+                toastr.error('Error fetching user details: ' + error.message);
             });
         }
 
-        // OCR on image upload
+        // Client-side validation for Create Violation Form
+        document.getElementById('createViolationForm').addEventListener('submit', function(e) {
+            console.log('Create violation form submission attempted');
+            const violatorName = document.getElementById('violator_name').value.trim();
+            const contactNumber = document.getElementById('contact_number').value.trim();
+            const plateNumber = document.getElementById('plate_number').value.trim();
+            const reason = document.getElementById('reason').value.trim();
+            const violationTypeId = document.getElementById('violation_type_id').value;
+
+            let isValid = true;
+
+            document.getElementById('violator_name').classList.remove('is-invalid');
+            document.getElementById('contact_number').classList.remove('is-invalid');
+            document.getElementById('plate_number').classList.remove('is-invalid');
+            document.getElementById('reason').classList.remove('is-invalid');
+            document.getElementById('violation_type_id').classList.remove('is-invalid');
+
+            if (!violatorName) {
+                document.getElementById('violator_name').classList.add('is-invalid');
+                isValid = false;
+            }
+            if (!contactNumber) {
+                document.getElementById('contact_number').classList.add('is-invalid');
+                isValid = false;
+            }
+            if (!plateNumber) {
+                document.getElementById('plate_number').classList.add('is-invalid');
+                isValid = false;
+            }
+            if (!reason) {
+                document.getElementById('reason').classList.add('is-invalid');
+                isValid = false;
+            }
+            if (!violationTypeId) {
+                document.getElementById('violation_type_id').classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                console.log('Client-side validation failed for create violation');
+                e.preventDefault();
+                return;
+            }
+
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to create this violation?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, create it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Create violation form submission confirmed');
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this)
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                title: 'Created!',
+                                text: 'Violation has been created successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Failed to create violation.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while creating the violation.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                } else {
+                    console.log('Create violation form submission canceled');
+                }
+            });
+        });
+
+        // Handle image upload for OCR in Create Violation Form
         document.getElementById('plate_image').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) performOCR(file, 'plate_number');
+            if (file) {
+                console.log('Image selected for OCR:', file.name);
+                performOCR(file, 'plate_number');
+            }
         });
 
-        // Auto-fetch on plate input
+        // Handle plate number input for auto-population
         document.getElementById('plate_number').addEventListener('input', function() {
-            fetchUserByPlateNumber(this.value.trim());
+            const plateNumber = this.value.trim();
+            console.log('Plate number input changed:', plateNumber);
+            fetchUserByPlateNumber(plateNumber);
         });
 
-        // Edit form OCR
+        // Handle image upload for OCR in Edit Violation Forms
         document.querySelectorAll('input[name="plate_image"]').forEach(input => {
             input.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
                     const inputId = this.id.replace('plate_image_', 'plate_number_');
+                    console.log('Image selected for OCR in edit form:', file.name);
                     performOCR(file, inputId);
                 }
             });

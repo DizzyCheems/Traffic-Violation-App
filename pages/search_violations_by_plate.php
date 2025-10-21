@@ -1,6 +1,9 @@
 <?php
 // search_violations_by_plate.php
+ob_start();
 session_start();
+header('Content-Type: application/json');
+
 include '../config/conn.php';
 
 if (!isset($_SESSION['user_id']) || !in_array(strtolower($_SESSION['role']), ['officer', 'admin'])) {
@@ -10,30 +13,42 @@ if (!isset($_SESSION['user_id']) || !in_array(strtolower($_SESSION['role']), ['o
 
 $plate = trim($_POST['plate_number'] ?? '');
 if (empty($plate)) {
-    echo json_encode(['success' => false, 'message' => 'Plate number required']);
+    echo json_encode(['success' => false, 'message' => 'Plate required']);
     exit;
 }
 
 try {
+    // Get violations grouped by type with offense count
     $stmt = $pdo->prepare("
-        SELECT DISTINCT t.id, t.violation_type, t.fine_amount 
+        SELECT 
+            t.id, 
+            t.violation_type, 
+            t.fine_amount,
+            COUNT(*) as offense_count,
+            MAX(v.issued_date) as last_offense
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
-        WHERE v.plate_number = ? AND v.officer_id = ?
+        WHERE UPPER(v.plate_number) = UPPER(?) 
+          AND v.officer_id = ?
+        GROUP BY t.id, t.violation_type, t.fine_amount
+        ORDER BY offense_count DESC, last_offense DESC
     ");
     $stmt->execute([$plate, $_SESSION['user_id']]);
-    $types = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $violationStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $count = $pdo->prepare("SELECT COUNT(*) FROM violations WHERE plate_number = ? AND officer_id = ?");
-    $count->execute([$plate, $_SESSION['user_id']]);
-    $total = $count->fetchColumn();
+    $total = array_sum(array_column($violationStats, 'offense_count'));
 
     echo json_encode([
         'success' => true,
-        'count' => $total,
-        'types' => $types
-    ]);
+        'count' => (int)$total,
+        'plate' => strtoupper($plate),
+        'stats' => $violationStats // Enhanced: includes count per type
+    ], JSON_UNESCAPED_SLASHES);
+
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Database error']);
+    error_log("search_violations_by_plate error: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Server error']);
 }
+ob_end_flush();
+exit;
 ?>
