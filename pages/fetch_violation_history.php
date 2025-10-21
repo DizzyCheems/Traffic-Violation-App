@@ -1,7 +1,5 @@
 <?php
 header('Content-Type: application/json');
-
-// Include the database connection
 include '../config/conn.php';
 
 try {
@@ -13,7 +11,7 @@ try {
     }
 
     $query = "
-        SELECT t.violation_type, t.fine_amount, v.issued_date, v.status
+        SELECT t.id AS violation_type_id, t.violation_type, t.fine_amount, v.issued_date, v.status
         FROM violations v
         JOIN types t ON v.violation_type_id = t.id
         WHERE v.plate_number = :plate_number
@@ -26,6 +24,6 @@ try {
 
     echo json_encode(['success' => true, 'violations' => $violations]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Error: ' + $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
 ?>

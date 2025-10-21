@@ -405,6 +405,15 @@ try {
     $violations = [];
 }
 ?>
+
+<style>
+    <style>
+    #violation_type_id option:disabled {
+        color: #ccc !important;
+        font-style: italic;
+    }
+</style>
+
 <!DOCTYPE html>
 <html lang="en">
 <?php include '../layout/header.php'; ?>
@@ -635,14 +644,15 @@ try {
                                                                     </div>
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="violation_type_id_<?php echo $violation['id']; ?>" class="form-label">Violation Type</label>
-                                                                        <select class="form-select" name="violation_type_id" id="violation_type_id_<?php echo $violation['id']; ?>" required>
-                                                                            <option value="">Select</option>
-                                                                            <?php foreach ($types as $type): ?>
-                                                                                <option value="<?php echo htmlspecialchars($type['id']); ?>" <?php echo $type['id'] == $violation['violation_type_id'] ? 'selected' : ''; ?>>
-                                                                                    <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
-                                                                                </option>
-                                                                            <?php endforeach; ?>
-                                                                        </select>
+<select class="form-select" name="violation_type_id" id="violation_type_id" required>
+    <option value="" disabled selected>Select</option>
+    <?php foreach ($types as $type): ?>
+        <option value="<?php echo htmlspecialchars($type['id']); ?>" 
+                data-original-text="<?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)">
+            <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
+        </option>
+    <?php endforeach; ?>
+</select>
                                                                         <div class="invalid-feedback">Please select a violation type.</div>
                                                                     </div>
                                                                 </div>
@@ -763,7 +773,8 @@ try {
                                     <select class="form-select" name="violation_type_id" id="violation_type_id" required>
                                         <option value="" disabled selected>Select</option>
                                         <?php foreach ($types as $type): ?>
-                                            <option value="<?php echo htmlspecialchars($type['id']); ?>">
+                                            <option value="<?php echo htmlspecialchars($type['id']); ?>"
+                                                    data-original-text="<?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)">
                                                 <?php echo htmlspecialchars($type['violation_type']); ?> (₱<?php echo number_format($type['fine_amount'], 2); ?>)
                                             </option>
                                         <?php endforeach; ?>
@@ -866,11 +877,19 @@ try {
 document.addEventListener('DOMContentLoaded', function() {
     const plateNumberInput = document.getElementById('plate_number');
     const violationHistoryBody = document.getElementById('violationHistoryBody');
+    const violationTypeSelect = document.getElementById('violation_type_id');
 
-    if (!plateNumberInput || !violationHistoryBody) {
-        console.error('Required elements not found:', { plateNumberInput, violationHistoryBody });
+    if (!plateNumberInput || !violationHistoryBody || !violationTypeSelect) {
+        console.error('Required elements not found:', { plateNumberInput, violationHistoryBody, violationTypeSelect });
         return;
     }
+
+    // Store original options for reset
+    const originalOptions = Array.from(violationTypeSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        disabled: opt.disabled
+    }));
 
     plateNumberInput.addEventListener('input', function() {
         const plateNumber = this.value.trim();
@@ -879,11 +898,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (plateNumber.length > 0) {
             fetchViolationHistory(plateNumber);
         } else {
-            violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view violation history</td></tr>';
+            clearHistoryAndResetDropdown();
         }
     });
 
-  function fetchViolationHistory(plateNumber) {
+    function fetchViolationHistory(plateNumber) {
         console.log('Fetching violation history for:', plateNumber);
         fetch('fetch_violation_history.php', {
             method: 'POST',
@@ -894,174 +913,307 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.statusText);
-            }
+            if (!response.ok) throw new Error('Network error: ' + response.statusText);
             return response.json();
         })
         .then(data => {
             console.log('Response data:', data);
             violationHistoryBody.innerHTML = '';
+
+            // Reset dropdown first
+            resetViolationTypeDropdown();
+
             if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
+                const usedTypeIds = new Set(data.violations.map(v => v.violation_type_id));
+
                 data.violations.forEach(violation => {
+                    // Add row to table
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${violation.violation_type || 'N/A'}</td>
                         <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
                         <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
-                        <td>${violation.status || 'N/A'}</td>
+                        <td><span class="badge bg-warning text-dark">${violation.status || 'N/A'}</span></td>
                     `;
                     violationHistoryBody.appendChild(row);
                 });
+
+                // Exclude used types from dropdown
+                filterViolationTypes(usedTypeIds);
             } else {
-                violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">No violations found for this plate number</td></tr>';
+                violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violations found for this plate number</td></tr>';
             }
         })
         .catch(error => {
-            console.error('Error fetching violation history:', error);
-            violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Error loading violation history: ' + error.message + '</td></tr>';
+            console.error('Error:', error);
+            violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
+            resetViolationTypeDropdown();
         });
     }
+
+    function filterViolationTypes(usedTypeIds) {
+        violationTypeSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+        originalOptions.forEach(opt => {
+            if (opt.value && !usedTypeIds.has(opt.value)) {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.text;
+                option.disabled = opt.disabled;
+                if (opt.value) {
+                    option.dataset.originalText = opt.text;
+                }
+                violationTypeSelect.appendChild(option);
+            }
+        });
+        if (violationTypeSelect.options.length <= 1) {
+            violationTypeSelect.innerHTML = '<option value="" disabled selected>No available violation types</option>';
+        }
+    }
+
+    function resetViolationTypeDropdown() {
+        violationTypeSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+        originalOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.text;
+            option.disabled = opt.disabled;
+            if (opt.value) {
+                option.dataset.originalText = opt.text;
+            }
+            violationTypeSelect.appendChild(option);
+        });
+        violationTypeSelect.selectedIndex = 0;
+    }
+
+    function clearHistoryAndResetDropdown() {
+        violationHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view violation history</td></tr>';
+        resetViolationTypeDropdown();
+    }
+
+    // Initialize: store original text in dataset
+    document.querySelectorAll('#violation_type_id option').forEach(opt => {
+        if (opt.value) {
+            opt.dataset.originalText = opt.textContent;
+        }
+    });
 });
 </script>
 </main>
 </div>
 </div>
-    <?php include '../layout/footer.php'; ?>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
-    <script>
-        // Initialize Toastr
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            positionClass: 'toast-top-right',
-            timeOut: 5000
-        };
+<?php include '../layout/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+<script>
+    // Initialize Toastr
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: 5000
+    };
 
-        // Display Toastr/SweetAlert messages
-        <?php foreach ($toastr_messages as $msg): ?>
-            <?php echo $msg; ?>
-        <?php endforeach; ?>
+    // Display Toastr/SweetAlert messages
+    <?php foreach ($toastr_messages as $msg): ?>
+        <?php echo $msg; ?>
+    <?php endforeach; ?>
 
-        // Function to perform OCR on image and populate plate number
-        function performOCR(file, inputId) {
-                const ocrStatus = document.getElementById('ocr_status');
-                ocrStatus.textContent = 'Processing image...';
-                Tesseract.recognize(
-                    file,
-                    'eng',
-                    { logger: m => console.log('OCR Progress:', m) }
-                ).then(({ data: { text } }) => {
-                    const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                    const input = document.getElementById(inputId);
-                    input.value = cleanedText;
-                    ocrStatus.textContent = 'Text extracted successfully!';
-                    console.log('OCR Result:', cleanedText);
-                    // Manually trigger the input event to fetch violation history
-                    input.dispatchEvent(new Event('input'));
-                    fetchUserByPlateNumber(cleanedText);
-                }).catch(error => {
-                    ocrStatus.textContent = 'Error extracting text from image.';
-                    console.error('OCR Error:', error);
-                });
-            }
+    // Function to perform OCR on image and populate plate number
+    function performOCR(file, inputId) {
+        const ocrStatus = document.getElementById('ocr_status');
+        ocrStatus.textContent = 'Processing image...';
+        Tesseract.recognize(
+            file,
+            'eng',
+            { logger: m => console.log('OCR Progress:', m) }
+        ).then(({ data: { text } }) => {
+            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            const input = document.getElementById(inputId);
+            input.value = cleanedText;
+            ocrStatus.textContent = 'Text extracted successfully!';
+            console.log('OCR Result:', cleanedText);
+            // Manually trigger the input event to fetch violation history
+            input.dispatchEvent(new Event('input'));
+            fetchUserByPlateNumber(cleanedText);
+        }).catch(error => {
+            ocrStatus.textContent = 'Error extracting text from image.';
+            console.error('OCR Error:', error);
+        });
+    }
 
-        // Function to fetch user details by plate number
-        function fetchUserByPlateNumber(plateNumber) {
-            if (!plateNumber) {
-                console.log('No plate number provided');
-                // Clear fields if plate number is empty
+    // Function to fetch user details by plate number
+    function fetchUserByPlateNumber(plateNumber) {
+        if (!plateNumber) {
+            console.log('No plate number provided');
+            document.getElementById('violator_name').value = '';
+            document.getElementById('contact_number').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('user_id').value = '';
+            document.getElementById('has_license').checked = false;
+            document.getElementById('license_number').value = '';
+            return;
+        }
+        console.log('Fetching user data for plate:', plateNumber);
+        fetch('get_user_by_plate.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'plate_number=' + encodeURIComponent(plateNumber)
+        })
+        .then(response => {
+            console.log('Fetch response status:', response.status);
+            if (!response.ok) throw new Error('Network response was not ok: ' + response.statusText);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Fetch response data:', data);
+            if (data.success) {
+                document.getElementById('violator_name').value = data.violator_name || '';
+                document.getElementById('contact_number').value = data.contact_number || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('user_id').value = data.user_id || '';
+                document.getElementById('has_license').checked = data.has_license == 1;
+                document.getElementById('license_number').value = data.license_number || '';
+                toastr.success('User details populated successfully.');
+            } else {
                 document.getElementById('violator_name').value = '';
                 document.getElementById('contact_number').value = '';
                 document.getElementById('email').value = '';
                 document.getElementById('user_id').value = '';
                 document.getElementById('has_license').checked = false;
                 document.getElementById('license_number').value = '';
-                return;
+                console.log('No user data found:', data.message);
+                toastr.info(data.message || 'No previous violation found for this plate number.');
             }
-            console.log('Fetching user data for plate:', plateNumber);
-            fetch('get_user_by_plate.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'plate_number=' + encodeURIComponent(plateNumber)
-            })
-            .then(response => {
-                console.log('Fetch response status:', response.status);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetch response data:', data);
-                if (data.success) {
-                    document.getElementById('violator_name').value = data.violator_name || '';
-                    document.getElementById('contact_number').value = data.contact_number || '';
-                    document.getElementById('email').value = data.email || '';
-                    document.getElementById('user_id').value = data.user_id || '';
-                    document.getElementById('has_license').checked = data.has_license == 1;
-                    document.getElementById('license_number').value = data.license_number || '';
-                    toastr.success('User details populated successfully.');
-                } else {
-                    // Clear fields if no data found
-                    document.getElementById('violator_name').value = '';
-                    document.getElementById('contact_number').value = '';
-                    document.getElementById('email').value = '';
-                    document.getElementById('user_id').value = '';
-                    document.getElementById('has_license').checked = false;
-                    document.getElementById('license_number').value = '';
-                    console.log('No user data found:', data.message);
-                    toastr.info(data.message || 'No previous violation found for this plate number.');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching user by plate:', error);
-                toastr.error('Error fetching user details: ' + error.message);
-            });
+        })
+        .catch(error => {
+            console.error('Error fetching user by plate:', error);
+            toastr.error('Error fetching user details: ' + error.message);
+        });
+    }
+
+    // Client-side validation for Create Violation Form
+    document.getElementById('createViolationForm').addEventListener('submit', function(e) {
+        console.log('Create violation form submission attempted');
+        const violatorName = document.getElementById('violator_name').value.trim();
+        const contactNumber = document.getElementById('contact_number').value.trim();
+        const plateNumber = document.getElementById('plate_number').value.trim();
+        const reason = document.getElementById('reason').value.trim();
+        const violationTypeId = document.getElementById('violation_type_id').value;
+
+        let isValid = true;
+
+        document.getElementById('violator_name').classList.remove('is-invalid');
+        document.getElementById('contact_number').classList.remove('is-invalid');
+        document.getElementById('plate_number').classList.remove('is-invalid');
+        document.getElementById('reason').classList.remove('is-invalid');
+        document.getElementById('violation_type_id').classList.remove('is-invalid');
+
+        if (!violatorName) { document.getElementById('violator_name').classList.add('is-invalid'); isValid = false; }
+        if (!contactNumber) { document.getElementById('contact_number').classList.add('is-invalid'); isValid = false; }
+        if (!plateNumber) { document.getElementById('plate_number').classList.add('is-invalid'); isValid = false; }
+        if (!reason) { document.getElementById('reason').classList.add('is-invalid'); isValid = false; }
+        if (!violationTypeId) { document.getElementById('violation_type_id').classList.add('is-invalid'); isValid = false; }
+
+        if (!isValid) {
+            console.log('Client-side validation failed for create violation');
+            e.preventDefault();
+            return;
         }
 
-        // Client-side validation for Create Violation Form
-        document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-            console.log('Create violation form submission attempted');
-            const violatorName = document.getElementById('violator_name').value.trim();
-            const contactNumber = document.getElementById('contact_number').value.trim();
-            const plateNumber = document.getElementById('plate_number').value.trim();
-            const reason = document.getElementById('reason').value.trim();
-            const violationTypeId = document.getElementById('violation_type_id').value;
+        e.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to create this violation?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, create it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('Create violation form submission confirmed');
+                fetch(this.action, { method: 'POST', body: new FormData(this) })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            title: 'Created!',
+                            text: 'Violation has been created successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => window.location.reload());
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to create violation.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while creating the violation.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            } else console.log('Create violation form submission canceled');
+        });
+    });
+
+    // Handle image upload for OCR in Create Violation Form
+    document.getElementById('plate_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            console.log('Image selected for OCR:', file.name);
+            performOCR(file, 'plate_number');
+        }
+    });
+
+    // Handle plate number input for auto-population
+    document.getElementById('plate_number').addEventListener('input', function() {
+        const plateNumber = this.value.trim();
+        console.log('Plate number input changed:', plateNumber);
+        fetchUserByPlateNumber(plateNumber);
+    });
+
+    // Handle image upload for OCR in Edit Violation Forms
+    document.querySelectorAll('input[name="plate_image"]').forEach(input => {
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const inputId = this.id.replace('plate_image_', 'plate_number_');
+                console.log('Image selected for OCR in edit form:', file.name);
+                performOCR(file, inputId);
+            }
+        });
+    });
+
+    // Client-side validation for Edit Violation Forms
+    document.querySelectorAll('.edit-violation-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            console.log('Edit violation form submission attempted');
+            const violatorName = this.querySelector('input[name="violator_name"]').value.trim();
+            const contactNumber = this.querySelector('input[name="contact_number"]').value.trim();
+            const plateNumber = this.querySelector('input[name="plate_number"]').value.trim();
+            const reason = this.querySelector('input[name="reason"]').value.trim();
+            const violationTypeId = this.querySelector('select[name="violation_type_id"]').value;
 
             let isValid = true;
 
-            document.getElementById('violator_name').classList.remove('is-invalid');
-            document.getElementById('contact_number').classList.remove('is-invalid');
-            document.getElementById('plate_number').classList.remove('is-invalid');
-            document.getElementById('reason').classList.remove('is-invalid');
-            document.getElementById('violation_type_id').classList.remove('is-invalid');
+            this.querySelector('input[name="violator_name"]').classList.remove('is-invalid');
+            this.querySelector('input[name="contact_number"]').classList.remove('is-invalid');
+            this.querySelector('input[name="plate_number"]').classList.remove('is-invalid');
+            this.querySelector('input[name="reason"]').classList.remove('is-invalid');
+            this.querySelector('select[name="violation_type_id"]').classList.remove('is-invalid');
 
-            if (!violatorName) {
-                document.getElementById('violator_name').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!contactNumber) {
-                document.getElementById('contact_number').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!plateNumber) {
-                document.getElementById('plate_number').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!reason) {
-                document.getElementById('reason').classList.add('is-invalid');
-                isValid = false;
-            }
-            if (!violationTypeId) {
-                document.getElementById('violation_type_id').classList.add('is-invalid');
-                isValid = false;
-            }
+            if (!violatorName) { this.querySelector('input[name="violator_name"]').classList.add('is-invalid'); isValid = false; }
+            if (!contactNumber) { this.querySelector('input[name="contact_number"]').classList.add('is-invalid'); isValid = false; }
+            if (!plateNumber) { this.querySelector('input[name="plate_number"]').classList.add('is-invalid'); isValid = false; }
+            if (!reason) { this.querySelector('input[name="reason"]').classList.add('is-invalid'); isValid = false; }
+            if (!violationTypeId) { this.querySelector('select[name="violation_type_id"]').classList.add('is-invalid'); isValid = false; }
 
             if (!isValid) {
-                console.log('Client-side validation failed for create violation');
+                console.log('Client-side validation failed for edit violation');
                 e.preventDefault();
                 return;
             }
@@ -1069,31 +1221,27 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             Swal.fire({
                 title: 'Are you sure?',
-                text: 'Do you want to create this violation?',
+                text: 'Do you want to update this violation?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, create it!',
+                confirmButtonText: 'Yes, update it!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Create violation form submission confirmed');
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: new FormData(this)
-                    }).then(response => {
+                    console.log('Edit violation form submission confirmed');
+                    fetch(this.action, { method: 'POST', body: new FormData(this) })
+                    .then(response => {
                         if (response.ok) {
                             Swal.fire({
-                                title: 'Created!',
-                                text: 'Violation has been created successfully.',
+                                title: 'Updated!',
+                                text: 'Violation has been updated successfully.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
+                            }).then(() => window.location.reload());
                         } else {
                             Swal.fire({
                                 title: 'Error!',
-                                text: 'Failed to create violation.',
+                                text: 'Failed to update violation.',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
@@ -1102,160 +1250,36 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.error('Error:', error);
                         Swal.fire({
                             title: 'Error!',
-                            text: 'An error occurred while creating the violation.',
+                            text: 'An error occurred while updating the violation.',
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });
                     });
-                } else {
-                    console.log('Create violation form submission canceled');
-                }
+                } else console.log('Edit violation form submission canceled');
             });
         });
+    });
 
-        // Handle image upload for OCR in Create Violation Form
-        document.getElementById('plate_image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                console.log('Image selected for OCR:', file.name);
-                performOCR(file, 'plate_number');
-            }
-        });
-
-        // Handle plate number input for auto-population
-        document.getElementById('plate_number').addEventListener('input', function() {
-            const plateNumber = this.value.trim();
-            console.log('Plate number input changed:', plateNumber);
-            fetchUserByPlateNumber(plateNumber);
-        });
-
-        // Handle image upload for OCR in Edit Violation Forms
-        document.querySelectorAll('input[name="plate_image"]').forEach(input => {
-            input.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const inputId = this.id.replace('plate_image_', 'plate_number_');
-                    console.log('Image selected for OCR in edit form:', file.name);
-                    performOCR(file, inputId);
-                }
+    // Client-side validation and confirmation for Delete Violation Forms
+    document.querySelectorAll('.delete-violation-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            console.log('Delete violation form submission attempted');
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to delete this violation? This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Delete violation form submission confirmed');
+                    this.submit();
+                } else console.log('Delete violation form submission canceled');
             });
         });
-
-        // Client-side validation for Edit Violation Forms
-        document.querySelectorAll('.edit-violation-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Edit violation form submission attempted');
-                const violatorName = this.querySelector('input[name="violator_name"]').value.trim();
-                const contactNumber = this.querySelector('input[name="contact_number"]').value.trim();
-                const plateNumber = this.querySelector('input[name="plate_number"]').value.trim();
-                const reason = this.querySelector('input[name="reason"]').value.trim();
-                const violationTypeId = this.querySelector('select[name="violation_type_id"]').value;
-
-                let isValid = true;
-
-                this.querySelector('input[name="violator_name"]').classList.remove('is-invalid');
-                this.querySelector('input[name="contact_number"]').classList.remove('is-invalid');
-                this.querySelector('input[name="plate_number"]').classList.remove('is-invalid');
-                this.querySelector('input[name="reason"]').classList.remove('is-invalid');
-                this.querySelector('select[name="violation_type_id"]').classList.remove('is-invalid');
-
-                if (!violatorName) {
-                    this.querySelector('input[name="violator_name"]').classList.add('is-invalid');
-                    isValid = false;
-                }
-                if (!contactNumber) {
-                    this.querySelector('input[name="contact_number"]').classList.add('is-invalid');
-                    isValid = false;
-                }
-                if (!plateNumber) {
-                    this.querySelector('input[name="plate_number"]').classList.add('is-invalid');
-                    isValid = false;
-                }
-                if (!reason) {
-                    this.querySelector('input[name="reason"]').classList.add('is-invalid');
-                    isValid = false;
-                }
-                if (!violationTypeId) {
-                    this.querySelector('select[name="violation_type_id"]').classList.add('is-invalid');
-                    isValid = false;
-                }
-
-                if (!isValid) {
-                    console.log('Client-side validation failed for edit violation');
-                    e.preventDefault();
-                    return;
-                }
-
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'Do you want to update this violation?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, update it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        console.log('Edit violation form submission confirmed');
-                        fetch(this.action, {
-                            method: 'POST',
-                            body: new FormData(this)
-                        }).then(response => {
-                            if (response.ok) {
-                                Swal.fire({
-                                    title: 'Updated!',
-                                    text: 'Violation has been updated successfully.',
-                                    icon: 'success',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: 'Failed to update violation.',
-                                    icon: 'error',
-                                    confirmButtonText: 'OK'
-                                });
-                            }
-                        }).catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'An error occurred while updating the violation.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        });
-                    } else {
-                        console.log('Edit violation form submission canceled');
-                    }
-                });
-            });
-        });
-
-        // Client-side validation and confirmation for Delete Violation Forms
-        document.querySelectorAll('.delete-violation-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Delete violation form submission attempted');
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'Do you want to delete this violation? This action cannot be undone.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        console.log('Delete violation form submission confirmed');
-                        this.submit();
-                    } else {
-                        console.log('Delete violation form submission canceled');
-                    }
-                });
-            });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
