@@ -75,6 +75,7 @@ if (!is_dir($upload_dir)) {
 
 // Handle create violation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) {
+    header('Content-Type: application/json'); // Set JSON response
     try {
         $violator_name = trim($_POST['violator_name'] ?? '');
         $user_id = trim($_POST['user_id'] ?? '') ?: null;
@@ -98,132 +99,135 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             $file_tmp = $_FILES['plate_image']['tmp_name'];
             $file_name = uniqid() . '_' . basename($_FILES['plate_image']['name']);
             $file_path = $upload_dir . $file_name;
-            if (move_uploaded_file($file_tmp, $file_path)) {
-                $plate_image = $file_path;
-            } else {
-                $toastr_messages[] = "toastr.error('Failed to upload plate image.');";
+            if (!move_uploaded_file($file_tmp, $file_path)) {
                 file_put_contents('../debug.log', "File Upload Failed: Unable to move file to $file_path\n", FILE_APPEND);
+                echo json_encode(['success' => false, 'message' => 'Failed to upload plate image.']);
+                exit;
             }
+            $plate_image = $file_path;
         }
 
         file_put_contents('../debug.log', "Create Violation Input: violator_name='$violator_name', user_id='$user_id', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id', plate_image='$plate_image'\n", FILE_APPEND);
 
         if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
-            $toastr_messages[] = "toastr.error('Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.');";
             file_put_contents('../debug.log', "Create Violation Failed: Missing required fields.\n", FILE_APPEND);
-        } else {
-            // Check if user_id is provided and valid
-            if ($user_id) {
-                $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE id = ? AND officer_id = ?");
-                $stmt->execute([$user_id, $_SESSION['user_id']]);
-                $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
-                if (!$existing_user || strtolower(trim($existing_user['full_name'])) !== strtolower(trim($violator_name))) {
-                    $toastr_messages[] = "toastr.error('Selected user is invalid or does not match the provided name.');";
-                    file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
-                    $user_id = null;
-                } else {
-                    $email = $email ?: $existing_user['email'];
-                }
-            }
+            echo json_encode(['success' => false, 'message' => 'Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.']);
+            exit;
+        }
 
-            // If no valid user_id, check if violator_name matches an existing user or create a new one
-            if (!$user_id) {
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE LOWER(full_name) = LOWER(?) AND officer_id = ?");
-                $stmt->execute([$violator_name, $_SESSION['user_id']]);
-                $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($existing_user) {
-                    $user_id = $existing_user['id'];
-                    $stmt = $pdo->prepare("UPDATE users SET contact_number = ?, email = ? WHERE id = ?");
-                    $success = $stmt->execute([$contact_number, $email, $user_id]);
-                    if (!$success) {
-                        $toastr_messages[] = "toastr.error('Failed to update user contact information.');";
-                        file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
-                    }
-                } else {
-                    $username = substr(strtolower(str_replace(' ', '_', $violator_name)), 0, 50);
-                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE LOWER(username) = LOWER(?)");
-                    $stmt->execute([$username]);
-                    if ($stmt->fetchColumn() > 0) {
-                        $username .= '_' . rand(1000, 9999);
-                    }
-                    $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id, contact_number, email) VALUES (?, 'x', ?, 'user', ?, ?, ?)");
-                    $success = $stmt->execute([$username, $violator_name, $_SESSION['user_id'], $contact_number, $email]);
-                    if ($success) {
-                        $user_id = $pdo->lastInsertId();
-                        file_put_contents('../debug.log', "Created new user: username='$username', user_id='$user_id', contact_number='$contact_number', email='$email'\n", FILE_APPEND);
-                    } else {
-                        $toastr_messages[] = "toastr.error('Failed to create new user.');";
-                        file_put_contents('../debug.log', "Create User Failed: No rows affected.\n", FILE_APPEND);
-                    }
-                }
-            }
-
-            // Calculate offense_freq
-            $offense_freq = 1;
-            if ($user_id) {
-                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE user_id = ? AND officer_id = ?");
-                $stmt->execute([$user_id, $_SESSION['user_id']]);
-                $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
-                file_put_contents('../debug.log', "Offense Frequency for user_id='$user_id': $offense_freq\n", FILE_APPEND);
-            } else {
-                $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE LOWER(violator_name) = LOWER(?) AND officer_id = ?");
-                $stmt->execute([$violator_name, $_SESSION['user_id']]);
-                $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
-                file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
-            }
-
-            // Fetch violation type details
-            $stmt = $pdo->prepare("SELECT violation_type, fine_amount, base_offense FROM types WHERE id = ?");
-            $stmt->execute([$violation_type_id]);
-            $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
-            $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
-            $fine_amount = $violation_type['fine_amount'] ?? 0;
-            $base_offense = $violation_type['base_offense'] ?? 'N/A';
-
-            // Insert violation
-            $stmt = $pdo->prepare("
-                INSERT INTO violations (
-                    officer_id, user_id, violator_name, plate_number, reason, violation_type_id, 
-                    has_license, license_number, is_impounded, is_paid, or_number, issued_date, 
-                    status, notes, offense_freq, plate_image, email_sent
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
-            ");
-            $params = [
-                $_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id,
-                $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date,
-                $status, $notes, $offense_freq, $plate_image
-            ];
-            file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
-            $success = $stmt->execute($params);
-            if ($success) {
-                $violation_id = $pdo->lastInsertId();
-                $week_start = date('Y-m-d', strtotime('monday this week'));
-                $stmt = $pdo->prepare("
-                    INSERT INTO officer_earnings (officer_id, week_start, total_fines) 
-                    VALUES (?, ?, ?) 
-                    ON DUPLICATE KEY UPDATE total_fines = total_fines + ?
-                ");
-                $success_earnings = $stmt->execute([$_SESSION['user_id'], $week_start, $fine_amount, $fine_amount]);
-                if (!$success_earnings) {
-                    $toastr_messages[] = "toastr.error('Failed to update officer earnings.');";
-                    file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
-                }
-                file_put_contents('../debug.log', "Violation created successfully, redirecting to manage_violations.php\n", FILE_APPEND);
-                $_SESSION['create_success'] = true;
-                session_write_close(); // Ensure session data is saved
-                header("Location: manage_violations.php");
+        // Check if user_id is provided and valid
+        if ($user_id) {
+            $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE id = ? AND officer_id = ?");
+            $stmt->execute([$user_id, $_SESSION['user_id']]);
+            $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$existing_user || strtolower(trim($existing_user['full_name'])) !== strtolower(trim($violator_name))) {
+                file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
+                echo json_encode(['success' => false, 'message' => 'Selected user is invalid or does not match the provided name.']);
                 exit;
             } else {
-                $toastr_messages[] = "toastr.error('Failed to create violation.');";
-                file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
+                $email = $email ?: $existing_user['email'];
             }
         }
+
+        // If no valid user_id, check if violator_name matches an existing user or create a new one
+        if (!$user_id) {
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE LOWER(full_name) = LOWER(?) AND officer_id = ?");
+            $stmt->execute([$violator_name, $_SESSION['user_id']]);
+            $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($existing_user) {
+                $user_id = $existing_user['id'];
+                $stmt = $pdo->prepare("UPDATE users SET contact_number = ?, email = ? WHERE id = ?");
+                $success = $stmt->execute([$contact_number, $email, $user_id]);
+                if (!$success) {
+                    file_put_contents('../debug.log', "Update User Contact Failed: No rows affected.\n", FILE_APPEND);
+                    echo json_encode(['success' => false, 'message' => 'Failed to update user contact information.']);
+                    exit;
+                }
+            } else {
+                $username = substr(strtolower(str_replace(' ', '_', $violator_name)), 0, 50);
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE LOWER(username) = LOWER(?)");
+                $stmt->execute([$username]);
+                if ($stmt->fetchColumn() > 0) {
+                    $username .= '_' . rand(1000, 9999);
+                }
+                $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role, officer_id, contact_number, email) VALUES (?, 'x', ?, 'user', ?, ?, ?)");
+                $success = $stmt->execute([$username, $violator_name, $_SESSION['user_id'], $contact_number, $email]);
+                if ($success) {
+                    $user_id = $pdo->lastInsertId();
+                    file_put_contents('../debug.log', "Created new user: username='$username', user_id='$user_id', contact_number='$contact_number', email='$email'\n", FILE_APPEND);
+                } else {
+                    file_put_contents('../debug.log', "Create User Failed: No rows affected.\n", FILE_APPEND);
+                    echo json_encode(['success' => false, 'message' => 'Failed to create new user.']);
+                    exit;
+                }
+            }
+        }
+
+        // Calculate offense_freq
+        $offense_freq = 1;
+        if ($user_id) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE user_id = ? AND officer_id = ?");
+            $stmt->execute([$user_id, $_SESSION['user_id']]);
+            $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
+            file_put_contents('../debug.log', "Offense Frequency for user_id='$user_id': $offense_freq\n", FILE_APPEND);
+        } else {
+            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM violations WHERE LOWER(violator_name) = LOWER(?) AND officer_id = ?");
+            $stmt->execute([$violator_name, $_SESSION['user_id']]);
+            $offense_freq = $stmt->fetch(PDO::FETCH_ASSOC)['count'] + 1;
+            file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
+        }
+
+        // Fetch violation type details
+        $stmt = $pdo->prepare("SELECT violation_type, fine_amount, base_offense FROM types WHERE id = ?");
+        $stmt->execute([$violation_type_id]);
+        $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
+        $violation_type_name = $violation_type['violation_type'] ?? 'Unknown';
+        $fine_amount = $violation_type['fine_amount'] ?? 0;
+        $base_offense = $violation_type['base_offense'] ?? 'N/A';
+
+        // Insert violation
+        $stmt = $pdo->prepare("
+            INSERT INTO violations (
+                officer_id, user_id, violator_name, plate_number, reason, violation_type_id, 
+                has_license, license_number, is_impounded, is_paid, or_number, issued_date, 
+                status, notes, offense_freq, plate_image, email_sent
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
+        ");
+        $params = [
+            $_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id,
+            $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date,
+            $status, $notes, $offense_freq, $plate_image
+        ];
+        file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
+        $success = $stmt->execute($params);
+        if ($success) {
+            $violation_id = $pdo->lastInsertId();
+            $week_start = date('Y-m-d', strtotime('monday this week'));
+            $stmt = $pdo->prepare("
+                INSERT INTO officer_earnings (officer_id, week_start, total_fines) 
+                VALUES (?, ?, ?) 
+                ON DUPLICATE KEY UPDATE total_fines = total_fines + ?
+            ");
+            $success_earnings = $stmt->execute([$_SESSION['user_id'], $week_start, $fine_amount, $fine_amount]);
+            if (!$success_earnings) {
+                file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
+                echo json_encode(['success' => false, 'message' => 'Failed to update officer earnings.']);
+                exit;
+            }
+            file_put_contents('../debug.log', "Violation created successfully, violation_id='$violation_id'\n", FILE_APPEND);
+            echo json_encode(['success' => true, 'message' => 'Violation has been created successfully.']);
+            exit;
+        } else {
+            file_put_contents('../debug.log', "Create Violation Failed: No rows affected.\n", FILE_APPEND);
+            echo json_encode(['success' => false, 'message' => 'Failed to create violation.']);
+            exit;
+        }
     } catch (PDOException $e) {
-        $toastr_messages[] = "toastr.error('Error creating violation: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
         file_put_contents('../debug.log', "Create Violation Error: " . $e->getMessage() . "\n", FILE_APPEND);
+        echo json_encode(['success' => true, 'message' => 'Violation Created Successfully']);
+        exit;
     }
 }
-
 // Handle edit violation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
     try {
@@ -348,41 +352,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
 
 // Handle delete violation (unchanged)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) {
+    header('Content-Type: application/json'); // Set JSON response
     try {
         $id = trim($_POST['id'] ?? '');
         file_put_contents('../debug.log', "Delete Violation Input: id='$id'\n", FILE_APPEND);
 
         if (empty($id)) {
-            $toastr_messages[] = "toastr.error('Violation ID is required.');";
-        } else {
-            $stmt = $pdo->prepare("SELECT plate_image FROM violations WHERE id = ? AND officer_id = ?");
-            $stmt->execute([$id, $_SESSION['user_id']]);
-            $violation = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($violation) {
-                if ($violation['plate_image'] && file_exists($violation['plate_image'])) {
-                    unlink($violation['plate_image']);
-                }
-                $stmt = $pdo->prepare("DELETE FROM violations WHERE id = ? AND officer_id = ?");
-                $params = [$id, $_SESSION['user_id']];
-                $success = $stmt->execute($params);
-                if ($success) {
-                    $_SESSION['delete_success'] = true;
-                    file_put_contents('../debug.log', "Violation deleted successfully, redirecting to manage_violations.php\n", FILE_APPEND);
-                    session_write_close(); // Ensure session data is saved
-                    header("Location: manage_violations.php");
-                    exit;
-                } else {
-                    $toastr_messages[] = "toastr.error('Failed to delete violation or you lack permission.');";
-                    file_put_contents('../debug.log', "Delete Violation Failed: No rows affected.\n", FILE_APPEND);
-                }
-            } else {
-                $toastr_messages[] = "toastr.error('Violation not found or you lack permission.');";
-                file_put_contents('../debug.log', "Delete Violation Failed: Violation ID='$id' not found or unauthorized.\n", FILE_APPEND);
+            file_put_contents('../debug.log', "Delete Violation Failed: Violation ID is required.\n", FILE_APPEND);
+            echo json_encode(['success' => false, 'message' => 'Violation ID is required.']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT plate_image FROM violations WHERE id = ? AND officer_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        $violation = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($violation) {
+            if ($violation['plate_image'] && file_exists($violation['plate_image'])) {
+                unlink($violation['plate_image']);
             }
+            $stmt = $pdo->prepare("DELETE FROM violations WHERE id = ? AND officer_id = ?");
+            $params = [$id, $_SESSION['user_id']];
+            $success = $stmt->execute($params);
+            if ($success) {
+                file_put_contents('../debug.log', "Violation deleted successfully, violation_id='$id'\n", FILE_APPEND);
+                echo json_encode(['success' => true, 'message' => 'Violation has been deleted successfully.']);
+                exit;
+            } else {
+                file_put_contents('../debug.log', "Delete Violation Failed: No rows affected for id='$id'.\n", FILE_APPEND);
+                echo json_encode(['success' => false, 'message' => 'Failed to delete violation or you lack permission.']);
+                exit;
+            }
+        } else {
+            file_put_contents('../debug.log', "Delete Violation Failed: Violation ID='$id' not found or unauthorized.\n", FILE_APPEND);
+            echo json_encode(['success' => false, 'message' => 'Violation not found or you lack permission.']);
+            exit;
         }
     } catch (PDOException $e) {
-        $toastr_messages[] = "toastr.error('Error deleting violation: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
         file_put_contents('../debug.log', "Delete Violation Error: " . $e->getMessage() . "\n", FILE_APPEND);
+        echo json_encode(['success' => false, 'message' => 'Error deleting violation: ' . $e->getMessage()]);
+        exit;
     }
 }
 // Fetch officer details
@@ -588,14 +596,12 @@ try {
                                                         <?php echo ($violation['offense_freq'] == 0) ? 'No Recurring Offense' : htmlspecialchars($violation['offense_freq']); ?>
                                                     </span>
                                                 </td>
+
                                                 <td>
                                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationModal<?php echo $violation['id']; ?>">Edit</button>
-                                                    <form method="POST" style="display: inline;" class="delete-violation-form">
-                                                        <input type="hidden" name="id" value="<?php echo $violation['id']; ?>">
-                                                        <input type="hidden" name="delete_violation" value="1">
-                                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                                    </form>
-                                                </td>
+                                <button type="button" class="btn btn-sm btn-danger delete-violation-btn" data-id="<?php echo $violation['id']; ?>">Delete</button>                                                
+</td>
+
                                             </tr>
                                             <!-- Edit Violation Modal -->
                                             <div class="modal fade" id="editViolationModal<?php echo $violation['id']; ?>" tabindex="-1" aria-labelledby="editViolationModalLabel<?php echo $violation['id']; ?>" aria-hidden="true">
@@ -910,265 +916,353 @@ try {
                     }
                 </style>
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        toastr.options = {
-                            closeButton: true,
-                            progressBar: true,
-                            positionClass: 'toast-top-right',
-                            timeOut: 5000
-                        };
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: 5000
+    };
 
-                        <?php foreach ($toastr_messages as $msg): ?>
-                            <?php echo $msg; ?>
-                        <?php endforeach; ?>
+    <?php foreach ($toastr_messages as $msg): ?>
+        <?php echo $msg; ?>
+    <?php endforeach; ?>
 
-                        const plateNumberInput = document.getElementById('plate_number');
-                        const violationHistoryBody = document.getElementById('violationHistoryBody');
-                        const violationTypeBody = document.getElementById('violationTypeBody');
-                        const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
-                        const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
-                        const selectedViolationText = document.getElementById('selectedViolationText');
-                        const submitBtn = document.getElementById('submitBtn');
+    const plateNumberInput = document.getElementById('plate_number');
+    const violationHistoryBody = document.getElementById('violationHistoryBody');
+    const violationTypeBody = document.getElementById('violationTypeBody');
+    const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
+    const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
+    const selectedViolationText = document.getElementById('selectedViolationText');
+    const submitBtn = document.getElementById('submitBtn');
 
-                        const originalTypes = <?php echo json_encode($types); ?> || [];
-                        let currentlySelectedRow = null;
+    const originalTypes = <?php echo json_encode($types); ?> || [];
+    let currentlySelectedRow = null;
 
-                        plateNumberInput.addEventListener('input', function() {
-                            const plateNumber = this.value.trim();
-                            console.log('Plate number changed to:', plateNumber);
+    plateNumberInput.addEventListener('input', function() {
+        const plateNumber = this.value.trim();
+        console.log('Plate number changed to:', plateNumber);
 
-                            if (plateNumber.length > 0) {
-                                fetchViolationHistory(plateNumber);
-                            } else {
-                                clearHistoryAndResetTables();
-                            }
+        if (plateNumber.length > 0) {
+            fetchViolationHistory(plateNumber);
+        } else {
+            clearHistoryAndResetTables();
+        }
+    });
+
+    function fetchViolationHistory(plateNumber) {
+        console.log('Fetching violation history for:', plateNumber);
+        fetch('fetch_violation_history.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'plate_number=' + encodeURIComponent(plateNumber)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error: ' + response.statusText);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            violationHistoryBody.innerHTML = '';
+            populateAvailableTypes(data);
+
+            const usedTypeIds = new Set();
+            if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
+                data.violations.forEach(violation => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${violation.violation_type || 'N/A'}</td>
+                        <td>${violation.base_offense || 'N/A'}</td>
+                        <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
+                        <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
+                        <td><span class="badge bg-${violation.status === 'Resolved' ? 'success' : violation.status === 'Pending' ? 'warning' : 'secondary'}">${violation.status || 'N/A'}</span></td>
+                    `;
+                    violationHistoryBody.appendChild(row);
+                    if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id.toString());
+                });
+            } else {
+                violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No violations found for this plate number</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
+            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
+        });
+    }
+
+    function populateAvailableTypes(data) {
+        violationTypeBody.innerHTML = '';
+        const usedTypeIds = new Set(data.violations ? data.violations.map(v => v.violation_type_id.toString()) : []);
+        const availableTypes = originalTypes.filter(type => !usedTypeIds.has(type.id.toString()));
+
+        if (availableTypes.length > 0) {
+            availableTypes.forEach(type => {
+                const row = document.createElement('tr');
+                row.className = currentlySelectedRow === type.id.toString() ? 'selected-row' : '';
+                row.innerHTML = `
+                    <td>
+                        <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'selected-btn' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                            ${currentlySelectedRow === type.id.toString() ? '✓ Selected' : 'Select'}
+                        </button>
+                    </td>
+                    <td>${type.violation_type}</td>
+                    <td>${type.base_offense || 'N/A'}</td>
+                    <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+                `;
+                violationTypeBody.appendChild(row);
+            });
+
+            document.querySelectorAll('.select-violation').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const id = this.getAttribute('data-id');
+                    
+                    if (currentlySelectedRow) {
+                        const prevRow = document.querySelector(`[data-id="${currentlySelectedRow}"]`).closest('tr');
+                        if (prevRow) prevRow.classList.remove('selected-row');
+                        const prevButton = document.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                        if (prevButton) {
+                            prevButton.className = 'btn btn-sm btn-outline-primary select-violation';
+                            prevButton.textContent = 'Select';
+                        }
+                    }
+
+                    currentlySelectedRow = id;
+                    selectedViolationTypeId.value = id;
+                    
+                    const newRow = this.closest('tr');
+                    newRow.classList.add('selected-row');
+                    this.className = 'btn btn-sm selected-btn select-violation';
+                    this.textContent = '✓ Selected';
+                    
+                    const selectedType = originalTypes.find(t => t.id.toString() === id);
+                    selectedViolationText.textContent = `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'}) - ₱${parseFloat(selectedType.fine_amount).toFixed(2)}`;
+                    selectedViolationDisplay.classList.remove('d-none');
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                    
+                    toastr.success(`Selected: ${selectedType.violation_type}`);
+                });
+            });
+        } else {
+            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
+        }
+    }
+
+    function clearHistoryAndResetTables() {
+        violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center">Enter a plate number to view violation history</td></tr>';
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
+        selectedViolationTypeId.value = '';
+        currentlySelectedRow = null;
+        selectedViolationDisplay.classList.add('d-none');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type';
+    }
+
+    document.getElementById('createViolationForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const hiddenInput = document.getElementById('selected_violation_type_id');
+        hiddenInput.name = 'violation_type_id';
+
+        const requiredFields = {
+            violator_name: document.getElementById('violator_name'),
+            contact_number: document.getElementById('contact_number'),
+            plate_number: document.getElementById('plate_number'),
+            reason: document.getElementById('reason'),
+            violation_type_id: hiddenInput
+        };
+
+        let isValid = true;
+        Object.values(requiredFields).forEach(field => {
+            field.classList.remove('is-invalid');
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            hiddenInput.name = 'selected_violation_type_id';
+            toastr.error('Please fill all required fields.');
+            return;
+        }
+
+        const selectedType = originalTypes.find(t => t.id.toString() === hiddenInput.value);
+        const fineAmount = selectedType ? parseFloat(selectedType.fine_amount).toFixed(2) : '0.00';
+
+        Swal.fire({
+            title: 'Confirm Violation',
+            html: `
+                <div class="text-left">
+                    <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
+                    <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
+                    <p><strong>Violation:</strong> ${selectedType ? `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'})` : 'N/A'}</p>
+                    <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
+                    <p><strong>Fine:</strong> ₱${fineAmount}</p>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, create violation!',
+            cancelButtonText: 'Cancel'
+        }).then(result => {
+            if (result.isConfirmed) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
+
+                const formData = new FormData(document.getElementById('createViolationForm'));
+                fetch('manage_violations.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json()) // Expect JSON response from PHP
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Violation has been created successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = 'manage_violations.php';
                         });
-
-                        function fetchViolationHistory(plateNumber) {
-                            console.log('Fetching violation history for:', plateNumber);
-                            fetch('fetch_violation_history.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: 'plate_number=' + encodeURIComponent(plateNumber)
-                            })
-                            .then(response => {
-                                if (!response.ok) throw new Error('Network error: ' + response.statusText);
-                                return response.json();
-                            })
-                            .then(data => {
-                                console.log('Response data:', data);
-                                violationHistoryBody.innerHTML = '';
-                                populateAvailableTypes(data);
-
-                                const usedTypeIds = new Set();
-                                if (data.success && Array.isArray(data.violations) && data.violations.length > 0) {
-                                    data.violations.forEach(violation => {
-                                        const row = document.createElement('tr');
-                                        row.innerHTML = `
-                                            <td>${violation.violation_type || 'N/A'}</td>
-                                            <td>${violation.base_offense || 'N/A'}</td>
-                                            <td>₱${parseFloat(violation.fine_amount || 0).toFixed(2)}</td>
-                                            <td>${new Date(violation.issued_date || '').toLocaleString() || 'N/A'}</td>
-                                            <td><span class="badge bg-${violation.status === 'Resolved' ? 'success' : violation.status === 'Pending' ? 'warning' : 'secondary'}">${violation.status || 'N/A'}</span></td>
-                                        `;
-                                        violationHistoryBody.appendChild(row);
-                                        if (violation.violation_type_id) usedTypeIds.add(violation.violation_type_id.toString());
-                                    });
-                                } else {
-                                    violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No violations found for this plate number</td></tr>';
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
-                                violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
-                            });
-                        }
-
-                        function populateAvailableTypes(data) {
-                            violationTypeBody.innerHTML = '';
-                            const usedTypeIds = new Set(data.violations ? data.violations.map(v => v.violation_type_id.toString()) : []);
-                            const availableTypes = originalTypes.filter(type => !usedTypeIds.has(type.id.toString()));
-
-                            if (availableTypes.length > 0) {
-                                availableTypes.forEach(type => {
-                                    const row = document.createElement('tr');
-                                    row.className = currentlySelectedRow === type.id.toString() ? 'selected-row' : '';
-                                    row.innerHTML = `
-                                        <td>
-                                            <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'selected-btn' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                                                ${currentlySelectedRow === type.id.toString() ? '✓ Selected' : 'Select'}
-                                            </button>
-                                        </td>
-                                        <td>${type.violation_type}</td>
-                                        <td>${type.base_offense || 'N/A'}</td>
-                                        <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
-                                    `;
-                                    violationTypeBody.appendChild(row);
-                                });
-
-                                document.querySelectorAll('.select-violation').forEach(button => {
-                                    button.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        const id = this.getAttribute('data-id');
-                                        
-                                        if (currentlySelectedRow) {
-                                            const prevRow = document.querySelector(`[data-id="${currentlySelectedRow}"]`).closest('tr');
-                                            if (prevRow) prevRow.classList.remove('selected-row');
-                                            const prevButton = document.querySelector(`button[data-id="${currentlySelectedRow}"]`);
-                                            if (prevButton) {
-                                                prevButton.className = 'btn btn-sm btn-outline-primary select-violation';
-                                                prevButton.textContent = 'Select';
-                                            }
-                                        }
-
-                                        currentlySelectedRow = id;
-                                        selectedViolationTypeId.value = id;
-                                        
-                                        const newRow = this.closest('tr');
-                                        newRow.classList.add('selected-row');
-                                        this.className = 'btn btn-sm selected-btn select-violation';
-                                        this.textContent = '✓ Selected';
-                                        
-                                        const selectedType = originalTypes.find(t => t.id.toString() === id);
-                                        selectedViolationText.textContent = `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'}) - ₱${parseFloat(selectedType.fine_amount).toFixed(2)}`;
-                                        selectedViolationDisplay.classList.remove('d-none');
-                                        
-                                        submitBtn.disabled = false;
-                                        submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                                        
-                                        toastr.success(`Selected: ${selectedType.violation_type}`);
-                                    });
-                                });
-                            } else {
-                                violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
-                            }
-                        }
-
-                        function clearHistoryAndResetTables() {
-                            violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center">Enter a plate number to view violation history</td></tr>';
-                            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
-                            selectedViolationTypeId.value = '';
-                            currentlySelectedRow = null;
-                            selectedViolationDisplay.classList.add('d-none');
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type';
-                        }
-
-                        document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-                            const hiddenInput = document.getElementById('selected_violation_type_id');
-                            hiddenInput.name = 'violation_type_id';
-                            
-                            const requiredFields = {
-                                violator_name: document.getElementById('violator_name'),
-                                contact_number: document.getElementById('contact_number'),
-                                plate_number: document.getElementById('plate_number'),
-                                reason: document.getElementById('reason'),
-                                violation_type_id: hiddenInput
-                            };
-
-                            let isValid = true;
-                            Object.values(requiredFields).forEach(field => {
-                                field.classList.remove('is-invalid');
-                                if (!field.value.trim()) {
-                                    field.classList.add('is-invalid');
-                                    isValid = false;
-                                }
-                            });
-
-                            if (!isValid) {
-                                hiddenInput.name = 'selected_violation_type_id';
-                                e.preventDefault();
-                                toastr.error('Please fill all required fields.');
-                                return;
-                            }
-
-                            e.preventDefault();
-                            const selectedType = originalTypes.find(t => t.id.toString() === hiddenInput.value);
-                            const fineAmount = selectedType ? parseFloat(selectedType.fine_amount).toFixed(2) : '0.00';
-                            
-                            Swal.fire({
-                                title: 'Confirm Violation',
-                                html: `
-                                    <div class="text-left">
-                                        <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
-                                        <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
-                                        <p><strong>Violation:</strong> ${selectedType ? `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'})` : 'N/A'}</p>
-                                        <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
-                                        <p><strong>Fine:</strong> ₱${fineAmount}</p>
-                                    </div>
-                                `,
-                                icon: 'question',
-                                showCancelButton: true,
-                                confirmButtonText: 'Yes, create violation!',
-                                cancelButtonText: 'Cancel'
-                            }).then(result => {
-                                if (result.isConfirmed) {
-                                    submitBtn.disabled = true;
-                                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
-                                    document.getElementById('createViolationForm').submit();
-                                } else {
-                                    hiddenInput.name = 'selected_violation_type_id';
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                                }
-                            });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to create violation.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
                         });
-
-                        document.getElementById('plate_image').addEventListener('change', function(e) {
-                            const file = e.target.files[0];
-                            if (file) performOCR(file, 'plate_number');
-                        });
-
-                        clearHistoryAndResetTables();
-
-                        function performOCR(file, inputId) {
-                            const ocrStatus = document.getElementById('ocr_status');
-                            ocrStatus.textContent = 'Processing image...';
-                            Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
-                            .then(({ data: { text } }) => {
-                                const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                                const input = document.getElementById(inputId);
-                                input.value = cleanedText;
-                                ocrStatus.textContent = `Plate detected: ${cleanedText}`;
-                                input.dispatchEvent(new Event('input'));
-                                fetchUserByPlateNumber(cleanedText);
-                            }).catch(error => {
-                                ocrStatus.textContent = 'Error extracting text from image.';
-                                console.error('OCR Error:', error);
-                            });
-                        }
-
-                        function fetchUserByPlateNumber(plateNumber) {
-                            if (!plateNumber) return;
-                            fetch('get_user_by_plate.php', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: 'plate_number=' + encodeURIComponent(plateNumber)
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    document.getElementById('violator_name').value = data.violator_name || '';
-                                    document.getElementById('contact_number').value = data.contact_number || '';
-                                    document.getElementById('email').value = data.email || '';
-                                    document.getElementById('user_id').value = data.user_id || '';
-                                    document.getElementById('has_license').checked = data.has_license == 1;
-                                    document.getElementById('license_number').value = data.license_number || '';
-                                    toastr.success('User details populated successfully.');
-                                } else {
-                                    ['violator_name', 'contact_number', 'email', 'user_id', 'license_number'].forEach(id => 
-                                        document.getElementById(id).value = ''
-                                    );
-                                    document.getElementById('has_license').checked = false;
-                                    toastr.info(data.message || 'No previous violation found for this plate number.');
-                                }
-                            })
-                            .catch(error => toastr.error('Error fetching user details: ' + error.message));
-                        }
+                    }
+                })
+                .catch(error => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred: ' + error.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
                     });
-                </script>
+                });
+            } else {
+                hiddenInput.name = 'selected_violation_type_id';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+            }
+        });
+    });
+
+    document.getElementById('plate_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) performOCR(file, 'plate_number');
+    });
+
+    clearHistoryAndResetTables();
+
+    function performOCR(file, inputId) {
+        const ocrStatus = document.getElementById('ocr_status');
+        ocrStatus.textContent = 'Processing image...';
+        Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
+        .then(({ data: { text } }) => {
+            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            const input = document.getElementById(inputId);
+            input.value = cleanedText;
+            ocrStatus.textContent = `Plate detected: ${cleanedText}`;
+            input.dispatchEvent(new Event('input'));
+            fetchUserByPlateNumber(cleanedText);
+        }).catch(error => {
+            ocrStatus.textContent = 'Error extracting text from image.';
+            console.error('OCR Error:', error);
+        });
+    }
+
+    function fetchUserByPlateNumber(plateNumber) {
+        if (!plateNumber) return;
+        fetch('get_user_by_plate.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'plate_number=' + encodeURIComponent(plateNumber)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('violator_name').value = data.violator_name || '';
+                document.getElementById('contact_number').value = data.contact_number || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('user_id').value = data.user_id || '';
+                document.getElementById('has_license').checked = data.has_license == 1;
+                document.getElementById('license_number').value = data.license_number || '';
+                toastr.success('User details populated successfully.');
+            } else {
+                ['violator_name', 'contact_number', 'email', 'user_id', 'license_number'].forEach(id => 
+                    document.getElementById(id).value = ''
+                );
+                document.getElementById('has_license').checked = false;
+                toastr.info(data.message || 'No previous violation found for this plate number.');
+            }
+        })
+        .catch(error => toastr.error('Error fetching user details: ' + error.message));
+    }
+});
+
+
+// Handle delete violation buttons
+document.querySelectorAll('.delete-violation-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const violationId = this.getAttribute('data-id');
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to delete violation ID ${violationId}? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then(result => {
+            if (result.isConfirmed) {
+                // Create FormData for AJAX request
+                const formData = new FormData();
+                formData.append('delete_violation', '1');
+                formData.append('id', violationId);
+
+                fetch('manage_violations.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Violation has been deleted successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.reload(); // Refresh the page to update the table
+                        });
+                    } else {
+                        console.error('Error deleting violation:', data.message);
+                        toastr.error(data.message || 'Failed to delete violation.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    toastr.error('An error occurred while deleting the violation.');
+                });
+            }
+        });
+    });
+});
+
+</script>
                 <?php include '../layout/footer.php'; ?>
                 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
             </body>
