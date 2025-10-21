@@ -10,7 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 require '../vendor/autoload.php';
 
 // Debug: Log session data
-file_put_contents('../debug.log', "Session Data: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+file_put_contents('../debug.log', "Session Data at start: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
 
 // Check session variables
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || 
@@ -35,7 +35,7 @@ if (!$pdo) {
     file_put_contents('../debug.log', "Database connection failed.\n", FILE_APPEND);
 }
 
-// Success messages handling (unchanged)
+// Success messages handling
 if (isset($_SESSION['create_success']) && $_SESSION['create_success']) {
     $toastr_messages[] = "Swal.fire({
         title: 'Created!',
@@ -43,6 +43,7 @@ if (isset($_SESSION['create_success']) && $_SESSION['create_success']) {
         icon: 'success',
         confirmButtonText: 'OK'
     });";
+    file_put_contents('../debug.log', "Create success message triggered.\n", FILE_APPEND);
     unset($_SESSION['create_success']);
 }
 if (isset($_SESSION['edit_success']) && $_SESSION['edit_success']) {
@@ -52,6 +53,7 @@ if (isset($_SESSION['edit_success']) && $_SESSION['edit_success']) {
         icon: 'success',
         confirmButtonText: 'OK'
     });";
+    file_put_contents('../debug.log', "Edit success message triggered.\n", FILE_APPEND);
     unset($_SESSION['edit_success']);
 }
 if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
@@ -61,6 +63,7 @@ if (isset($_SESSION['delete_success']) && $_SESSION['delete_success']) {
         icon: 'success',
         confirmButtonText: 'OK'
     });";
+    file_put_contents('../debug.log', "Delete success message triggered.\n", FILE_APPEND);
     unset($_SESSION['delete_success']);
 }
 
@@ -169,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                 file_put_contents('../debug.log', "Offense Frequency for violator_name='$violator_name': $offense_freq\n", FILE_APPEND);
             }
 
-            // Fetch violation type details for email
+            // Fetch violation type details
             $stmt = $pdo->prepare("SELECT violation_type, fine_amount, base_offense FROM types WHERE id = ?");
             $stmt->execute([$violation_type_id]);
             $violation_type = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -205,9 +208,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
                     $toastr_messages[] = "toastr.error('Failed to update officer earnings.');";
                     file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
                 }
-                file_put_contents('../debug.log', "Violation created successfully, redirecting to send_mail.php?violation_id=$violation_id\n", FILE_APPEND);
+                file_put_contents('../debug.log', "Violation created successfully, redirecting to manage_violations.php\n", FILE_APPEND);
                 $_SESSION['create_success'] = true;
-                header("Location: send_mail.php?violation_id=$violation_id");
+                session_write_close(); // Ensure session data is saved
+                header("Location: manage_violations.php");
                 exit;
             } else {
                 $toastr_messages[] = "toastr.error('Failed to create violation.');";
@@ -311,7 +315,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                 $stmt = $pdo->prepare($query);
                 $success = $stmt->execute($params);
                 if ($success) {
-                    $_SESSION['edit_success'] = true;
                     $week_start = date('Y-m-d', strtotime('monday this week'));
                     $stmt = $pdo->prepare("SELECT fine_amount FROM types WHERE id = ?");
                     $stmt->execute([$violation_type_id]);
@@ -321,7 +324,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_violation'])) {
                         VALUES (?, ?, ?, ?) 
                         ON DUPLICATE KEY UPDATE total_fines = total_fines + ?
                     ");
-                    $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
+                    $success_earnings = $stmt->execute([$_SESSION['user_id'], $plate_number, $week_start, $fine, $fine]);
+                    if (!$success_earnings) {
+                        $toastr_messages[] = "toastr.error('Failed to update officer earnings.');";
+                        file_put_contents('../debug.log', "Update Officer Earnings Failed: No rows affected.\n", FILE_APPEND);
+                    }
+                    file_put_contents('../debug.log', "Violation updated successfully, redirecting to manage_violations.php\n", FILE_APPEND);
+                    $_SESSION['edit_success'] = true;
+                    session_write_close(); // Ensure session data is saved
+                    header("Location: manage_violations.php");
+                    exit;
                 } else {
                     $toastr_messages[] = "toastr.error('Failed to update violation or you lack permission.');";
                     file_put_contents('../debug.log', "Edit Violation Failed: No rows affected.\n", FILE_APPEND);
@@ -355,6 +367,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) 
                 $success = $stmt->execute($params);
                 if ($success) {
                     $_SESSION['delete_success'] = true;
+                    file_put_contents('../debug.log', "Violation deleted successfully, redirecting to manage_violations.php\n", FILE_APPEND);
+                    session_write_close(); // Ensure session data is saved
                     header("Location: manage_violations.php");
                     exit;
                 } else {
@@ -371,7 +385,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_violation'])) 
         file_put_contents('../debug.log', "Delete Violation Error: " . $e->getMessage() . "\n", FILE_APPEND);
     }
 }
-
 // Fetch officer details
 $officer_id = $_SESSION['user_id'];
 try {
