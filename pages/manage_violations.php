@@ -746,8 +746,8 @@ try {
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="violator_name" class="form-label">Violator Name</label>
-                                <input type="text" class="form-control" name="violator_name" id="violator_name">
+                                <label for="violator_name" class="form-label">Violator Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
                                 <div class="invalid-feedback">Please enter violator name.</div>
                             </div>
                             <div class="mb-3">
@@ -757,8 +757,8 @@ try {
                                 <small class="form-text text-muted">Format: 09XX-XXX-XXXX</small>
                             </div>
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" name="email" id="email" required placeholder="example@email.com">
+                                <label for="email" class="form-label">Email (Optional)</label>
+                                <input type="email" class="form-control" name="email" id="email" placeholder="example@email.com">
                                 <div class="invalid-feedback">Please enter a valid email address.</div>
                             </div>
                         </div>
@@ -776,10 +776,10 @@ try {
                                     <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>
                                 </div>
                             </div>
-                            <div class="row">
+                             <div class="row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="reason" class="form-label">Reason</label>
-                                    <input type="text" class="form-control" name="reason" id="reason">
+                                    <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="reason" id="reason" required>
                                     <div class="invalid-feedback">Please enter reason.</div>
                                 </div>
                             </div>
@@ -848,8 +848,8 @@ try {
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="license_number" class="form-label">License Number <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="license_number" id="license_number" required placeholder="NXX12C34567" maxlength="12">
+                                    <label for="license_number" class="form-label">License Number</label>
+                                    <input type="text" class="form-control" name="license_number" id="license_number" placeholder="NXX12C34567" maxlength="12">
                                     <div class="invalid-feedback">Please enter a valid license number (e.g., NXX12C34567).</div>
                                     <small class="form-text text-muted">Format: NXX12C34567 (3 letters + 2 numbers + 1 letter + 6 numbers)</small>
                                 </div>
@@ -1046,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value.length <= 3) {
                 value = value;
             } else {
-                value = value.substring(0, 3) + '-' + value.substring(3);
+                value = value.substring(0, 3) + value.substring(3);
             }
         }
         e.target.value = value;
@@ -1097,6 +1097,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const plateNumber = this.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
         if (plateNumber.length >= 3) {
             fetchViolationHistory(plateNumber);
+            fetchUserByPlateNumber(plateNumber);
         } else {
             clearHistoryAndResetTables();
         }
@@ -1224,12 +1225,13 @@ document.addEventListener('DOMContentLoaded', function() {
         hiddenInput.name = 'violation_type_id';
 
         const requiredFields = {
+            violator_name: document.getElementById('violator_name'),
             contact_number: document.getElementById('contact_number'),
-            email: document.getElementById('email'),
             plate_number: document.getElementById('plate_number'),
-            license_number: document.getElementById('license_number'),
+            reason: document.getElementById('reason'),
             violation_type_id: hiddenInput
         };
+        const emailInput = document.getElementById('email');
 
         let isValid = true;
 
@@ -1237,6 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         Object.values(requiredFields).forEach(field => {
             field.classList.remove('is-invalid', 'is-valid');
         });
+        emailInput.classList.remove('is-invalid', 'is-valid');
 
         // Validate required fields
         Object.entries(requiredFields).forEach(([key, field]) => {
@@ -1256,16 +1259,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            if (key === 'email') {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(field.value.trim())) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.add('is-valid');
-                }
-            }
-
             if (key === 'plate_number') {
                 const plateValue = field.value.replace(/[^A-Z0-9]/g, '');
                 if (plateValue.length !== 7 || !/^[A-Z]{3}[0-9]{4}$/.test(plateValue)) {
@@ -1275,18 +1268,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     field.classList.add('is-valid');
                 }
             }
-
-            if (key === 'license_number') {
-                const licenseValue = field.value.replace(/[^A-Z0-9]/g, '');
-                const licenseRegex = /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/;
-                if (licenseValue.length !== 12 || !licenseRegex.test(licenseValue)) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.add('is-valid');
-                }
-            }
         });
+
+        // Validate email if provided
+        if (emailInput.value.trim()) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value.trim())) {
+                emailInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                emailInput.classList.add('is-valid');
+            }
+        }
 
         if (!isValid) {
             hiddenInput.name = 'selected_violation_type_id';
@@ -1301,20 +1294,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const selectedType = originalTypes.find(t => t.id.toString() === hiddenInput.value);
         const fineAmount = selectedType ? parseFloat(selectedType.fine_amount).toFixed(2) : '0.00';
-        const violatorName = document.getElementById('violator_name').value.trim() || 'N/A';
-        const reason = document.getElementById('reason').value.trim() || 'N/A';
+        const emailValue = emailInput.value.trim() || 'N/A';
 
         Swal.fire({
             title: 'Confirm Violation',
             html: `
                 <div class="text-left">
-                    <p><strong>Violator:</strong> ${violatorName}</p>
+                    <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
                     <p><strong>Contact:</strong> ${requiredFields.contact_number.value}</p>
-                    <p><strong>Email:</strong> ${requiredFields.email.value}</p>
+                    <p><strong>Email:</strong> ${emailValue}</p>
                     <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
-                    <p><strong>License:</strong> ${requiredFields.license_number.value}</p>
+                    <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
                     <p><strong>Violation:</strong> ${selectedType ? `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'})` : 'N/A'}</p>
-                    <p><strong>Reason:</strong> ${reason}</p>
                     <p><strong>Fine:</strong> ₱${fineAmount}</p>
                 </div>
             `,
@@ -1476,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             toastr.error(data.message || 'Failed to delete violation.');
                         }
                     })
-                    .catch(error => {
+                    .catch(error => {A
                         console.error('Fetch error:', error);
                         toastr.error('An error occurred while deleting the violation.');
                     });
