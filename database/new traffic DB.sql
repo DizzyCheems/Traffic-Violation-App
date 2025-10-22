@@ -1136,3 +1136,6 @@ ALTER TABLE violations ADD COLUMN email_sent BOOLEAN DEFAULT FALSE;
 
 
 ALTER TABLE types ADD COLUMN base_offense VARCHAR(100);
+
+ALTER TABLE violations   
+ADD COLUMN impound_pic text NULL;

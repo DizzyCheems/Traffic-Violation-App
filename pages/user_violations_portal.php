@@ -6,7 +6,7 @@ include '../config/conn.php';
 $toastr_messages = [];
 $violations = [];
 
-// Handle plate number search (from form or URL query parameter)
+// Handle plate number search
 $plate_number = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_violations'])) {
     $plate_number = trim($_POST['plate_number'] ?? '');
@@ -48,15 +48,12 @@ if ($plate_number) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        /* Navigation link styles for sidebar and modules */
         .nav-link {
             transition: all 0.3s ease;
             border-radius: 5px;
             padding: 10px 15px;
             margin: 5px 0;
         }
-
-        /* Hover effect: float, black background, white bold text */
         .nav-link:hover {
             background-color: #000000;
             color: #ffffff !important;
@@ -64,22 +61,17 @@ if ($plate_number) {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-
-        /* Active link style to maintain consistency */
         .nav-link.active {
             background-color: #007bff;
             color: #ffffff !important;
             font-weight: bold;
         }
-
-        /* Ensure modal trigger links also get the style */
         a[data-bs-toggle="modal"] {
             transition: all 0.3s ease;
             border-radius: 5px;
             padding: 8px 12px;
             display: inline-block;
         }
-
         a[data-bs-toggle="modal"]:hover {
             background-color: #000000;
             color: #ffffff !important;
@@ -87,17 +79,13 @@ if ($plate_number) {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-
-        /* Portal specific styles */
         body {
             background-color: #f8f9fa;
             min-height: 100vh;
         }
-
         .container {
             max-width: 1200px;
         }
-
         .card {
             border: none;
             border-radius: 8px;
@@ -106,12 +94,10 @@ if ($plate_number) {
             transition: all 0.3s ease;
             overflow: hidden;
         }
-
         .card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         }
-
         .card-header {
             background: #4dabf7;
             color: white;
@@ -121,49 +107,40 @@ if ($plate_number) {
             font-weight: 600;
             font-size: 1.1rem;
         }
-
         .card-body {
             padding: 1.25rem;
         }
-
         .card-body p {
             margin-bottom: 0.75rem;
             font-size: 0.9rem;
             color: #495057;
         }
-
         .card-body strong {
             color: #212529;
             font-weight: 600;
         }
-
         .badge {
             padding: 0.4em 0.8em;
             border-radius: 12px;
             font-weight: 500;
             font-size: 0.8rem;
         }
-
         .search-card {
             background: #ffffff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             margin-bottom: 2rem;
         }
-
         .form-control {
             border-radius: 5px;
             border: 1px solid #dee2e6;
             padding: 0.75rem;
             transition: all 0.3s ease;
         }
-
         .form-control:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
-
-        /* Button styling to match dashboard */
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
@@ -172,7 +149,6 @@ if ($plate_number) {
             font-weight: 500;
             transition: all 0.3s ease;
         }
-
         .btn-primary:hover {
             background-color: #000000;
             border-color: #000000;
@@ -180,21 +156,30 @@ if ($plate_number) {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
         .alert {
             border-radius: 5px;
             border: none;
         }
-
         .display-4 {
             font-weight: 700;
         }
-
         .lead {
             font-weight: 400;
         }
-
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .card-header {
                 font-size: 1rem;
@@ -284,6 +269,13 @@ if ($plate_number) {
                                     </div>
                                 </div>
                                 <p><strong>Notes:</strong> <?php echo htmlspecialchars($violation['notes'] ?: 'N/A'); ?></p>
+                                <?php if (!$violation['is_paid']): ?>
+                                    <button class="btn btn-success w-100 pay-violation-btn" 
+                                            data-id="<?php echo htmlspecialchars($violation['id']); ?>" 
+                                            data-fine="<?php echo htmlspecialchars($violation['fine_amount']); ?>">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Pay Now
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -311,6 +303,76 @@ if ($plate_number) {
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
+
+        // Handle Pay Violation Button
+        document.querySelectorAll('.pay-violation-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const violationId = this.getAttribute('data-id');
+                const fineAmount = parseFloat(this.getAttribute('data-fine'));
+
+                Swal.fire({
+                    title: 'Confirm Payment',
+                    html: `
+                        <p><strong>Violation ID:</strong> ${violationId}</p>
+                        <p><strong>Fine Amount:</strong> ₱${fineAmount.toFixed(2)}</p>
+                        <p>Are you sure you want to pay this amount?</p>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Pay Now',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        const formData = new FormData();
+                        formData.append('pay_violation', '1');
+                        formData.append('id', violationId);
+
+                        fetch('pay_violations.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            const contentType = response.headers.get('content-type');
+                            if (!contentType || !contentType.includes('application/json')) {
+                                throw new Error('Invalid response: Expected JSON but received something else.');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Payment Successful!',
+                                    text: `Violation has been paid.`,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to process payment.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred: ' + error.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
