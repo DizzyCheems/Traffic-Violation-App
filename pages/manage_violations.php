@@ -730,192 +730,217 @@ try {
                     </div>
                 </div>
 
-                <!-- Create Violation Modal -->
-                <div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Create Violation Modal -->
+<div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createViolationModalLabel">Create Violation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
+                    <input type="hidden" name="create_violation" value="1">
+                    <input type="hidden" name="user_id" id="user_id">
+                    <input type="hidden" name="selected_violation_type_id" id="selected_violation_type_id">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="violator_name" class="form-label">Violator Name</label>
+                                <input type="text" class="form-control" name="violator_name" id="violator_name">
+                                <div class="invalid-feedback">Please enter violator name.</div>
                             </div>
-                            <div class="modal-body">
-                                <form method="POST" class="form-outline create-violation-form" id="createViolationForm" enctype="multipart/form-data">
-                                    <input type="hidden" name="create_violation" value="1">
-                                    <input type="hidden" name="user_id" id="user_id">
-                                    <input type="hidden" name="selected_violation_type_id" id="selected_violation_type_id">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="violator_name" class="form-label">Violator Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="violator_name" id="violator_name" required>
-                                                <div class="invalid-feedback">Please enter violator name.</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="contact_number" id="contact_number" required>
-                                                <div class="invalid-feedback">Please enter contact number.</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email (Optional)</label>
-                                                <input type="email" class="form-control" name="email" id="email">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
-                                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
-                                                    <div id="ocr_status" class="form-text"></div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required>
-                                                    <div class="invalid-feedback">Please enter plate number.</div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12 mb-3">
-                                                    <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="reason" id="reason" required>
-                                                    <div class="invalid-feedback">Please enter reason.</div>
-                                                </div>
-                                            </div>
-                                            <!-- Selected Violation Display -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-12">
-                                                    <div id="selectedViolationDisplay" class="alert alert-success d-none" role="alert">
-                                                        <i class="fas fa-check-circle me-2"></i>
-                                                        <strong>Selected:</strong> <span id="selectedViolationText"></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Violation Type Selection Table -->
-                                            <div class="row">
-                                                <div class="col-md-12 mb-3">
-                                                    <h6>Available Violation Types</h6>
-                                                    <div id="violationTypeTable" class="table-responsive">
-                                                        <table class="table table-bordered">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Select</th>
-                                                                    <th>Violation Type</th>
-                                                                    <th>Base Offense</th>
-                                                                    <th>Fine Amount</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="violationTypeBody">
-                                                                <tr>
-                                                                    <td colspan="4" class="text-center">Enter a plate number to view available violation types</td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Violation History Table -->
-                                            <div class="row">
-                                                <div class="col-md-12 mb-3">
-                                                    <h6>Violation History</h6>
-                                                    <div id="violationHistoryTable" class="table-responsive">
-                                                        <table class="table table-bordered">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Violation Type</th>
-                                                                    <th>Base Offense</th>
-                                                                    <th>Fine Amount</th>
-                                                                    <th>Issued Date</th>
-                                                                    <th>Status</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="violationHistoryBody">
-                                                                <tr>
-                                                                    <td colspan="5" class="text-center">Enter a plate number to view violation history</td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Rest of the form fields -->
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
-                                                        <label class="form-check-label" for="has_license">Has License</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="license_number" class="form-label">License Number</label>
-                                                    <input type="text" class="form-control" name="license_number" id="license_number">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
-                                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <div class="form-check">
-                                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
-                                                        <label class="form-check-label" for="is_paid">Is Paid</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="or_number" class="form-label">CR Number</label>
-                                                    <input type="text" class="form-control" name="or_number" id="or_number">
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="issued_date" class="form-label">Issued Date</label>
-                                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="status" class="form-label">Status</label>
-                                                    <select class="form-select" name="status" id="status">
-                                                        <option value="Pending" selected>Pending</option>
-                                                        <option value="Resolved">Resolved</option>
-                                                        <option value="Disputed">Disputed</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="notes" class="form-label">Notes</label>
-                                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-                                                        <i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="mb-3">
+                                <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="contact_number" id="contact_number" required placeholder="09XX-XXX-XXXX">
+                                <div class="invalid-feedback">Please enter a valid contact number (e.g., 0917-123-4567).</div>
+                                <small class="form-text text-muted">Format: 09XX-XXX-XXXX</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" name="email" id="email" required placeholder="example@email.com">
+                                <div class="invalid-feedback">Please enter a valid email address.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="plate_image" class="form-label">Upload Plate Number</label>
+                                    <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
+                                    <div id="ocr_status" class="form-text"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="plate_number" id="plate_number" required placeholder="ABC-1234" maxlength="8">
+                                    <div class="invalid-feedback">Please enter a valid plate number (e.g., ABC-1234).</div>
+                                    <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <input type="text" class="form-control" name="reason" id="reason">
+                                    <div class="invalid-feedback">Please enter reason.</div>
+                                </div>
+                            </div>
+                            <!-- Selected Violation Display -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div id="selectedViolationDisplay" class="alert alert-success d-none" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Selected:</strong> <span id="selectedViolationText"></span>
                                     </div>
-                                </form>
+                                </div>
+                            </div>
+                            <!-- Violation Type Selection Table -->
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <h6>Available Violation Types</h6>
+                                    <div id="violationTypeTable" class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Violation Type</th>
+                                                    <th>Base Offense</th>
+                                                    <th>Fine Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="violationTypeBody">
+                                                <tr>
+                                                    <td colspan="4" class="text-center">Enter a plate number to view available violation types</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Violation History Table -->
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <h6>Violation History</h6>
+                                    <div id="violationHistoryTable" class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Violation Type</th>
+                                                    <th>Base Offense</th>
+                                                    <th>Fine Amount</th>
+                                                    <th>Issued Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="violationHistoryBody">
+                                                <tr>
+                                                    <td colspan="5" class="text-center">Enter a plate number to view violation history</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Rest of the form fields -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
+                                        <label class="form-check-label" for="has_license">Has License</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="license_number" class="form-label">License Number <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="license_number" id="license_number" required placeholder="NXX12C34567" maxlength="12">
+                                    <div class="invalid-feedback">Please enter a valid license number (e.g., NXX12C34567).</div>
+                                    <small class="form-text text-muted">Format: NXX12C34567 (3 letters + 2 numbers + 1 letter + 6 numbers)</small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="is_impounded" id="is_impounded">
+                                        <label class="form-check-label" for="is_impounded">Is Impounded</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
+                                        <label class="form-check-label" for="is_paid">Is Paid</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="or_number" class="form-label">CR Number</label>
+                                    <input type="text" class="form-control" name="or_number" id="or_number">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="issued_date" class="form-label">Issued Date</label>
+                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="status">
+                                        <option value="Pending" selected>Pending</option>
+                                        <option value="Resolved">Resolved</option>
+                                        <option value="Disputed">Disputed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="notes" class="form-label">Notes</label>
+                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                        <i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <style>
-                    .selected-row {
-                        background-color: #d4edda !important;
-                        border-left: 4px solid #28a745 !important;
-                    }
-                    .selected-btn {
-                        background-color: #28a745 !important;
-                        border-color: #28a745 !important;
-                        color: white !important;
-                    }
-                </style>
+<style>
+    .selected-row {
+        background-color: #d4edda !important;
+        border-left: 4px solid #28a745 !important;
+    }
+    .selected-btn {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: white !important;
+    }
+    .input-formatted {
+        position: relative;
+    }
+    .input-formatted input {
+        padding-right: 10px;
+    }
+    .input-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    .input-valid {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    }
+    .format-hint {
+        font-size: 0.875em;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Toastr
     toastr.options = {
         closeButton: true,
         progressBar: true,
@@ -923,10 +948,12 @@ document.addEventListener('DOMContentLoaded', function() {
         timeOut: 5000
     };
 
+    // Display any server-side Toastr messages
     <?php foreach ($toastr_messages as $msg): ?>
         <?php echo $msg; ?>
     <?php endforeach; ?>
 
+    // DOM Elements
     const plateNumberInput = document.getElementById('plate_number');
     const violationHistoryBody = document.getElementById('violationHistoryBody');
     const violationTypeBody = document.getElementById('violationTypeBody');
@@ -934,21 +961,148 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
     const selectedViolationText = document.getElementById('selectedViolationText');
     const submitBtn = document.getElementById('submitBtn');
-
     const originalTypes = <?php echo json_encode($types); ?> || [];
     let currentlySelectedRow = null;
 
-    plateNumberInput.addEventListener('input', function() {
-        const plateNumber = this.value.trim();
-        console.log('Plate number changed to:', plateNumber);
+    // Initialize input formatters and validators
+    initializeInputFormatters();
 
-        if (plateNumber.length > 0) {
+    function initializeInputFormatters() {
+        const contactNumberInput = document.getElementById('contact_number');
+        const emailInput = document.getElementById('email');
+        const licenseNumberInput = document.getElementById('license_number');
+
+        // Contact Number (09XX-XXX-XXXX)
+        contactNumberInput.addEventListener('input', formatContactNumber);
+        contactNumberInput.addEventListener('blur', validateContactNumber);
+        contactNumberInput.addEventListener('focus', clearFormatOnFocus);
+
+        // Email
+        emailInput.addEventListener('input', validateEmailOnInput);
+        emailInput.addEventListener('blur', validateEmail);
+
+        // Plate Number (XXX-XXXX)
+        plateNumberInput.addEventListener('input', formatPlateNumber);
+        plateNumberInput.addEventListener('blur', validatePlateNumber);
+        plateNumberInput.addEventListener('focus', clearFormatOnFocus);
+
+        // License Number (NXX12C34567)
+        licenseNumberInput.addEventListener('input', formatLicenseNumber);
+        licenseNumberInput.addEventListener('blur', validateLicenseNumber);
+        licenseNumberInput.addEventListener('focus', clearFormatOnFocus);
+    }
+
+    // Contact Number Formatting and Validation
+    function formatContactNumber(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.substring(0, 11);
+        if (value.length > 0) {
+            if (value.length <= 4) {
+                value = value;
+            } else if (value.length <= 7) {
+                value = value.substring(0, 4) + '-' + value.substring(4);
+            } else {
+                value = value.substring(0, 4) + '-' + value.substring(4, 7) + '-' + value.substring(7);
+            }
+        }
+        e.target.value = value;
+    }
+
+    function validateContactNumber(e) {
+        const value = e.target.value.replace(/\D/g, '');
+        const isValid = value.length === 11 && value.startsWith('09');
+        e.target.classList.remove('is-invalid', 'is-valid');
+        if (value.length > 0) {
+            e.target.classList.add(isValid ? 'is-valid' : 'is-invalid');
+        }
+    }
+
+    // Email Validation
+    function validateEmailOnInput(e) {
+        const value = e.target.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = value === '' || emailRegex.test(value);
+        e.target.classList.remove('is-invalid', 'is-valid');
+        if (value.length > 0) {
+            e.target.classList.add(isValid ? 'is-valid' : 'is-invalid');
+        }
+    }
+
+    function validateEmail(e) {
+        const value = e.target.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = value === '' || emailRegex.test(value);
+        e.target.classList.remove('is-invalid', 'is-valid');
+        if (value.length > 0) {
+            e.target.classList.add(isValid ? 'is-valid' : 'is-invalid');
+        }
+    }
+
+    // Plate Number Formatting and Validation
+    function formatPlateNumber(e) {
+        let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (value.length > 7) value = value.substring(0, 7);
+        if (value.length > 0) {
+            if (value.length <= 3) {
+                value = value;
+            } else {
+                value = value.substring(0, 3) + '-' + value.substring(3);
+            }
+        }
+        e.target.value = value;
+    }
+
+    function validatePlateNumber(e) {
+        const value = e.target.value.replace(/[^A-Z0-9]/g, '');
+        const isValid = value.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(value);
+        e.target.classList.remove('is-invalid', 'is-valid');
+        if (value.length > 0) {
+            e.target.classList.add(isValid ? 'is-valid' : 'is-invalid');
+        }
+    }
+
+    // License Number Formatting and Validation
+    function formatLicenseNumber(e) {
+        let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (value.length > 12) value = value.substring(0, 12);
+        if (value.length >= 1 && !/^[A-Z]/.test(value)) {
+            value = 'N' + value.substring(1);
+        }
+        e.target.value = value;
+    }
+
+    function validateLicenseNumber(e) {
+        const value = e.target.value.replace(/[^A-Z0-9]/g, '');
+        const licenseRegex = /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/;
+        const isValid = value.length === 12 && licenseRegex.test(value);
+        e.target.classList.remove('is-invalid', 'is-valid');
+        if (value.length > 0) {
+            e.target.classList.add(isValid ? 'is-valid' : 'is-invalid');
+        }
+    }
+
+    // Clear formatting on focus
+    function clearFormatOnFocus(e) {
+        if (e.target.dataset.originalValue === undefined) {
+            e.target.dataset.originalValue = e.target.value;
+        }
+        if (e.target.value.includes('-')) {
+            const cleanValue = e.target.value.replace(/[^A-Za-z0-9]/g, '');
+            e.target.value = cleanValue;
+        }
+    }
+
+    // Plate Number Input Handler
+    plateNumberInput.addEventListener('input', function() {
+        const plateNumber = this.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+        if (plateNumber.length >= 3) {
             fetchViolationHistory(plateNumber);
         } else {
             clearHistoryAndResetTables();
         }
     });
 
+    // Fetch Violation History
     function fetchViolationHistory(plateNumber) {
         console.log('Fetching violation history for:', plateNumber);
         fetch('fetch_violation_history.php', {
@@ -990,6 +1144,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Populate Available Violation Types
     function populateAvailableTypes(data) {
         violationTypeBody.innerHTML = '';
         const usedTypeIds = new Set(data.violations ? data.violations.map(v => v.violation_type_id.toString()) : []);
@@ -1050,6 +1205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Clear History and Reset Tables
     function clearHistoryAndResetTables() {
         violationHistoryBody.innerHTML = '<tr><td colspan="5" class="text-center">Enter a plate number to view violation history</td></tr>';
         violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number to view available violation types</td></tr>';
@@ -1060,46 +1216,105 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Please select a violation type';
     }
 
+    // Form Submission Handler
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
 
         const hiddenInput = document.getElementById('selected_violation_type_id');
         hiddenInput.name = 'violation_type_id';
 
         const requiredFields = {
-            violator_name: document.getElementById('violator_name'),
             contact_number: document.getElementById('contact_number'),
+            email: document.getElementById('email'),
             plate_number: document.getElementById('plate_number'),
-            reason: document.getElementById('reason'),
+            license_number: document.getElementById('license_number'),
             violation_type_id: hiddenInput
         };
 
         let isValid = true;
+
+        // Clear previous validation states
         Object.values(requiredFields).forEach(field => {
-            field.classList.remove('is-invalid');
+            field.classList.remove('is-invalid', 'is-valid');
+        });
+
+        // Validate required fields
+        Object.entries(requiredFields).forEach(([key, field]) => {
             if (!field.value.trim()) {
                 field.classList.add('is-invalid');
                 isValid = false;
+                return;
+            }
+
+            if (key === 'contact_number') {
+                const phoneValue = field.value.replace(/\D/g, '');
+                if (phoneValue.length !== 11 || !phoneValue.startsWith('09')) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            }
+
+            if (key === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(field.value.trim())) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            }
+
+            if (key === 'plate_number') {
+                const plateValue = field.value.replace(/[^A-Z0-9]/g, '');
+                if (plateValue.length !== 7 || !/^[A-Z]{3}[0-9]{4}$/.test(plateValue)) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            }
+
+            if (key === 'license_number') {
+                const licenseValue = field.value.replace(/[^A-Z0-9]/g, '');
+                const licenseRegex = /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/;
+                if (licenseValue.length !== 12 || !licenseRegex.test(licenseValue)) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
             }
         });
 
         if (!isValid) {
             hiddenInput.name = 'selected_violation_type_id';
-            toastr.error('Please fill all required fields.');
+            Swal.fire({
+                title: 'Validation Error!',
+                text: 'Please correct the highlighted fields and ensure all data is in the correct format.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
         const selectedType = originalTypes.find(t => t.id.toString() === hiddenInput.value);
         const fineAmount = selectedType ? parseFloat(selectedType.fine_amount).toFixed(2) : '0.00';
+        const violatorName = document.getElementById('violator_name').value.trim() || 'N/A';
+        const reason = document.getElementById('reason').value.trim() || 'N/A';
 
         Swal.fire({
             title: 'Confirm Violation',
             html: `
                 <div class="text-left">
-                    <p><strong>Violator:</strong> ${requiredFields.violator_name.value}</p>
+                    <p><strong>Violator:</strong> ${violatorName}</p>
+                    <p><strong>Contact:</strong> ${requiredFields.contact_number.value}</p>
+                    <p><strong>Email:</strong> ${requiredFields.email.value}</p>
                     <p><strong>Plate:</strong> ${requiredFields.plate_number.value}</p>
+                    <p><strong>License:</strong> ${requiredFields.license_number.value}</p>
                     <p><strong>Violation:</strong> ${selectedType ? `${selectedType.violation_type} (${selectedType.base_offense || 'N/A'})` : 'N/A'}</p>
-                    <p><strong>Reason:</strong> ${requiredFields.reason.value}</p>
+                    <p><strong>Reason:</strong> ${reason}</p>
                     <p><strong>Fine:</strong> ₱${fineAmount}</p>
                 </div>
             `,
@@ -1117,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json()) // Expect JSON response from PHP
+                .then(response => response.json())
                 .then(data => {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
@@ -1158,12 +1373,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // OCR for Plate Image
     document.getElementById('plate_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) performOCR(file, 'plate_number');
     });
-
-    clearHistoryAndResetTables();
 
     function performOCR(file, inputId) {
         const ocrStatus = document.getElementById('ocr_status');
@@ -1182,6 +1396,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Fetch User by Plate Number
     function fetchUserByPlateNumber(plateNumber) {
         if (!plateNumber) return;
         fetch('get_user_by_plate.php', {
@@ -1193,12 +1408,16 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 document.getElementById('violator_name').value = data.violator_name || '';
-                document.getElementById('contact_number').value = data.contact_number || '';
+                document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
                 document.getElementById('email').value = data.email || '';
                 document.getElementById('user_id').value = data.user_id || '';
                 document.getElementById('has_license').checked = data.has_license == 1;
                 document.getElementById('license_number').value = data.license_number || '';
                 toastr.success('User details populated successfully.');
+                // Validate populated fields
+                validateContactNumber({ target: document.getElementById('contact_number') });
+                validateEmail({ target: document.getElementById('email') });
+                validateLicenseNumber({ target: document.getElementById('license_number') });
             } else {
                 ['violator_name', 'contact_number', 'email', 'user_id', 'license_number'].forEach(id => 
                     document.getElementById(id).value = ''
@@ -1209,59 +1428,68 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => toastr.error('Error fetching user details: ' + error.message));
     }
-});
 
+    function formatContactNumberFromData(phone) {
+        if (!phone) return '';
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length === 11 && cleanPhone.startsWith('09')) {
+            return `${cleanPhone.substring(0, 4)}-${cleanPhone.substring(4, 7)}-${cleanPhone.substring(7)}`;
+        }
+        return phone;
+    }
 
-// Handle delete violation buttons
-document.querySelectorAll('.delete-violation-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const violationId = this.getAttribute('data-id');
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Do you want to delete violation ID ${violationId}? This action cannot be undone.`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then(result => {
-            if (result.isConfirmed) {
-                // Create FormData for AJAX request
-                const formData = new FormData();
-                formData.append('delete_violation', '1');
-                formData.append('id', violationId);
+    // Delete Violation Handler
+    document.querySelectorAll('.delete-violation-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const violationId = this.getAttribute('data-id');
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete violation ID ${violationId}? This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('delete_violation', '1');
+                    formData.append('id', violationId);
 
-                fetch('manage_violations.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Deleted!',
-                            text: 'Violation has been deleted successfully.',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.reload(); // Refresh the page to update the table
-                        });
-                    } else {
-                        console.error('Error deleting violation:', data.message);
-                        toastr.error(data.message || 'Failed to delete violation.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    toastr.error('An error occurred while deleting the violation.');
-                });
-            }
+                    fetch('manage_violations.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Violation has been deleted successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            console.error('Error deleting violation:', data.message);
+                            toastr.error(data.message || 'Failed to delete violation.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        toastr.error('An error occurred while deleting the violation.');
+                    });
+                }
+            });
         });
     });
-});
 
+    // Initial table reset
+    clearHistoryAndResetTables();
+});
 </script>
-                <?php include '../layout/footer.php'; ?>
-                <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
-            </body>
-        </html>
+<?php include '../layout/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+</body>
+</html>
