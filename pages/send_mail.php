@@ -7,9 +7,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-// Initialize variables
-$toastr_messages = [];
-
 // Function to send email for a specific violation
 function sendViolationEmail($pdo, $violation_id) {
     try {
@@ -160,10 +157,10 @@ function sendViolationEmail($pdo, $violation_id) {
         $stmt->execute([$violation_id]);
 
         file_put_contents('../debug.log', "Email sent successfully for violation ID $violation_id to $email\n", FILE_APPEND);
-        return ['success' => true, 'message' => "Violation email sent successfully to $email! Check the inbox or spam folder."];
+        return ['success' => true, 'message' => "Violation email sent successfully to $email!"];
     } catch (Exception $e) {
         file_put_contents('../debug.log', "Error sending email for violation ID $violation_id: " . $e->getMessage() . "\n", FILE_APPEND);
-        return ['success' => false, 'message' => "Error sending email for violation ID $violation_id: " . $e->getMessage()];
+        return ['success' => false, 'message' => "Error sending email: " . $e->getMessage()];
     }
 }
 
@@ -175,12 +172,12 @@ try {
         exit;
     }
 
-    // Check for violation_id in query parameter for automatic email sending
-    $violation_id = isset($_GET['violation_id']) ? (int)$_GET['violation_id'] : 0;
-    if ($violation_id) {
+    // Handle AJAX form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) {
+        $violation_id = (int)$_POST['violation_id'];
         $result = sendViolationEmail($pdo, $violation_id);
-        $_SESSION['email_status'] = $result;
-        header("Location: manage_violations.php");
+        header('Content-Type: application/json');
+        echo json_encode($result);
         exit;
     }
 
@@ -200,59 +197,22 @@ try {
     // Get the latest violation ID (first in the list due to ORDER BY id DESC)
     $latest_violation_id = !empty($violations) ? $violations[0]['id'] : 0;
 
-    // Fetch violation types
-    $stmt = $pdo->query("SELECT id, violation_type FROM types ORDER BY violation_type");
-    $violation_types = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Fetch users
-    $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE officer_id = ? ORDER BY full_name");
-    $stmt->execute([$_SESSION['user_id']]);
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Handle manual form submission
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_violation'])) {
-        $violation_id = (int)$_POST['violation_id'];
-        $result = sendViolationEmail($pdo, $violation_id);
-        if ($result['success']) {
-            $toastr_messages[] = "Swal.fire({
-                title: 'Email Sent!',
-                text: '" . addslashes($result['message']) . "',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = 'manage_violations.php';
-            });";
-        } else {
-            $toastr_messages[] = "toastr.error('" . addslashes($result['message']) . "');";
-        }
-    }
-
-    // Check for email status message from session
-    if (isset($_SESSION['email_status'])) {
-        $email_status = $_SESSION['email_status'];
-        if ($email_status['success']) {
-            $toastr_messages[] = "Swal.fire({
-                title: 'Email Sent!',
-                text: '" . addslashes($email_status['message']) . "',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = 'manage_violations.php';
-            });";
-        } else {
-            $toastr_messages[] = "toastr.error('" . addslashes($email_status['message']) . "');";
-        }
-        unset($_SESSION['email_status']);
-    }
-
 } catch (PDOException $e) {
-    $toastr_messages[] = "toastr.error('Database error: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    echo "<script>Swal.fire({
+        title: 'Database Error!',
+        text: '" . addslashes(htmlspecialchars($e->getMessage())) . "',
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });</script>";
     file_put_contents('../debug.log', "Database Error: " . $e->getMessage() . "\n", FILE_APPEND);
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include '../layout/header.php'; ?>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 <body>
     <?php include '../layout/navbar.php'; ?>
     <div class="container-fluid">
@@ -373,43 +333,43 @@ try {
     </div>
     <?php include '../layout/footer.php'; ?>
     <script>
-        // Initialize Toastr
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            positionClass: 'toast-top-right',
-            timeOut: 5000
-        };
-
-        // Display Toastr/Swal messages
-        <?php foreach ($toastr_messages as $msg): ?>
-            <?php echo $msg; ?>
-        <?php endforeach; ?>
-
-        // Client-side validation for Email Form
         document.getElementById('emailForm')?.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
             const violationId = document.getElementById('violation_id').value;
             if (!violationId) {
                 document.getElementById('violation_id').classList.add('is-invalid');
-                toastr.error('Please select a violation.');
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Please select a violation.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
             document.getElementById('violation_id').classList.remove('is-invalid');
 
-            // Submit form via fetch
             fetch(this.action, {
                 method: 'POST',
                 body: new FormData(this)
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            }).then(data => {
-                // PHP will handle Swal for success
+            }).then(response => response.json())
+            .then(data => {
+                Swal.fire({
+                    title: data.success ? 'Email Sent!' : 'Error!',
+                    text: data.message,
+                    icon: data.success ? 'success' : 'error',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                });
             }).catch(error => {
-                toastr.error('Error sending email: ' + error.message);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Error sending email: ' + error.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             });
         });
     </script>
