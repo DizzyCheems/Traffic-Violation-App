@@ -539,6 +539,9 @@ try {
                     <div class="card-body">
                         <div class="mb-3">
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationModal">Create Violation</button>
+
+       <a href="../pages/send_mail.php" class="btn btn-outline-primary" style="margin-left: auto; display: block; width: fit-content;">Email Ticket</a>
+
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
