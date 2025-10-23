@@ -70,7 +70,7 @@ if ($filter_date_to) {
     $params[] = $filter_date_to;
 }
 
-$sql = "SELECT v.id, v.violator_name, v.plate_number, v.reason, t.violation_type, t.fine_amount, v.issued_date, v.has_license, v.is_impounded, v.is_paid, v.status, v.notes, u.full_name as user_name 
+$sql = "SELECT v.id, v.violator_name, v.plate_number, v.plate_image, v.impound_pic, v.reason, t.violation_type, t.fine_amount, v.issued_date, v.has_license, v.is_impounded, v.is_paid, v.status, v.notes, u.full_name as user_name 
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
         JOIN users u ON v.user_id = u.id";
@@ -156,6 +156,8 @@ try {
                                         <th>ID</th>
                                         <th>Violator Name</th>
                                         <th>Plate Number</th>
+                                        <th>Plate Image</th>
+                                        <th>Impound Image</th>
                                         <th>Reason</th>
                                         <th>Violation Type</th>
                                         <th>Fine Amount</th>
@@ -170,13 +172,41 @@ try {
                                 </thead>
                                 <tbody>
                                     <?php if (empty($violations)): ?>
-                                        <tr><td colspan="13" class="text-center text-muted">No violations found</td></tr>
+                                        <tr><td colspan="15" class="text-center text-muted">No violations found</td></tr>
                                     <?php else: ?>
                                         <?php foreach ($violations as $violation): ?>
                                             <tr class="table-row-hover">
                                                 <td><?php echo htmlspecialchars($violation['id']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violator_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['plate_number']); ?></td>
+                                                <td>
+                                                    <?php if ($violation['plate_image'] && file_exists($violation['plate_image'])): ?>
+                                                        <img src="<?php echo htmlspecialchars($violation['plate_image']); ?>" 
+                                                             alt="Plate Image" 
+                                                             class="img-thumbnail" 
+                                                             style="max-width: 50px; object-fit: contain; cursor: pointer;" 
+                                                             data-bs-toggle="modal" 
+                                                             data-bs-target="#imageModal" 
+                                                             data-image="<?php echo htmlspecialchars($violation['plate_image']); ?>" 
+                                                             data-title="Plate Image for Violation #<?php echo htmlspecialchars($violation['id']); ?>">
+                                                    <?php else: ?>
+                                                        <span class="text-muted">No Image</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php if ($violation['impound_pic'] && file_exists($violation['impound_pic'])): ?>
+                                                        <img src="<?php echo htmlspecialchars($violation['impound_pic']); ?>" 
+                                                             alt="Impound Image" 
+                                                             class="img-thumbnail" 
+                                                             style="max-width: 50px; object-fit: contain; cursor: pointer;" 
+                                                             data-bs-toggle="modal" 
+                                                             data-bs-target="#imageModal" 
+                                                             data-image="<?php echo htmlspecialchars($violation['impound_pic']); ?>" 
+                                                             data-title="Impound Image for Violation #<?php echo htmlspecialchars($violation['id']); ?>">
+                                                    <?php else: ?>
+                                                        <span class="text-muted">N/A</span>
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td><?php echo htmlspecialchars($violation['reason']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
                                                 <td><?php echo '₱' . number_format($violation['fine_amount'], 2); ?></td>
@@ -270,10 +300,40 @@ try {
                         </div>
                     </div>
                 </div>
+
+                <!-- Image Viewer Modal -->
+                <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="imageModalLabel">Image Viewer</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img id="modalImage" src="" alt="Violation Image" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
     <?php include '../layout/footer.php'; ?>
+    <style>
+        .img-thumbnail {
+            max-width: 50px;
+            object-fit: contain;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .table-row-hover:hover {
+            background-color: #f8f9fa;
+        }
+        #modalImage {
+            max-height: 70vh;
+            object-fit: contain;
+        }
+    </style>
     <script>
         toastr.options = {
             closeButton: true,
@@ -284,6 +344,17 @@ try {
         <?php foreach ($toastr_messages as $msg): ?>
             <?php echo $msg; ?>
         <?php endforeach; ?>
+
+        // Image modal handler
+        document.querySelectorAll('.img-thumbnail').forEach(img => {
+            img.addEventListener('click', function() {
+                const imageSrc = this.getAttribute('data-image');
+                const imageTitle = this.getAttribute('data-title');
+                document.getElementById('modalImage').src = imageSrc;
+                document.getElementById('imageModalLabel').textContent = imageTitle;
+                console.log('Opening image modal for:', imageSrc);
+            });
+        });
 
         document.querySelectorAll('.edit-violation-form').forEach(form => {
             form.addEventListener('submit', function(e) {

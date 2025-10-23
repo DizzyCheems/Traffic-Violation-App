@@ -15,6 +15,11 @@ try {
         FROM violations v
         JOIN types t ON v.violation_type_id = t.id
         WHERE v.plate_number = :plate_number
+        AND (
+            t.violation_type LIKE '%1st Offense%'
+            OR t.violation_type LIKE '%2nd Offense%'
+            OR t.violation_type LIKE '%3rd Offense%'
+        )
         ORDER BY v.issued_date DESC
     ";
 
@@ -26,4 +31,4 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
-?>
+?>  
