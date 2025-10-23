@@ -209,23 +209,32 @@ try {
     $open_concerns = 0;
 }
 
-// Fetch officer status for users with role containing 'officer'
+// Fetch officer status for users with role 'officer'
 try {
-    // Count online officers (users with role containing 'officer' and active session)
+    // Count total officers (users with role = 'officer')
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count 
+                           FROM users 
+                           WHERE role = 'officer'");
+    $stmt->execute();
+    $total_officers = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
+
+    // Debug: Fetch session records for officers
+    $stmt = $pdo->prepare("SELECT s.user_id, u.username, u.role, s.session_token, s.created_at, s.expires_at, s.is_valid 
+                           FROM sessions s 
+                           JOIN users u ON s.user_id = u.id 
+                           WHERE u.role = 'officer'");
+    $stmt->execute();
+    $officer_sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    file_put_contents('../debug.log', "Officer Sessions: " . print_r($officer_sessions, true) . "\n", FILE_APPEND);
+
+    // Count active officers (users with role = 'officer' and valid session)
     $stmt = $pdo->prepare("SELECT COUNT(DISTINCT u.id) as count 
                            FROM users u 
                            JOIN sessions s ON u.id = s.user_id 
-                           WHERE LOWER(u.role) LIKE '%officer%' 
-                           AND s.expires_at > NOW()");
+                           WHERE u.role = 'officer' 
+                           AND s.is_valid = 1");
     $stmt->execute();
     $active_officers = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
-
-    // Count total officers (users with role containing 'officer')
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count 
-                           FROM users 
-                           WHERE LOWER(role) LIKE '%officer%'");
-    $stmt->execute();
-    $total_officers = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 
     // Offline officers are total officers minus active officers
     $offline_officers = max(0, $total_officers - $active_officers);

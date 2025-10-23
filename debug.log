@@ -11317,3 +11317,1525 @@ Session Data: Array
 Login.php accessed: 2025-10-23 12:18:30
 Login.php accessed: 2025-10-23 12:18:35
 Login successful for user_id: 1, role: admin
+Session Data at start: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Login.php accessed: 2025-10-23 14:07:18
+Session Data: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Login.php accessed: 2025-10-23 14:07:18
+Login.php accessed: 2025-10-23 14:07:21
+Login successful for user_id: 1, role: admin
+Officer Sessions: Array
+(
+)
+
+Officer Sessions: Array
+(
+)
+
+Officer Sessions: Array
+(
+)
+
+Officer Sessions: Array
+(
+)
+
+Officer Sessions: Array
+(
+)
+
+Officer Sessions: Array
+(
+)
+
+Officer Sessions: Array
+(
+)
+
+Login.php accessed: 2025-10-23 18:30:41
+Login.php accessed: 2025-10-23 18:30:47
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=3og2n5qe2ll3op48u8dqbjr3ub, expires_at=2025-10-23 19:30:47
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-23 18:30:53
+Login.php accessed: 2025-10-23 18:31:08
+Login.php accessed: 2025-10-23 18:31:13
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=3og2n5qe2ll3op48u8dqbjr3ub, expires_at=2025-10-23 19:31:13
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-23 18:31:24
+Login attempt: username='admin'
+Session recorded: user_id=1, session_token=eqk57h1dgns45hn9pvkmee069m, expires_at=2025-10-23 19:31:24
+Login successful for user_id: 1, role: admin
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+)
+
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+)
+
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Login.php accessed: 2025-10-23 09:56:25
+Login.php accessed: 2025-10-23 09:56:28
+Login attempt: username='officer'
+Invalidated old sessions for user_id=5
+Session recorded: user_id=5, session_token=3og2n5qe2ll3op48u8dqbjr3ub, created_at=2025-10-23 09:56:28, expires_at=2025-10-23 10:56:28, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Fetch Officer Status Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'current_time' at line 1
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Login.php accessed: 2025-10-23 19:08:39
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:30:47
+            [expires_at] => 2025-10-23 19:30:47
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [2] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 00:31:13
+            [expires_at] => 2025-10-23 19:31:13
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 0
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 0
+        )
+
+)
+
+Login.php accessed: 2025-10-23 19:16:29
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=3og2n5qe2ll3op48u8dqbjr3ub, expires_at=2025-10-23 20:16:29, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 01:16:29
+            [expires_at] => 2025-10-23 20:16:29
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 01:16:29
+            [expires_at] => 2025-10-23 20:16:29
+            [is_valid] => 1
+        )
+
+)
+
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 01:16:29
+            [expires_at] => 2025-10-23 20:16:29
+            [is_valid] => 1
+        )
+
+)
+
+Logout.php accessed: user_id=5, time=2025-10-23 19:16:36
+Session invalidated: user_id=5, session_token=3og2n5qe2ll3op48u8dqbjr3ub
+Login.php accessed: 2025-10-23 19:16:36
+Officer Sessions: Array
+(
+    [0] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-23 09:56:28
+            [expires_at] => 2025-10-23 10:56:28
+            [is_valid] => 0
+        )
+
+    [1] => Array
+        (
+            [user_id] => 5
+            [username] => Officer
+            [role] => officer
+            [session_token] => 3og2n5qe2ll3op48u8dqbjr3ub
+            [created_at] => 2025-10-24 01:16:29
+            [expires_at] => 2025-10-23 20:16:29
+            [is_valid] => 0
+        )
+
+)
+
