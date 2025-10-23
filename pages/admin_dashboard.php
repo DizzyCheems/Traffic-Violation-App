@@ -209,21 +209,29 @@ try {
     $open_concerns = 0;
 }
 
-// Fetch officer status
+// Fetch officer status for users with role containing 'officer'
 try {
-    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM officer_status GROUP BY status");
-    $officer_counts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $active_officers = 0;
-    $offline_officers = 0;
-    foreach ($officer_counts as $count) {
-        if ($count['status'] === 'ONLINE') {
-            $active_officers = $count['count'];
-        } elseif ($count['status'] === 'OFFLINE') {
-            $offline_officers = $count['count'];
-        }
-    }
+    // Count online officers (users with role containing 'officer' and active session)
+    $stmt = $pdo->prepare("SELECT COUNT(DISTINCT u.id) as count 
+                           FROM users u 
+                           JOIN sessions s ON u.id = s.user_id 
+                           WHERE LOWER(u.role) LIKE '%officer%' 
+                           AND s.expires_at > NOW()");
+    $stmt->execute();
+    $active_officers = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
+
+    // Count total officers (users with role containing 'officer')
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count 
+                           FROM users 
+                           WHERE LOWER(role) LIKE '%officer%'");
+    $stmt->execute();
+    $total_officers = $stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
+
+    // Offline officers are total officers minus active officers
+    $offline_officers = max(0, $total_officers - $active_officers);
 } catch (PDOException $e) {
     $toastr_messages[] = "toastr.error('Error fetching officer status: " . addslashes(htmlspecialchars($e->getMessage())) . "');";
+    file_put_contents('../debug.log', "Fetch Officer Status Error: " . $e->getMessage() . "\n", FILE_APPEND);
     $active_officers = 0;
     $offline_officers = 0;
 }
@@ -270,71 +278,18 @@ try {
                                 Manage Users
                             </a>
                         </li>
-
-
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/monitor_violations.php">
                                 <i class="fas fa-list me-2"></i>
                                 Monitor Violations
                             </a>
                         </li>
-                        
-<!--                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/violation_report.php">
-                                <i class="fas fa-chart-bar me-2"></i>
-                                Violation Reports
-                            </a>
-                        </li>-->
-
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/violation_heatmap.php">
-                                <i class="fas fa-map-marked-alt me-2"></i>
-                                Violation Heatmap
-                            </a>
-                        </li>-->
-
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/set_fines.php">
-                                <i class="fas fa-peso-sign me-2"></i>
-                                Set Fines
-                            </a>
-                        </li>-->
-
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_concerns.php">
-                                <i class="fas fa-comment-dots me-2"></i>
-                                Manage Complaints
-                            </a>
-                        </li>-->
-
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/officer_performance.php">
-                                <i class="fas fa-star me-2"></i>
-                                Officer Performance
-                            </a>
-                        </li>-->
-
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/audit_log.php">
                                 <i class="fas fa-file-alt me-2"></i>
                                 Audit Log
                             </a>
                         </li>
-                        
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/appeal_workflow.php">
-                                <i class="fas fa-gavel me-2"></i>
-                                Appeal Workflow
-                            </a>
-                        </li>-->
-
-                        <!--<<li class="nav-item">
-                            <a class="nav-link" href="../pages/database_backup.php">
-                                <i class="fas fa-database me-2"></i>
-                                Database Backup
-                            </a>
-                        </li>-->
-
                         <li class="nav-item">
                             <a class="nav-link" href="../index.php">
                                 <i class="fas fa-home me-2"></i>
@@ -369,48 +324,18 @@ try {
                                 Manage Users
                             </a>
                         </li>
-                        
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/monitor_violations.php">
                                 <i class="fas fa-list me-2"></i>
                                 Monitor Violations
                             </a>
                         </li>
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/violation_report.php">
-                                <i class="fas fa-chart-bar me-2"></i>
-                                Violation Reports
-                            </a>
-                        </li>-->
-
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/set_fines.php">
-                                <i class="fas fa-peso-sign me-2"></i>
-                                Set Fines
-                            </a>
-                        </li>-->
-                        <!--<li class="nav-item">
-                            <a class="nav-link" href="../pages/manage_concerns.php">
-                                <i class="fas fa-comment-dots me-2"></i>
-                                Manage Complaints
-                            </a>
-                        </li>-->
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="../pages/audit_log.php">
-                                <i class="fas fa-file-alt me-2"></i>
-                                Audit Log
-                            </a>
-                        </li>
-
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/appeal_workflow.php">
                                 <i class="fas fa-gavel me-2"></i>
                                 Appeal Workflow
                             </a>
                         </li>
-
-
                         <li class="nav-item">
                             <a class="nav-link" href="../index.php">
                                 <i class="fas fa-home me-2"></i>
@@ -437,34 +362,6 @@ try {
 
                 <!-- Dashboard Metrics -->
                 <div class="row g-4 mb-4">
-
-                    <!--<div class="col-md-3">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">System Health</h5>
-                                <p class="card-text">Uptime: <?php echo htmlspecialchars($system_uptime); ?> <span class="text-success">✅</span></p>
-                                <p class="card-text">API Status: <?php echo htmlspecialchars($api_status); ?> <span class="text-success">✅</span></p>
-                            </div>
-                        </div>
-                    </div>-->
-
-<!--                    <div class="col-md-3">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">Violation Collection</h5>
-                                <p class="card-text">Amount: <?php echo htmlspecialchars($total_revenue); ?></p>
-                            </div>
-                        </div>
-                    </div> -->
-
-                   <!-- <div class="col-md-3">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">Open Concerns</h5>
-                                <p class="card-text"><?php echo htmlspecialchars($open_concerns); ?></p>
-                            </div>
-                        </div>
-                    </div>-->
                     <div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
@@ -478,27 +375,6 @@ try {
 
                 <!-- Analytics Section -->
                 <div class="row g-4 mb-4">
-                    <!--<div class="col-md-6">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">Revenue Collection Analytics</h5>
-                                <div class="progress mb-3" style="height: 20px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: <?php echo htmlspecialchars($top_violation_data['percentage'] ?? 0); ?>%;" aria-valuenow="<?php echo htmlspecialchars($top_violation_data['percentage'] ?? 0); ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <p class="card-text">Top Violation: <?php echo htmlspecialchars($top_violation); ?></p>
-                                <a href="../pages/violation_report.php" class="btn btn-outline-primary btn-sm">📊 Generate Full Report</a>
-                            </div>
-                        </div>
-                    </div>-->
-                    <!--<div class="col-md-6">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">Violation Heatmap</h5>
-                                <p class="card-text">Shows high-frequency violation zones for patrol allocation.</p>
-                                <a href="../pages/violation_heatmap.php" class="btn btn-outline-primary btn-sm">📍 View Interactive Map</a>
-                            </div>
-                        </div>
-                    </div>-->
                 </div>
 
                 <!-- Admin Actions and Rule Management -->
@@ -639,7 +515,6 @@ try {
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <!--<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createViolationTypeModal">Add Violation Type</button>-->
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
@@ -649,7 +524,6 @@ try {
                                         <th>Violation Type</th>
                                         <th>Fine Amount</th>
                                         <th>Description</th>
-                                        <!--<th>Actions</th>-->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -662,14 +536,6 @@ try {
                                                 <td><?php echo htmlspecialchars($type['violation_type']); ?></td>
                                                 <td>₱<?php echo htmlspecialchars(number_format($type['fine_amount'], 2)); ?></td>
                                                 <td><?php echo htmlspecialchars($type['description'] ?: 'N/A'); ?></td>
-                                                <!--<td>
-                                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editViolationTypeModal<?php echo $type['id']; ?>">Edit</button>
-                                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteViolationTypeModal<?php echo $type['id']; ?>">Delete</button>
-                                                    <form method="POST" style="display: none;" class="delete-violation-type-form" id="deleteViolationTypeForm<?php echo $type['id']; ?>">
-                                                        <input type="hidden" name="id" value="<?php echo $type['id']; ?>">
-                                                        <input type="hidden" name="delete_violation_type" value="1">
-                                                    </form>
-                                                </td>-->
                                             </tr>
                                             <!-- Edit Violation Type Modal -->
                                             <div class="modal fade" id="editViolationTypeModal<?php echo $type['id']; ?>" tabindex="-1" aria-labelledby="editViolationTypeModalLabel<?php echo $type['id']; ?>" aria-hidden="true">

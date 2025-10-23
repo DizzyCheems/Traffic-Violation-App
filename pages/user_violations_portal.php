@@ -253,8 +253,8 @@ if ($plate_number) {
                                 <div class="row g-2 mb-2">
                                     <div class="col-6">
                                         <p><strong>Paid:</strong><br>
-                                            <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
-                                                <?php echo $violation['is_paid'] ? 'Paid' : 'Unpaid'; ?>
+                                            <span class="badge <?php echo $violation['is_paid'] == 1 ? 'bg-success' : ($violation['is_paid'] == 2 ? '' : 'bg-danger'); ?>" style="font-size: 10px; <?php echo $violation['is_paid'] == 2 ? 'background-color: #ff6200; color: white;' : ''; ?>">
+                                                <?php echo $violation['is_paid'] == 1 ? 'Paid' : ($violation['is_paid'] == 2 ? 'Payment Pending For Approval' : 'Unpaid'); ?>
                                             </span>
                                         </p>
                                     </div>

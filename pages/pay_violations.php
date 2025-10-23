@@ -66,7 +66,7 @@ try {
     }
 
     // Update the is_paid column
-    $stmt = $pdo->prepare("UPDATE violations SET is_paid = 1 WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE violations SET is_paid = 2 WHERE id = ?");
     $stmt->execute([$violation_id]);
 
     // Check if the update was successful

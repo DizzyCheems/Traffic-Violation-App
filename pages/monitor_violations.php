@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_violation'])) 
             $toastr_messages[] = "toastr.error('Violation ID, Status, and Payment Status are required.');";
         } elseif (!in_array($status, ['Pending', 'Resolved', 'Disputed'])) {
             $toastr_messages[] = "toastr.error('Invalid status selected.');";
-        } elseif (!in_array($is_paid, ['0', '1'])) {
+        } elseif (!in_array($is_paid, ['0', '1', '2'])) {
             $toastr_messages[] = "toastr.error('Invalid payment status selected.');";
         } else {
             $stmt = $pdo->prepare("UPDATE violations SET status = ?, is_paid = ?, notes = ? WHERE id = ?");
@@ -222,8 +222,13 @@ try {
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge <?php echo $violation['is_paid'] ? 'bg-success' : 'bg-danger'; ?>">
-                                                        <?php echo $violation['is_paid'] ? 'Paid' : 'Unpaid'; ?>
+                                                    <span class="badge <?php 
+                                                        echo $violation['is_paid'] == 1 ? 'bg-success' : 
+                                                            ($violation['is_paid'] == 2 ? 'bg-warning text-dark' : 'bg-danger'); ?>">
+                                                        <?php 
+                                                            echo $violation['is_paid'] == 1 ? 'Paid' : 
+                                                                ($violation['is_paid'] == 2 ? 'Payment Pending For Approval' : 'Unpaid'); 
+                                                        ?>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -277,8 +282,9 @@ try {
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <select class="form-select" name="is_paid" id="is_paid_<?php echo $violation['id']; ?>" required>
-                                                                        <option value="1" <?php echo $violation['is_paid'] ? 'selected' : ''; ?>>Paid</option>
-                                                                        <option value="0" <?php echo !$violation['is_paid'] ? 'selected' : ''; ?>>Unpaid</option>
+                                                                        <option value="0" <?php echo $violation['is_paid'] == 0 ? 'selected' : ''; ?>>Unpaid</option>
+                                                                        <option value="1" <?php echo $violation['is_paid'] == 1 ? 'selected' : ''; ?>>Paid</option>
+                                                                        <option value="2" <?php echo $violation['is_paid'] == 2 ? 'selected' : ''; ?>>Payment Pending For Approval</option>
                                                                     </select>
                                                                     <label class="form-label" for="is_paid_<?php echo $violation['id']; ?>">Payment Status</label>
                                                                     <div class="invalid-feedback">Please select a payment status.</div>

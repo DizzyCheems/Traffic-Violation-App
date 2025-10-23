@@ -10950,3 +10950,370 @@ Login.php accessed: 2025-10-23 02:52:23
 Login successful for user_id: 1, role: admin
 Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
 Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Fetch Concerns Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.concern_text' in 'field list'
+Login.php accessed: 2025-10-23 02:57:10
+Session Data at start: Array
+(
+    [user_id] => 1
+    [role] => admin
+)
+
+Login.php accessed: 2025-10-23 02:57:11
+Login.php accessed: 2025-10-23 02:57:12
+Login.php accessed: 2025-10-23 04:55:44
+Login.php accessed: 2025-10-23 04:55:49
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => spiralsmoke903@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='Hubog ka', violation_type_id='17', plate_image='../Uploads/plate_68f99d5e07294_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 9
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => Hubog ka
+    [5] => 17
+    [6] => 0
+    [7] => 
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-23T04:59
+    [12] => Pending
+    [13] => 
+    [14] => 9
+    [15] => ../Uploads/plate_68f99d5e07294_1760879076_68f4e1e4734c7.png
+    [16] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 202 to spiralsmoke903@gmail.com
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => spiralsmoke903@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => je7570568@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => je7570568@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='je7570568@gmail.com', plate_number='NBC1234', reason='Hubog Ka!', violation_type_id='17', plate_image='../Uploads/plate_68f99db9997d2_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 10
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => Hubog Ka!
+    [5] => 17
+    [6] => 0
+    [7] => 
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-23T05:14
+    [12] => Pending
+    [13] => 
+    [14] => 10
+    [15] => ../Uploads/plate_68f99db9997d2_1760879076_68f4e1e4734c7.png
+    [16] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 203 to je7570568@gmail.com
+Email sent successfully for violation ID 197 to je7570568@gmail.com
+Login.php accessed: 2025-10-23 05:19:06
+Login.php accessed: 2025-10-23 05:19:08
+Login successful for user_id: 1, role: admin
+Fetch Officer Status Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.sessions' doesn't exist
+Fetch Officer Status Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.sessions' doesn't exist
+Login.php accessed: 2025-10-23 06:25:32
+Login.php accessed: 2025-10-23 06:25:42
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='joshuaedwardtupasmorante@gmail.com', plate_number='NBC1234', reason='Ga gana ang send mail?', violation_type_id='17', plate_image='../Uploads/plate_68f9ae7659b8a_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 11
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => Ga gana ang send mail?
+    [5] => 17
+    [6] => 0
+    [7] => 
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-10-23T06:25
+    [12] => Pending
+    [13] => 
+    [14] => 11
+    [15] => ../Uploads/plate_68f9ae7659b8a_1760879076_68f4e1e4734c7.png
+    [16] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent successfully for violation ID 204 to joshuaedwardtupasmorante@gmail.com
+Email sent successfully for violation ID 196 to joshuaedwardtupasmorante@gmail.com
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-23 07:03:07
+Login.php accessed: 2025-10-23 07:03:13
+Login.php accessed: 2025-10-23 07:03:18
+Login successful for user_id: 1, role: admin
+Fetch Officer Status Error: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'traffic.sessions' doesn't exist
+Login.php accessed: 2025-10-23 11:31:09
+Login.php accessed: 2025-10-23 11:31:13
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Payment Update Failed for Violation ID 204: SQL Error:  (Error Code: ) at 2025-10-23 12:12:18
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-10-23 12:18:30
+Login.php accessed: 2025-10-23 12:18:35
+Login successful for user_id: 1, role: admin
