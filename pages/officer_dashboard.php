@@ -625,27 +625,29 @@ try {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+
+                    <!--<div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Assigned Items</h5>
                                 <p class="card-text">Concerns: <?php echo htmlspecialchars($assigned_concerns); ?></p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
+                    </div>-->
+                    
+                    <!--<div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Collection (WTD)</h5>
                                 <p class="card-text"><?php echo htmlspecialchars($wtd_earnings); ?></p>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
 
                 <!-- Violations and Patrol Zones -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="card shadow-sm h-100">
                             <div class="card-header bg-primary text-white">
                                 <h3 class="mb-0">Recent Violations</h3>
@@ -696,7 +698,8 @@ try {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+
+                    <!--<div class="col-md-6">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Patrol Zones</h5>
@@ -720,7 +723,7 @@ try {
                                 <p style="display:none;" class="card-text">📍 Your location is being tracked</p>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
 
                 <!-- Violation Types -->

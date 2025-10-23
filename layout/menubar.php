@@ -28,12 +28,12 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+<!--            <li class="nav-item">
                 <a class="nav-link" href="../pages/violation_report.php">
                     <i class="fas fa-chart-bar me-2"></i>
                     Violation Reports
                 </a>
-            </li>
+            </li>-->
             
             <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/violation_heatmap.php">
@@ -42,19 +42,19 @@
                 </a>
             </li>-->
 
-            <li class="nav-item">
+            <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/set_fines.php">
                     <i class="fas fa-peso-sign me-2"></i>
                     Set Fines
                 </a>
-            </li>
+            </li>-->
             
-            <li class="nav-item">
+<!--            <li class="nav-item">
                 <a class="nav-link" href="../pages/manage_concerns.php">
                     <i class="fas fa-comment-dots me-2"></i>
                     Manage Complaints
                 </a>
-            </li>
+            </li>-->
             
             <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/officer_performance.php">
@@ -63,12 +63,12 @@
                 </a>
             </li>-->
 
-            <li class="nav-item">
+           <!-- <li class="nav-item">
                 <a class="nav-link" href="../pages/audit_log.php">
                     <i class="fas fa-file-alt me-2"></i>
                     Audit Log
                 </a>
-            </li>
+            </li>-->
             <!--<li class="nav-item">
                 <a class="nav-link" href="../pages/holiday_rules.php">
                     <i class="fas fa-calendar-alt me-2"></i>

@@ -279,12 +279,12 @@ try {
                             </a>
                         </li>
                         
-                        <li class="nav-item">
+<!--                        <li class="nav-item">
                             <a class="nav-link" href="../pages/violation_report.php">
                                 <i class="fas fa-chart-bar me-2"></i>
                                 Violation Reports
                             </a>
-                        </li>
+                        </li>-->
 
                         <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/violation_heatmap.php">
@@ -293,19 +293,19 @@ try {
                             </a>
                         </li>-->
 
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/set_fines.php">
                                 <i class="fas fa-peso-sign me-2"></i>
                                 Set Fines
                             </a>
-                        </li>
+                        </li>-->
 
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/manage_concerns.php">
                                 <i class="fas fa-comment-dots me-2"></i>
                                 Manage Complaints
                             </a>
-                        </li>
+                        </li>-->
 
                         <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/officer_performance.php">
@@ -376,25 +376,25 @@ try {
                                 Monitor Violations
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/violation_report.php">
                                 <i class="fas fa-chart-bar me-2"></i>
                                 Violation Reports
                             </a>
-                        </li>
+                        </li>-->
 
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/set_fines.php">
                                 <i class="fas fa-peso-sign me-2"></i>
                                 Set Fines
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>-->
+                        <!--<li class="nav-item">
                             <a class="nav-link" href="../pages/manage_concerns.php">
                                 <i class="fas fa-comment-dots me-2"></i>
                                 Manage Complaints
                             </a>
-                        </li>
+                        </li>-->
 
                         <li class="nav-item">
                             <a class="nav-link" href="../pages/audit_log.php">
@@ -448,22 +448,23 @@ try {
                         </div>
                     </div>-->
 
-                    <div class="col-md-3">
+<!--                    <div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Violation Collection</h5>
                                 <p class="card-text">Amount: <?php echo htmlspecialchars($total_revenue); ?></p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
+                    </div> -->
+
+                   <!-- <div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">Open Concerns</h5>
                                 <p class="card-text"><?php echo htmlspecialchars($open_concerns); ?></p>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                     <div class="col-md-3">
                         <div class="card shadow-sm h-100">
                             <div class="card-body">
