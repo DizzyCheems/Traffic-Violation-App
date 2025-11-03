@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plate_number'])) {
                 'violator_name' => $violation['violator_name'] ?: '',
                 'contact_number' => $violation['contact_number'] ?: '',
                 'email' => $violation['email'] ?: '',
-                'has_license' => $violation['has_license'] ?: 0,
+                'has_license' => $violation['has_license'] ?: 1,
                 'license_number' => $violation['license_number'] ?: ''
             ]);
         } else {

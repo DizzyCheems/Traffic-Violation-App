@@ -12905,3 +12905,450 @@ Login.php accessed: 2025-11-03 05:33:49
 Login.php accessed: 2025-11-03 05:38:49
 Login.php accessed: 2025-11-03 05:38:51
 Login.php accessed: 2025-11-03 05:38:51
+Login.php accessed: 2025-11-03 08:54:37
+Login.php accessed: 2025-11-03 08:54:41
+Login.php accessed: 2025-11-03 08:55:04
+Login.php accessed: 2025-11-03 08:55:08
+Login attempt: username='officer'
+Login failed: Invalid credentials for username='officer'
+Login.php accessed: 2025-11-03 08:55:12
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=glokqf1sn1uf6e1i0vg11f044e, expires_at=2025-11-03 09:55:12, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Logout.php accessed: user_id=5, time=2025-11-03 08:55:14
+Session invalidated: user_id=5, session_token=glokqf1sn1uf6e1i0vg11f044e
+Login.php accessed: 2025-11-03 08:55:14
+Session Data at start: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Session Data at start: Array
+(
+)
+
+Redirecting to login.php. user_id not set. role not set. 
+Logout.php accessed: user_id=unknown, time=2025-11-03 08:55:19
+Login.php accessed: 2025-11-03 08:55:19
+Login.php accessed: 2025-11-03 08:55:22
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=glokqf1sn1uf6e1i0vg11f044e, expires_at=2025-11-03 09:55:22, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CAEINER'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CAEINERRBPPRENTAWSIAEAEGENIFAR4WNONORCIDSEASALAHO4I1ERTECMEDA1BYFOR72BL1SIIELE44TEESERABADEYABERT4DEE4EEEESBASE7EROEEEE'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944EE'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944EE'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944EE'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944EE'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944EE'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NGP3944EE'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+

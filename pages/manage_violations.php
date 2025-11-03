@@ -653,7 +653,7 @@ try {
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="plate_number_<?php echo $violation['id']; ?>" class="form-label">Plate Number</label>
                                                                         <input type="text" class="form-control" name="plate_number" id="plate_number_<?php echo $violation['id']; ?>" required value="<?php echo htmlspecialchars($violation['plate_number']); ?>">
-                                                                        <div class="invalid-feedback">Please enter a valid license plate.</div>
+                                                                        <div class="invalid-feedback">Please enter a valid plate number.</div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="row">
@@ -861,16 +861,39 @@ try {
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" name="has_license" id="has_license">
+                                            <input type="checkbox" class="form-check-input" name="has_license" id="has_license" checked>
                                             <label class="form-check-label" for="has_license">Has License</label>
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="license_number" class="form-label">License Number</label>
-                                        <input type="text" class="form-control" name="license_number" id="license_number" placeholder="NXX12C34567" maxlength="12">
+                                        <label for="license_number" class="form-label">License Number <span id="license_required_indicator" class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="license_number" id="license_number" placeholder="NXX12C34567" maxlength="12" required>
                                         <div class="invalid-feedback">Please enter a valid license number (e.g., NXX12C34567).</div>
                                         <small class="form-text text-muted">Format: NXX12C34567 (3 letters + 2 numbers + 1 letter + 6 numbers)</small>
                                     </div>
+                                        <script>
+                                            // === License Number Required Toggle ===
+                                        const hasLicenseCheckbox = document.getElementById('has_license');
+                                        const licenseNumberInput = document.getElementById('license_number');
+                                        const licenseRequiredIndicator = document.getElementById('license_required_indicator');
+
+function toggleLicenseRequired() {
+        if (hasLicenseCheckbox.checked) {
+            licenseNumberInput.setAttribute('required', 'required');
+            licenseRequiredIndicator.style.display = 'inline';
+        } else {
+            licenseNumberInput.removeAttribute('required');
+            licenseNumberInput.value = ''; // Clear only when unchecked
+            licenseNumberInput.classList.remove('is-invalid');
+            licenseRequiredIndicator.style.display = 'none';
+        }
+    }
+
+// Attach event once
+    hasLicenseCheckbox.addEventListener('change', toggleLicenseRequired);
+    toggleLicenseRequired(); // Initial state
+                                        </script>
+
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
