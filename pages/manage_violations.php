@@ -1393,26 +1393,35 @@ try {
             }
         });
 
-        function performOCR(file, inputId) {
-            const ocrStatus = document.getElementById('ocr_status');
-            ocrStatus.textContent = 'Processing image...';
-            console.log('Starting OCR for input:', inputId);
-            Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
-                .then(({ data: { text } }) => {
-                    const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                    console.log('OCR Result:', cleanedText);
-                    const input = document.getElementById(inputId);
-                    input.value = cleanedText;
-                    ocrStatus.textContent = `Plate detected: ${cleanedText}`;
-                    input.dispatchEvent(new Event('input'));
-                    fetchUserByPlateNumber(cleanedText);
-                })
-                .catch(error => {
-                    console.error('OCR Error:', error);
-                    ocrStatus.textContent = 'Error extracting text from image.';
-                    toastr.error('Failed to process plate image: ' + error.message);
-                });
-        }
+ function performOCR(file, inputId) {
+    const ocrStatus = document.getElementById('ocr_status');
+    ocrStatus.textContent = 'Processing image...';
+    console.log('Starting OCR for input:', inputId);
+
+    Tesseract.recognize(file, 'eng', { logger: m => console.log('OCR Progress:', m) })
+        .then(({ data: { text } }) => {
+            // --------------------------------------------------------------
+            //  NEW BEHAVIOUR:  just paste the raw OCR result (no formatting)
+            // --------------------------------------------------------------
+            const cleanedText = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            console.log('OCR Result (raw):', cleanedText);
+
+            const input = document.getElementById(inputId);
+            input.value = cleanedText;               // <-- paste exactly what Tesseract gave us
+            ocrStatus.textContent = `Plate detected: ${cleanedText}`;
+
+            // Still fire the input event so the rest of the UI (history, user-lookup…) reacts
+            input.dispatchEvent(new Event('input'));
+
+            // If you still want the user-lookup to work with the raw plate:
+            fetchUserByPlateNumber(cleanedText);
+        })
+        .catch(error => {
+            console.error('OCR Error:', error);
+            ocrStatus.textContent = 'Error extracting text from image.';
+            toastr.error('Failed to process plate image: ' + error.message);
+        });
+}
 
         // Fetch User by Plate Number
         function fetchUserByPlateNumber(plateNumber) {
