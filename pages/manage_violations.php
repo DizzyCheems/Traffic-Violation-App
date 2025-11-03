@@ -1049,18 +1049,18 @@ try {
         }
 
         // Plate Number Formatting and Validation
-        function formatPlateNumber(e) {
-            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (value.length > 7) value = value.substring(0, 7);
-            if (value.length > 0) {
-                if (value.length <= 3) {
-                    value = value;
-                } else {
-                    value = value.substring(0, 3) + value.substring(3);
-                }
-            }
-            e.target.value = value;
-        }
+//        function formatPlateNumber(e) {
+  //          let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    //        if (value.length > 7) value = value.substring(0, 7);
+      //      if (value.length > 0) {
+        //        if (value.length <= 3) {
+          //          value = value;
+            //    } else {
+              //      value = value.substring(0, 3) + value.substring(3);
+               // }
+           // }
+           // e.target.value = value;
+       // }
 
         function validatePlateNumber(e) {
             const value = e.target.value.replace(/[^A-Z0-9]/g, '');
