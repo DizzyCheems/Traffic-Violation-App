@@ -12898,3 +12898,7 @@ Session Data at start: Array
     [role] => officer
 )
 
+Logout.php accessed: user_id=5, time=2025-10-23 19:33:37
+Session invalidated: user_id=5, session_token=eqk57h1dgns45hn9pvkmee069m
+Login.php accessed: 2025-10-23 19:33:37
+Login.php accessed: 2025-11-03 05:33:49

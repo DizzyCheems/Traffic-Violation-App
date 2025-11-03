@@ -134,13 +134,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE id = ? AND officer_id = ?");
             $stmt->execute([$user_id, $_SESSION['user_id']]);
             $existing_user = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$existing_user || strtolower(trim($existing_user['full_name'])) !== strtolower(trim($violator_name))) {
-                file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
-                echo json_encode(['success' => false, 'message' => 'Selected user is invalid or does not match the provided name.']);
-                exit;
-            } else {
-                $email = $email ?: $existing_user['email'];
-            }
+//            if (!$existing_user || strtolower(trim($existing_user['full_name'])) !== strtolower(trim($violator_name))) {
+  //              file_put_contents('../debug.log', "Create Violation Failed: Invalid user_id='$user_id' or name mismatch.\n", FILE_APPEND);
+    //            echo json_encode(['success' => false, 'message' => 'Selected user is invalid or does not match the provided name.']);
+      //          exit;
+      //      } else {
+          //      $email = $email ?: $existing_user['email'];
+        //    }
         }
 
         // If no valid user_id, check if violator_name matches an existing user or create a new one
