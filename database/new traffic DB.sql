@@ -1139,3 +1139,7 @@ ALTER TABLE types ADD COLUMN base_offense VARCHAR(100);
 
 ALTER TABLE violations   
 ADD COLUMN impound_pic text NULL;
+
+
+ALTER TABLE violations   
+ADD COLUMN violator_pic text NULL;
