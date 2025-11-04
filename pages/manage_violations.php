@@ -959,15 +959,15 @@ function toggleLicenseRequired() {
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Debugging: Confirm Tesseract is available
+    // Debugging
     if (typeof Tesseract === 'undefined') {
-        console.error('Tesseract.js is not loaded');
-        toastr.error('Tesseract.js failed to load. OCR functionality unavailable.');
+        console.error('Tesseract.js not loaded');
+        toastr.error('OCR unavailable.');
     } else {
-        console.log('Tesseract.js loaded successfully');
+        console.log('Tesseract.js loaded');
     }
 
-    // Initialize Toastr
+    // Toastr
     toastr.options = {
         closeButton: true,
         progressBar: true,
@@ -992,7 +992,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const originalTypes = <?php echo json_encode($types ?? []); ?> || [];
     let currentlySelectedRow = null;
 
-    // Escape HTML (security)
+    // Escape HTML
     function escapeHtml(text) {
         if (!text) return 'N/A';
         const div = document.createElement('div');
@@ -1009,28 +1009,25 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // Toggle impound_pic
+    // Impound toggle
     isImpoundedCheckbox.addEventListener('change', function() {
         impoundPicContainer.style.display = this.checked ? 'block' : 'none';
-        if (!this.checked) {
-            impoundPicInput.value = '';
-            impoundPicInput.classList.remove('is-invalid');
-        }
+        if (!this.checked) impoundPicInput.value = '';
     });
 
-    // Initialize input formatters
+    // Formatters
     initializeInputFormatters();
 
     function initializeInputFormatters() {
-        const contactNumberInput = document.getElementById('contact_number');
-        const emailInput = document.getElementById('email');
+        const contact = document.getElementById('contact_number');
+        const email = document.getElementById('email');
 
-        contactNumberInput.addEventListener('input', formatContactNumber);
-        contactNumberInput.addEventListener('blur', validateContactNumber);
-        contactNumberInput.addEventListener('focus', clearFormatOnFocus);
+        contact.addEventListener('input', formatContactNumber);
+        contact.addEventListener('blur', validateContactNumber);
+        contact.addEventListener('focus', clearFormatOnFocus);
 
-        emailInput.addEventListener('input', validateEmailOnInput);
-        emailInput.addEventListener('blur', validateEmail);
+        email.addEventListener('input', validateEmailOnInput);
+        email.addEventListener('blur', validateEmail);
 
         plateNumberInput.addEventListener('input', formatPlateNumber);
         plateNumberInput.addEventListener('blur', validatePlateNumber);
@@ -1041,58 +1038,56 @@ document.addEventListener('DOMContentLoaded', function() {
         licenseNumberInput.addEventListener('focus', clearFormatOnFocus);
     }
 
-    // Format & Validate Functions
+    // Format & Validate
     function formatContactNumber(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 11) value = value.substring(0, 11);
-        if (value.length > 7) value = value.substring(0, 4) + '-' + value.substring(4, 7) + '-' + value.substring(7);
-        else if (value.length > 4) value = value.substring(0, 4) + '-' + value.substring(4);
-        e.target.value = value;
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 11) v = v.substring(0, 11);
+        if (v.length > 7) v = v.substring(0, 4) + '-' + v.substring(4, 7) + '-' + v.substring(7);
+        else if (v.length > 4) v = v.substring(0, 4) + '-' + v.substring(4);
+        e.target.value = v;
     }
 
     function validateContactNumber(e) {
-        const value = e.target.value.replace(/\D/g, '');
-        const isValid = value.length === 11 && value.startsWith('09');
-        e.target.classList.toggle('is-valid', isValid && value.length > 0);
-        e.target.classList.toggle('is-invalid', !isValid && value.length > 0);
+        const v = e.target.value.replace(/\D/g, '');
+        const ok = v.length === 11 && v.startsWith('09');
+        e.target.classList.toggle('is-valid', ok && v.length > 0);
+        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
 
     function validateEmailOnInput(e) {
-        const value = e.target.value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const isValid = value === '' || emailRegex.test(value);
-        e.target.classList.toggle('is-valid', isValid && value.length > 0);
-        e.target.classList.toggle('is-invalid', !isValid && value.length > 0);
+        const v = e.target.value.trim();
+        const ok = v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(v);
+        e.target.classList.toggle('is-valid', ok && v.length > 0);
+        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
 
     function validateEmail(e) { validateEmailOnInput(e); }
 
     function formatPlateNumber(e) {
-        let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        if (value.length > 7) value = value.substring(0, 7);
-        e.target.value = value;
+        let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (v.length > 7) v = v.substring(0, 7);
+        e.target.value = v;
     }
 
     function validatePlateNumber(e) {
-        const value = e.target.value.replace(/[^A-Z0-9]/g, '');
-        const isValid = value.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(value);
-        e.target.classList.toggle('is-valid', isValid);
-        e.target.classList.toggle('is-invalid', !isValid && value.length > 0);
+        const v = e.target.value.replace(/[^A-Z0-9]/g, '');
+        const ok = v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v);
+        e.target.classList.toggle('is-valid', ok);
+        e.target.classList.toggle('is Baking', !ok && v.length > 0);
     }
 
     function formatLicenseNumber(e) {
-        let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        if (value.length > 12) value = value.substring(0, 12);
-        if (value.length >= 1 && !/^[A-Z]/.test(value)) value = 'N' + value.substring(1);
-        e.target.value = value;
+        let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (v.length > 12) v = v.substring(0, 12);
+        if (v.length >= 1 && !/^[A-Z]/.test(v)) v = 'N' + v.substring(1);
+        e.target.value = v;
     }
 
     function validateLicenseNumber(e) {
-        const value = e.target.value.replace(/[^A-Z0-9]/g, '');
-        const licenseRegex = /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/;
-        const isValid = value.length === 12 && licenseRegex.test(value);
-        e.target.classList.toggle('is-valid', isValid);
-        e.target.classList.toggle('is-invalid', !isValid && value.length > 0);
+        const v = e.target.value.replace(/[^A-Z0-9]/g, '');
+        const ok = v.length === 12 && /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/.test(v);
+        e.target.classList.toggle('is-valid', ok);
+        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
 
     function clearFormatOnFocus(e) {
@@ -1101,10 +1096,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Clear history and reset tables
+    // Clear tables
     function clearHistoryAndResetTables() {
-        violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center">Enter a plate number or license number to view violation history</td></tr>';
-        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Enter a plate number or license number to view available violation types</td></tr>';
+        violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center">Enter plate or license to view history</td></tr>';
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Select violation type</td></tr>';
         selectedViolationTypeId.value = '';
         currentlySelectedRow = null;
         selectedViolationDisplay.classList.add('d-none');
@@ -1117,7 +1112,87 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // REFRESH HISTORY + AUTO-FILL PLATE FROM LICENSE
+    // AUTO-FILL USER DATA FROM PLATE
+    function autoFillUserFromPlate(plateNumber) {
+        const formData = new FormData();
+        formData.append('plate_number', plateNumber);
+        formData.append('officer_id', officerId);
+
+        fetch('get_user_by_plate.php', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('violator_name').value = data.violator_name || '';
+                    document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('user_id').value = data.user_id || '';
+                    document.getElementById('has_license').checked = data.has_license == 1;
+
+                    // Only fill license if empty
+                    if (!licenseNumberInput.value.trim() && data.license_number) {
+                        licenseNumberInput.value = data.license_number;
+                        licenseNumberInput.dispatchEvent(new Event('input'));
+                        licenseNumberInput.dispatchEvent(new Event('blur'));
+                    }
+
+                    toastr.success('Name, contact, email, license filled from plate!');
+                    validateAll();
+                } else {
+                    toastr.info(data.message || 'No user found for this plate.');
+                }
+            })
+            .catch(() => toastr.error('Failed to load user from plate.'));
+    }
+
+    // AUTO-FILL USER DATA FROM LICENSE
+    function autoFillUserFromLicense(licenseNumber) {
+        const formData = new FormData();
+        formData.append('license_number', licenseNumber);
+        formData.append('officer_id', officerId);
+
+        fetch('get_user_by_license.php', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('violator_name').value = data.violator_name || '';
+                    document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('user_id').value = data.user_id || '';
+                    document.getElementById('has_license').checked = true;
+
+                    // Only fill plate if empty or invalid
+                    const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
+                    if (currentPlate.length < 7 && data.plate_number) {
+                        plateNumberInput.value = data.plate_number;
+                        plateNumberInput.dispatchEvent(new Event('input'));
+                        plateNumberInput.dispatchEvent(new Event('blur'));
+                    }
+
+                    toastr.success('Name, contact, email, plate filled from license!');
+                    validateAll();
+                } else {
+                    toastr.info(data.message || 'No user found for this license.');
+                }
+            })
+            .catch(() => toastr.error('Failed to load user from license.'));
+    }
+
+    function formatContactNumberFromData(phone) {
+        if (!phone) return '';
+        const clean = phone.replace(/\D/g, '');
+        return clean.length === 11 && clean.startsWith('09')
+            ? `${clean.substring(0,4)}-${clean.substring(4,7)}-${clean.substring(7)}`
+            : phone;
+    }
+
+    function validateAll() {
+        validateContactNumber({ target: document.getElementById('contact_number') });
+        validateEmail({ target: document.getElementById('email') });
+        validatePlateNumber({ target: plateNumberInput });
+        validateLicenseNumber({ target: licenseNumberInput });
+    }
+
+    // REFRESH HISTORY + AUTO-FILL
     const refreshHistory = debounce(function () {
         const plate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
         const license = licenseNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
@@ -1128,12 +1203,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let paramName = null;
         let paramValue = null;
 
-        if (hasLicense && license.length >= 12) {
+        if (hasLicense && license.length === 12) {
             paramName = 'license_number';
             paramValue = license;
-        } else if (plate.length >= 3) {
+            autoFillUserFromLicense(license); // Trigger user fill
+        } else if (plate.length === 7) {
             paramName = 'plate_number';
             paramValue = plate;
+            autoFillUserFromPlate(plate); // Trigger user fill
         }
 
         if (!paramName) return;
@@ -1152,7 +1229,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let latestPlate = null;
 
             if (data.success && data.violations?.length > 0) {
-                // Sort by issued_date DESC and get the most recent plate
                 const sorted = [...data.violations].sort((a, b) => new Date(b.issued_date) - new Date(a.issued_date));
                 latestPlate = sorted[0].plate_number;
 
@@ -1170,31 +1246,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     violationHistoryBody.appendChild(row);
                 });
 
-                // AUTO-FILL PLATE NUMBER FROM LICENSE (only if license is active and plate is empty or invalid)
+                // AUTO-FILL PLATE FROM HISTORY (fallback)
                 if (hasLicense && license.length === 12 && latestPlate) {
                     const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
                     if (currentPlate.length < 7 || currentPlate !== latestPlate) {
                         plateNumberInput.value = latestPlate;
-                        plateNumberInput.dispatchEvent(new Event('input')); // Trigger formatting
-                        plateNumberInput.dispatchEvent(new Event('blur'));  // Trigger validation
-                        toastr.info(`Plate auto-filled: ${latestPlate}`);
+                        plateNumberInput.dispatchEvent(new Event('input'));
+                        plateNumberInput.dispatchEvent(new Event('blur'));
                     }
                 }
             } else {
-                const type = hasLicense ? 'license number' : 'plate number';
-                violationHistoryBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No previous violations found for this ${type}.</td></tr>`;
+                const type = hasLicense ? 'license' : 'plate';
+                violationHistoryBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No violations for this ${type}.</td></tr>`;
             }
-
             populateAvailableTypes({violations: data.violations || []});
         })
-        .catch(err => {
-            console.error(err);
+        .catch(() => {
             violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading history</td></tr>';
-            toastr.error('Failed to load violation history.');
+            toastr.error('Failed to load history.');
         });
     }, 500);
 
-    // Input Listeners
+    // Listeners
     plateNumberInput.addEventListener('input', refreshHistory);
     licenseNumberInput.addEventListener('input', refreshHistory);
     hasLicenseCheckbox.addEventListener('change', function () {
@@ -1210,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // POPULATE AVAILABLE TYPES
+    // POPULATE TYPES
     function populateAvailableTypes(data) {
         violationTypeBody.innerHTML = '';
         const used = new Set(data.violations?.map(v => v.violation_type_id.toString()) || []);
@@ -1259,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
         } else {
-            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional violation types available</td></tr>';
+            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional types available</td></tr>';
         }
     }
 
@@ -1282,11 +1355,11 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(err => {
                 status.textContent = 'OCR Failed';
-                toastr.error('OCR failed: ' + err.message);
+                toastr.error('OCR error: ' + err.message);
             });
     }
 
-    // FORM SUBMIT
+    // FORM SUBMIT (unchanged)
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const hidden = document.getElementById('selected_violation_type_id');
@@ -1394,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // DELETE HANDLER
+    // DELETE
     document.querySelectorAll('.delete-violation-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
