@@ -14346,3 +14346,270 @@ get_user_by_license.php accessed. Session: Array
 
 Fetching data for license_number: 'NXX12C342342'
 Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 0
+    [license_number] => 
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='joshuaedwardtupasmorante@gmail.com', plate_number='NBC1234', reason='Spped', violation_type_id='135', plate_image='', impound_pic=''
+Offense Frequency for user_id='163': 12
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => Spped
+    [5] => 135
+    [6] => 1
+    [7] => NXX12C342342
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-11-04T06:19
+    [12] => Pending
+    [13] => qwe
+    [14] => 12
+    [15] => 
+    [16] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Login.php accessed: 2025-11-04 09:16:30
+Login.php accessed: 2025-11-04 09:16:48
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=p5enp2g486migjnqn654ueaqfa, expires_at=2025-11-04 10:16:48, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
