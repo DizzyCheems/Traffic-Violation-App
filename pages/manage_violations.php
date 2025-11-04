@@ -1073,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const v = e.target.value.replace(/[^A-Z0-9]/g, '');
         const ok = v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v);
         e.target.classList.toggle('is-valid', ok);
-        e.target.classList.toggle('is Baking', !ok && v.length > 0);
+        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
 
     function formatLicenseNumber(e) {
@@ -1112,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // AUTO-FILL USER DATA FROM PLATE
+    // AUTO-FILL FROM PLATE
     function autoFillUserFromPlate(plateNumber) {
         const formData = new FormData();
         formData.append('plate_number', plateNumber);
@@ -1128,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('user_id').value = data.user_id || '';
                     document.getElementById('has_license').checked = data.has_license == 1;
 
-                    // Only fill license if empty
+                    // Fill license if empty
                     if (!licenseNumberInput.value.trim() && data.license_number) {
                         licenseNumberInput.value = data.license_number;
                         licenseNumberInput.dispatchEvent(new Event('input'));
@@ -1144,38 +1144,49 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(() => toastr.error('Failed to load user from plate.'));
     }
 
-    // AUTO-FILL USER DATA FROM LICENSE
-    function autoFillUserFromLicense(licenseNumber) {
-        const formData = new FormData();
-        formData.append('license_number', licenseNumber);
-        formData.append('officer_id', officerId);
+    // AUTO-FILL FROM LICENSE
+  function autoFillUserFromLicense(licenseNumber) {
+    const formData = new FormData();
+    formData.append('license_number', licenseNumber);
+    formData.append('officer_id', officerId);
 
-        fetch('get_user_by_license.php', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('violator_name').value = data.violator_name || '';
-                    document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
-                    document.getElementById('email').value = data.email || '';
-                    document.getElementById('user_id').value = data.user_id || '';
-                    document.getElementById('has_license').checked = true;
+    fetch('get_user_by_license.php', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('violator_name').value = data.violator_name || '';
+                document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('user_id').value = data.user_id || '';
+                document.getElementById('has_license').checked = true;
 
-                    // Only fill plate if empty or invalid
-                    const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
-                    if (currentPlate.length < 7 && data.plate_number) {
-                        plateNumberInput.value = data.plate_number;
-                        plateNumberInput.dispatchEvent(new Event('input'));
-                        plateNumberInput.dispatchEvent(new Event('blur'));
-                    }
+                const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
+                if (currentPlate.length < 7 && data.plate_number) {
+                    plateNumberInput.value = data.plate_number;
+                    plateNumberInput.dispatchEvent(new Event('input'));
+                    plateNumberInput.dispatchEvent(new Event('blur'));
 
-                    toastr.success('Name, contact, email, plate filled from license!');
-                    validateAll();
+                    // CRITICAL: NOW CALL refreshHistory() AFTER PLATE IS FILLED
+                    setTimeout(() => {
+                        const newPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+                        if (newPlate.length === 7) {
+                            autoFillUserFromPlate(newPlate);
+                            refreshHistory(); // ← THIS IS THE KEY!
+                        }
+                    }, 150);
                 } else {
-                    toastr.info(data.message || 'No user found for this license.');
+                    // If plate already exists, just refresh history
+                    refreshHistory();
                 }
-            })
-            .catch(() => toastr.error('Failed to load user from license.'));
-    }
+
+                toastr.success('Full profile loaded from license!');
+                validateAll();
+            } else {
+                toastr.info(data.message || 'No user found for this license.');
+            }
+        })
+        .catch(() => toastr.error('Failed to load user from license.'));
+}
 
     function formatContactNumberFromData(phone) {
         if (!phone) return '';
@@ -1206,11 +1217,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hasLicense && license.length === 12) {
             paramName = 'license_number';
             paramValue = license;
-            autoFillUserFromLicense(license); // Trigger user fill
+            // DO NOT call autoFillUserFromLicense() here — input event will trigger it
         } else if (plate.length === 7) {
             paramName = 'plate_number';
             paramValue = plate;
-            autoFillUserFromPlate(plate); // Trigger user fill
+            autoFillUserFromPlate(plate);
         }
 
         if (!paramName) return;
@@ -1246,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     violationHistoryBody.appendChild(row);
                 });
 
-                // AUTO-FILL PLATE FROM HISTORY (fallback)
+                // Fallback plate fill from history
                 if (hasLicense && license.length === 12 && latestPlate) {
                     const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
                     if (currentPlate.length < 7 || currentPlate !== latestPlate) {
@@ -1269,7 +1280,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Listeners
     plateNumberInput.addEventListener('input', refreshHistory);
-    licenseNumberInput.addEventListener('input', refreshHistory);
+    licenseNumberInput.addEventListener('input', function() {
+        const license = this.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+        if (license.length === 12 && hasLicenseCheckbox.checked) {
+            autoFillUserFromLicense(license);
+        }
+        refreshHistory();
+    });
     hasLicenseCheckbox.addEventListener('change', function () {
         toggleLicenseRequired();
         refreshHistory();
@@ -1359,7 +1376,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // FORM SUBMIT (unchanged)
+    // FORM SUBMIT
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const hidden = document.getElementById('selected_violation_type_id');
