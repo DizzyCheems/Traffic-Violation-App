@@ -108,6 +108,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
             $plate_image = $file_path;
         }
 
+
+// ---------- 3. MULTIPLE VIOLATOR PICTURES ----------
+$violator_pic_paths = [];                     // will hold each saved path
+$allowed_ext = ['jpg','jpeg','png','gif','webp'];
+
+if (!empty($_FILES['violator_pic']['name'][0])) {   // at least one file selected
+    $files = $_FILES['violator_pic'];
+
+    foreach ($files['error'] as $i => $err) {
+        if ($err !== UPLOAD_ERR_OK) {
+            // optional: log non-OK errors
+            continue;
+        }
+
+        $tmp   = $files['tmp_name'][$i];
+        $name  = $files['name'][$i];
+        $ext   = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+        if (!in_array($ext, $allowed_ext, true)) {
+            echo json_encode(['success'=>false,
+                             'message'=>"Invalid file type: $name"]);
+            exit;
+        }
+
+        $new_name = uniqid('violator_') . '_' . basename($name);
+        $dest     = $upload_dir . $new_name;
+
+        if (!move_uploaded_file($tmp, $dest)) {
+            file_put_contents('../debug.log',
+                "Violator Pic Upload Failed: $dest\n", FILE_APPEND);
+            echo json_encode(['success'=>false,
+                             'message'=>"Failed to save picture: $name"]);
+            exit;
+        }
+
+        $violator_pic_paths[] = $dest;
+    }
+}
+$violator_pic = !empty($violator_pic_paths) ? implode(',', $violator_pic_paths) : null;
+
         // Handle impound_pic upload (only if is_impounded is checked)
         if ($is_impounded && isset($_FILES['impound_pic']) && $_FILES['impound_pic']['error'] === UPLOAD_ERR_OK) {
             $file_tmp = $_FILES['impound_pic']['tmp_name'];
@@ -201,17 +241,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_violation'])) 
 
         // Insert violation
         $stmt = $pdo->prepare("
-            INSERT INTO violations (
-                officer_id, user_id, violator_name, plate_number, reason, violation_type_id, 
-                has_license, license_number, is_impounded, is_paid, or_number, issued_date, 
-                status, notes, offense_freq, plate_image, impound_pic, email_sent
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
-        ");
-        $params = [
-            $_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id,
-            $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date,
-            $status, $notes, $offense_freq, $plate_image, $impound_pic
-        ];
+ INSERT INTO violations (
+        officer_id, user_id, violator_name, plate_number, reason, violation_type_id,
+        has_license, license_number, is_impounded, is_paid, or_number, issued_date,
+        status, notes, offense_freq, plate_image, impound_pic, violator_pic, email_sent
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
+");
+$params = [
+    $_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id,
+    $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date,
+    $status, $notes, $offense_freq, $plate_image, $impound_pic, $violator_pic
+];
         file_put_contents('../debug.log', "Executing INSERT query with params: " . print_r($params, true) . "\n", FILE_APPEND);
         $success = $stmt->execute($params);
         if ($success) {
@@ -937,7 +977,33 @@ function toggleLicenseRequired() {
                                         <label for="notes" class="form-label">Notes</label>
                                         <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
                                     </div>
+                                    
                                 </div>
+
+<!-- VIOLATOR PICTURES (MULTIPLE) -->
+<div class="row">
+    <div class="col-md-6 mb-3" id="violator_pic_container">
+        <label for="violator_pic" class="form-label">
+            Violator Picture(s) <small class="text-muted">(optional – multiple allowed)</small>
+        </label>
+        <input type="file"
+               class="form-control"
+               name="violator_pic[]"
+               id="violator_pic"
+               accept="image/*"
+               multiple>
+        <div class="preview mt-2"></div>
+    </div>
+
+    <!-- (keep the “Is Paid” checkbox in the same row if you like) -->
+    <div class="col-md-6 mb-3">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="is_paid" id="is_paid">
+            <label class="form-check-label" for="is_paid">Is Paid</label>
+        </div>
+    </div>
+</div>
+
                                 <div class="row">
                                     <div class="col-md-12">
                                         <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
@@ -1513,6 +1579,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // INIT
     toggleLicenseRequired();
     clearHistoryAndResetTables();
+});
+
+
+
+</script>
+
+<script>
+document.getElementById('violator_pic').addEventListener('change', function (e) {
+    const preview = document.querySelector('#violator_pic_container .preview');
+    preview.innerHTML = '';                     // clear old thumbs
+    for (const file of e.target.files) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.cssText = 'width:80px;height:80px;object-fit:cover;margin:0 5px 5px 0;border-radius:4px;';
+        preview.appendChild(img);
+    }
 });
 </script>
 </body>
