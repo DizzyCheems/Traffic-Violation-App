@@ -473,10 +473,28 @@ try {
 // Fetch all violations issued by the officer
 try {
     $stmt = $pdo->prepare("
-        SELECT v.id, v.officer_id, v.user_id, v.violator_name, v.plate_number, v.reason, 
-               v.violation_type_id, v.has_license, v.license_number, v.is_impounded, v.is_paid, 
-               v.or_number, v.issued_date, v.status, v.notes, v.offense_freq, v.plate_image, 
-               t.violation_type, t.fine_amount, t.base_offense 
+        SELECT 
+            v.id, 
+            v.officer_id, 
+            v.user_id, 
+            v.violator_name, 
+            v.plate_number, 
+            v.reason, 
+            v.violation_type_id, 
+            v.has_license, 
+            v.license_number, 
+            v.is_impounded, 
+            v.is_paid, 
+            v.or_number, 
+            v.issued_date, 
+            v.status, 
+            v.notes, 
+            v.offense_freq, 
+            v.plate_image,
+            v.violator_pic,          -- INCLUDED HERE
+            t.violation_type, 
+            t.fine_amount, 
+            t.base_offense 
         FROM violations v 
         JOIN types t ON v.violation_type_id = t.id 
         WHERE v.officer_id = ? 
@@ -490,6 +508,53 @@ try {
     $violations = [];
 }
 ?>
+
+<style>
+.table img {
+    transition: transform .2s ease;
+    cursor: zoom-in;
+}
+.table img:hover {
+    transform: scale(3);
+    position: relative;
+    z-index: 1000;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+</style>
+
+
+<style>
+.violator-thumb {
+    transition: transform .2s ease;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.violator-thumb:hover {
+    transform: scale(1.1);
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    opacity: 0.9 !important;
+    transition: opacity 0.2s;
+}
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 1 !important;
+}
+
+/* Optional: Add indicators (dots) at bottom */
+.carousel-indicators {
+    bottom: 10px;
+}
+.carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0.5);
+}
+</style>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -592,6 +657,7 @@ try {
                                         <th>Violator</th>
                                         <th>Plate</th>
                                         <th>Plate Image</th>
+                                        <th>Violator Image</th>
                                         <th>Type</th>
                                         <th>Base Offense</th>
                                         <th>Fine</th>
@@ -634,6 +700,119 @@ try {
                                                         N/A
                                                     <?php endif; ?>
                                                 </td>
+<?php
+// ---------------------------------------------------
+// 1. PREPARE VIOLATOR PICTURES (once per row)
+// ---------------------------------------------------
+$violatorPic = $violation['violator_pic'] ?? null;
+$allPics     = [];
+$picCount    = 0;
+
+if ($violatorPic && trim($violatorPic) !== '') {
+    $allPics = array_filter(
+        explode(',', $violatorPic),
+        function($p) { return file_exists(trim($p)); }
+    );
+    $picCount = count($allPics);
+}
+?>
+
+<!-- ====================== VIOLATOR IMAGE CELL ====================== -->
+<td>
+    <?php if ($picCount > 0): ?>
+        <?php $firstPic = htmlspecialchars(trim(reset($allPics))); ?>
+        <div class="position-relative d-inline-block">
+            <a href="javascript:void(0)"
+               data-bs-toggle="modal"
+               data-bs-target="#violatorModal<?php echo $violation['id']; ?>">
+                <img src="<?php echo $firstPic; ?>"
+                     alt="Violator"
+                     class="img-thumbnail violator-thumb"
+                     style="width:60px;height:60px;object-fit:cover;cursor:pointer;">
+            </a>
+            <?php if ($picCount > 1): ?>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                      style="font-size:0.65rem;">
+                    +<?php echo $picCount - 1; ?>
+                </span>
+            <?php endif; ?>
+        </div>
+    <?php else: ?>
+        <span class="text-muted">N/A</span>
+    <?php endif; ?>
+</td>
+
+<!-- ====================== MODAL (inside loop) ====================== -->
+<div class="modal fade" id="violatorModal<?php echo $violation['id']; ?>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Violator: <?php echo htmlspecialchars($violation['violator_name']); ?>
+                    <small class="text-muted ms-2">(<?php echo $picCount; ?> image<?php echo $picCount !== 1 ? 's' : ''; ?>)</small>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-0 position-relative">
+                <?php if ($picCount > 0): ?>
+                    <div id="carouselViolator<?php echo $violation['id']; ?>" class="carousel slide">
+                        <div class="carousel-inner">
+                            <?php foreach ($allPics as $index => $pic):
+                                $path   = htmlspecialchars(trim($pic));
+                                $active = $index === 0 ? 'active' : '';
+                            ?>
+                                <div class="carousel-item <?php echo $active; ?>">
+                                    <img src="<?php echo $path; ?>"
+                                         class="d-block w-100"
+                                         alt="Violator Picture <?php echo $index + 1; ?>"
+                                         style="max-height:70vh; object-fit:contain;">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <?php if ($picCount > 1): ?>
+                            <!-- ENHANCED LEFT ARROW -->
+                            <button class="carousel-control-prev" type="button"
+                                    data-bs-target="#carouselViolator<?php echo $violation['id']; ?>"
+                                    data-bs-slide="prev"
+                                    style="width:60px; opacity:0.9;">
+                                <span class="carousel-control-prev-icon" 
+                                      style="width:40px; height:40px; background-color:rgba(0,0,0,0.6); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
+                                        <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                    </svg>
+                                </span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+
+                            <!-- ENHANCED RIGHT ARROW -->
+                            <button class="carousel-control-next" type="button"
+                                    data-bs-target="#carouselViolator<?php echo $violation['id']; ?>"
+                                    data-bs-slide="next"
+                                    style="width:60px; opacity:0.9;">
+                                <span class="carousel-control-next-icon"
+                                      style="width:40px; height:40px; background-color:rgba(0,0,0,0.6); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
+                                        <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <p class="text-center text-muted p-5">No images available.</p>
+                <?php endif; ?>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
                                                 <td><?php echo htmlspecialchars($violation['violation_type']); ?></td>
                                                 <td><?php echo htmlspecialchars($violation['base_offense'] ?: 'N/A'); ?></td>
                                                 <td>₱<?php echo htmlspecialchars(number_format($violation['fine_amount'], 2)); ?></td>
