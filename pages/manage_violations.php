@@ -1308,11 +1308,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateEmail(e) { validateEmailOnInput(e); }
 
-    function formatPlateNumber(e) {
-        let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        if (v.length > 7) v = v.substring(0, 7);
-        e.target.value = v;
+function formatPlateNumber(e) {
+    let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    
+    if (v.length >= 6) {
+        v = v.substring(0, 7); // Cap at 7
+        if (v.length !== 6 && v.length !== 7) {
+            v = v.substring(0, 6); // Force to 6 if not 7
+        }
     }
+    
+    e.target.value = v;
+}
 
     function validatePlateNumber(e) {
         const v = e.target.value.replace(/[^A-Z0-9]/g, '');
