@@ -2,7 +2,7 @@
 $host = 'localhost';
 $dbname = 'traffic';
 $username = 'root';
-$password = '';
+$password = '@4CornersPH1';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);

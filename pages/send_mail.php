@@ -38,10 +38,6 @@ function sendViolationEmail($pdo, $violation_id) {
         $issued_date = $violation['issued_date'];
         $license_number = $violation['license_number'] ?: 'N/A';
 
-        // Validate required fields
-        if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($user_id) || empty($email)) {
-            return ['success' => false, 'message' => 'All required fields must be filled for violation ID ' . $violation_id . '.'];
-        }
 
         // Initialize PHPMailer
         $mail = new PHPMailer(true);
