@@ -1562,7 +1562,7 @@ function shouldHideViolation(violationName, isAlreadyUsed) {
 
     // POPULATE TYPES
 // POPULATE TYPES – SHOW **ALL** VIOLATION TYPES EVERY TIME
-// POPULATE TYPES – HIDE 1st/2nd/3rd THAT ARE ALREADY ISSUED
+// POPULATE TYPES – SMART HIDE: 1st/2nd/3rd only if already issued, 3rd repeatable, no skipping
 function populateAvailableTypes(data) {
     violationTypeBody.innerHTML = '';
 
@@ -1570,18 +1570,19 @@ function populateAvailableTypes(data) {
         (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
     );
 
-    // Group violations by base_offense to know which level was last issued
-    const lastLevelByBase = {};
+    // Map: base_offense → highest level issued (1,2,3)
+    const highestLevelByBase = {};
     (data.violations || []).forEach(v => {
-        const base = v.base_offense || 'unknown';
-        const typeName = originalTypes.find(t => t.id == v.violation_type_id)?.violation_type || '';
-        const match = typeName.match(/(1st|2nd|3rd)/i);
-        if (match) {
-            const level = match[0].toLowerCase();
-            const order = { '1st': 1, '2nd': 2, '3rd': 3 };
-            if (!lastLevelByBase[base] || order[level] > order[lastLevelByBase[base]]) {
-                lastLevelByBase[base] = level;
-            }
+        const type = originalTypes.find(t => t.id == v.violation_type_id);
+        if (!type) return;
+        const name = type.violation_type || '';
+        const match = name.match(/(1st|2nd|3rd)/i);
+        if (!match) return;
+        const levelStr = match[0].toLowerCase();
+        const level = { '1st': 1, '2nd': 2, '3rd': 3 }[levelStr];
+        const base = type.base_offense || 'unknown';
+        if (!highestLevelByBase[base] || level > highestLevelByBase[base]) {
+            highestLevelByBase[base] = level;
         }
     });
 
@@ -1590,51 +1591,45 @@ function populateAvailableTypes(data) {
     originalTypes.forEach(type => {
         const name = type.violation_type || '';
         const base = type.base_offense || 'unknown';
-        const isSequenced = /(1st|2nd|3rd).*offense/i.test(name);
         const idStr = type.id.toString();
 
-        if (!isSequenced) {
-            // Always show non-sequenced (Speeding, No Helmet, etc.)
+        // Always show non-sequenced
+        if (!/(1st|2nd|3rd).*offense/i.test(name)) {
             typesToShow.add(type);
             return;
         }
 
-        // For sequenced: hide if already issued AND not the next one
-        if (usedIds.has(idStr)) {
-            const match = name.match(/(1st|2nd|3rd)/i);
-            if (!match) return;
+        const match = name.match(/(1st|2nd|3rd)/i);
+        if (!match) return;
+        const levelStr = match[0].toLowerCase();
+        const level = { '1st': 1, '2nd': 2, '3rd': 3 }[levelStr];
+        const highest = highestLevelByBase[base] || 0;
 
-            const currentLevel = match[0].toLowerCase();
-            const lastLevel = lastLevelByBase[base];
-            const order = { '1st': 1, '2nd': 2, '3rd': 3 };
-            const currentOrder = order[currentLevel];
+        const isAlreadyIssued = usedIds.has(idStr);
 
-            if (!lastLevel || currentOrder > order[lastLevel]) {
-                // This is the NEXT offense → show it
-                typesToShow.add(type);
+        // Logic:
+        // - Show 1st if not issued OR if it's the first
+        // - Show 2nd only if 1st was issued
+        // - Show 3rd only if 2nd was issued
+        // - Once 3rd is issued → always show it again
+        if (isAlreadyIssued) {
+            if (level === 3) {
+                typesToShow.add(type); // 3rd is repeatable
             }
-            // Otherwise: already issued and not next → hide
+            // Do not show 1st or 2nd if already issued
         } else {
-            // Not issued yet → show only if it's the logical next (or first-time)
-            const lastLevel = lastLevelByBase[base];
-            const match = name.match(/(1st|2nd|3rd)/i);
-            if (!match) return;
-            const currentLevel = match[0].toLowerCase();
-            const order = { '1st': 1, '2nd': 2, '3rd': 3 };
-
-            if (!lastLevel && currentLevel === '1st') {
+            // Not issued yet → show only if it's the next expected
+            if (highest === 0 && level === 1) {
                 typesToShow.add(type); // first offense
-            } else if (lastLevel && order[currentLevel] === order[lastLevel] + 1) {
-                typesToShow.add(type); // next in sequence
-            }
-            // 3rd offense: always allow repeat
-            else if (currentLevel === '3rd') {
-                typesToShow.add(type);
+            } else if (highest === 1 && level === 2) {
+                typesToShow.add(type); // after 1st
+            } else if (highest >= 2 && level === 3) {
+                typesToShow.add(type); // after 2nd (or repeat)
             }
         }
     });
 
-    // Render sorted list
+    // Sort alphabetically
     const sorted = Array.from(typesToShow).sort((a, b) =>
         a.violation_type.localeCompare(b.violation_type)
     );
@@ -1661,12 +1656,11 @@ function populateAvailableTypes(data) {
         violationTypeBody.appendChild(row);
     });
 
-    // Re-attach select button listeners
+    // Re-attach select buttons
     document.querySelectorAll('.select-violation').forEach(btn => {
         btn.addEventListener('click', function () {
             const id = this.dataset.id;
 
-            // Deselect previouds
             if (currentlySelectedRow) {
                 const prevRow = violationTypeBody.querySelector('tr.table-success');
                 if (prevRow) prevRow.classList.remove('table-success');
