@@ -163,7 +163,7 @@ $violator_pic = !empty($violator_pic_paths) ? implode(',', $violator_pic_paths) 
 
         file_put_contents('../debug.log', "Create Violation Input: violator_name='$violator_name', user_id='$user_id', contact_number='$contact_number', email='$email', plate_number='$plate_number', reason='$reason', violation_type_id='$violation_type_id', plate_image='$plate_image', impound_pic='$impound_pic'\n", FILE_APPEND);
 
-        if (empty($violator_name) || empty($plate_number) || empty($reason) || empty($violation_type_id) || empty($contact_number)) {
+        if (empty($violator_name) ||  empty($reason) || empty($violation_type_id) || empty($contact_number)) {
             file_put_contents('../debug.log', "Create Violation Failed: Missing required fields.\n", FILE_APPEND);
             echo json_encode(['success' => false, 'message' => 'Violator Name, Plate Number, Reason, Violation Type, and Contact Number are required.']);
             exit;
@@ -1310,7 +1310,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateEmail(e) { validateEmailOnInput(e); }
 
-function formatPlateNumber(e) {
+/*function formatPlateNumber(e) {
         let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
         // Allow 6-character (motor) OR 7-character plates
@@ -1322,15 +1322,15 @@ function formatPlateNumber(e) {
         }
 
         e.target.value = v;
-    }
+    }*/
     
 
-function validatePlateNumber(e) {
+/*function validatePlateNumber(e) {
         const v = e.target.value.replace(/[^A-Z0-9]/g, '');
         const ok = (v.length === 6) || (v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v));
         e.target.classList.toggle('is-valid', ok);
         e.target.classList.toggle('is-invalid', !ok && v.length > 0);
-    }
+    }*/
 
     function formatLicenseNumber(e) {
         let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
