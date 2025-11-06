@@ -1400,8 +1400,8 @@ function validatePlateNumber(e) {
             .catch(() => toastr.error('Failed to load user from plate.'));
     }
 
-    // AUTO-FILL FROM LICENSE
-  function autoFillUserFromLicense(licenseNumber) {
+ // AUTO-FILL FROM LICENSE
+function autoFillUserFromLicense(licenseNumber) {
     const formData = new FormData();
     formData.append('license_number', licenseNumber);
     formData.append('officer_id', officerId);
@@ -1416,24 +1416,24 @@ function validatePlateNumber(e) {
                 document.getElementById('user_id').value = data.user_id || '';
                 document.getElementById('has_license').checked = true;
 
-                const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
-                if (currentPlate.length < 7 && data.plate_number) {
-                    plateNumberInput.value = data.plate_number;
+                const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+                const newPlate = (data.plate_number || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
+
+                // Only fill if current is empty OR shorter than 6
+                if (currentPlate.length < 6 && newPlate.length >= 6) {
+                    plateNumberInput.value = newPlate;
                     plateNumberInput.dispatchEvent(new Event('input'));
                     plateNumberInput.dispatchEvent(new Event('blur'));
-
-                    // CRITICAL: NOW CALL refreshHistory() AFTER PLATE IS FILLED
-                    setTimeout(() => {
-                        const newPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
-                        if (newPlate.length === 7) {
-                            autoFillUserFromPlate(newPlate);
-                            refreshHistory(); // ← THIS IS THE KEY!
-                        }
-                    }, 150);
-                } else {
-                    // If plate already exists, just refresh history
-                    refreshHistory();
                 }
+
+                // Trigger history refresh after plate is possibly filled
+                setTimeout(() => {
+                    const finalPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+                    if (finalPlate.length === 6 || finalPlate.length === 7) {
+                        autoFillUserFromPlate(finalPlate);
+                        refreshHistory();
+                    }
+                }, 150);
 
                 toastr.success('Full profile loaded from license!');
                 validateAll();
