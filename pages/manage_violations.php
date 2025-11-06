@@ -1666,7 +1666,7 @@ function populateAvailableTypes(data) {
         btn.addEventListener('click', function () {
             const id = this.dataset.id;
 
-            // Deselect previous
+            // Deselect previouds
             if (currentlySelectedRow) {
                 const prevRow = violationTypeBody.querySelector('tr.table-success');
                 if (prevRow) prevRow.classList.remove('table-success');
