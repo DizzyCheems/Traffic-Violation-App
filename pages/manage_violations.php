@@ -1238,6 +1238,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const impoundPicInput = document.getElementById('impound_pic');
     const originalTypes = <?php echo json_encode($types ?? []); ?> || [];
     let currentlySelectedRow = null;
+    let lastValidKey = ''; // Track last loaded plate/license
+    let isLoading = false;
 
     // Escape HTML
     function escapeHtml(text) {
@@ -1264,7 +1266,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Formatters
     initializeInputFormatters();
-
     function initializeInputFormatters() {
         const contact = document.getElementById('contact_number');
         const email = document.getElementById('email');
@@ -1277,9 +1278,6 @@ document.addEventListener('DOMContentLoaded', function() {
         email.addEventListener('blur', validateEmail);
 
         plateNumberInput.addEventListener('input', formatPlateNumber);
-//        plateNumberInput.addEventListener('blur', validatePlateNumber);
-  //      plateNumberInput.addEventListener('focus', clearFormatOnFocus);
-
         licenseNumberInput.addEventListener('input', formatLicenseNumber);
         licenseNumberInput.addEventListener('blur', validateLicenseNumber);
         licenseNumberInput.addEventListener('focus', clearFormatOnFocus);
@@ -1310,26 +1308,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validateEmail(e) { validateEmailOnInput(e); }
 
-function formatPlateNumber(e) {
+    function formatPlateNumber(e) {
         let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-
-        // Allow 6-character (motor) OR 7-character plates
         if (v.length > 7) v = v.substring(0, 7);
-
-        // Insert hyphen only for 7-character plates
         if (v.length === 7) {
             v = v.substring(0, 3) + '-' + v.substring(3);
         }
-
         e.target.value = v;
-    }
-    
-
-function validatePlateNumber(e) {
-        const v = e.target.value.replace(/[^A-Z0-9]/g, '');
-        const ok = (v.length === 6) || (v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v));
-        e.target.classList.toggle('is-valid', ok);
-        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
 
     function formatLicenseNumber(e) {
@@ -1354,8 +1339,8 @@ function validatePlateNumber(e) {
 
     // Clear tables
     function clearHistoryAndResetTables() {
-        violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center">Enter plate or license to view history</td></tr>';
-        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center">Select violation type</td></tr>';
+        violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Enter plate or license to view history</td></tr>';
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Select violation type</td></tr>';
         selectedViolationTypeId.value = '';
         currentlySelectedRow = null;
         selectedViolationDisplay.classList.add('d-none');
@@ -1384,66 +1369,49 @@ function validatePlateNumber(e) {
                     document.getElementById('user_id').value = data.user_id || '';
                     document.getElementById('has_license').checked = data.has_license == 1;
 
-                    // Fill license if empty
                     if (!licenseNumberInput.value.trim() && data.license_number) {
                         licenseNumberInput.value = data.license_number;
                         licenseNumberInput.dispatchEvent(new Event('input'));
                         licenseNumberInput.dispatchEvent(new Event('blur'));
                     }
 
-                    toastr.success('Name, contact, email, license filled from plate!');
+                    toastr.success('Profile loaded from plate!');
                     validateAll();
-                } else {
-                    toastr.info(data.message || 'No user found for this plate.');
                 }
             })
             .catch(() => toastr.error('Failed to load user from plate.'));
     }
 
     // AUTO-FILL FROM LICENSE
- // AUTO-FILL FROM LICENSE
-function autoFillUserFromLicense(licenseNumber) {
-    const formData = new FormData();
-    formData.append('license_number', licenseNumber);
-    formData.append('officer_id', officerId);
+    function autoFillUserFromLicense(licenseNumber) {
+        const formData = new FormData();
+        formData.append('license_number', licenseNumber);
+        formData.append('officer_id', officerId);
 
-    fetch('get_user_by_license.php', { method: 'POST', body: formData })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('violator_name').value = data.violator_name || '';
-                document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
-                document.getElementById('email').value = data.email || '';
-                document.getElementById('user_id').value = data.user_id || '';
-                document.getElementById('has_license').checked = true;
+        fetch('get_user_by_license.php', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('violator_name').value = data.violator_name || '';
+                    document.getElementById('contact_number').value = formatContactNumberFromData(data.contact_number || '');
+                    document.getElementById('email').value = data.email || '';
+                    document.getElementById('user_id').value = data.user_id || '';
+                    document.getElementById('has_license').checked = true;
 
-                const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
-                const newPlate = (data.plate_number || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
+                    const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+                    const newPlate = (data.plate_number || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
 
-                // Only fill if current is empty OR shorter than 6
-                if (currentPlate.length < 6 && newPlate.length >= 6) {
-                    plateNumberInput.value = newPlate;
-                    plateNumberInput.dispatchEvent(new Event('input'));
-                    plateNumberInput.dispatchEvent(new Event('blur'));
-                }
-
-                // Trigger history refresh after plate is possibly filled
-                setTimeout(() => {
-                    const finalPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
-                    if (finalPlate.length === 6 || finalPlate.length === 7) {
-                        autoFillUserFromPlate(finalPlate);
-                        refreshHistory();
+                    if (currentPlate.length < 6 && newPlate.length >= 6) {
+                        plateNumberInput.value = newPlate;
+                        plateNumberInput.dispatchEvent(new Event('input'));
                     }
-                }, 150);
 
-                toastr.success('Full profile loaded from license!');
-                validateAll();
-            } else {
-                toastr.info(data.message || 'No user found for this license.');
-            }
-        })
-        .catch(() => toastr.error('Failed to load user from license.'));
-}
+                    toastr.success('Full profile loaded from license!');
+                    validateAll();
+                }
+            })
+            .catch(() => toastr.error('Failed to load user from license.'));
+    }
 
     function formatContactNumberFromData(phone) {
         if (!phone) return '';
@@ -1456,241 +1424,170 @@ function autoFillUserFromLicense(licenseNumber) {
     function validateAll() {
         validateContactNumber({ target: document.getElementById('contact_number') });
         validateEmail({ target: document.getElementById('email') });
-        validatePlateNumber({ target: plateNumberInput });
         validateLicenseNumber({ target: licenseNumberInput });
     }
 
-    // REFRESH HISTORY + AUTO-FILL
-    const refreshHistory = debounce(function () {
-        const plate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
-        const license = licenseNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+    // SMART REFRESH: Only when input is valid & complete
+    const smartRefresh = debounce(function () {
+        const plateRaw = plateNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+        const licenseRaw = licenseNumberInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
         const hasLicense = hasLicenseCheckbox.checked;
 
-        clearHistoryAndResetTables();
+        const plateValid = (plateRaw.length === 6) || (plateRaw.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(plateRaw));
+        const licenseValid = hasLicense && licenseRaw.length === 12 && /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/.test(licenseRaw);
 
-        let paramName = null;
-        let paramValue = null;
+        const currentKey = plateValid ? plateRaw : (licenseValid ? licenseRaw : '');
 
-        if (hasLicense && license.length === 12) {
-            paramName = 'license_number';
-            paramValue = license;
-            // DO NOT call autoFillUserFromLicense() here — input event will trigger it
-        } else if (plate.length === 7 || plate.length === 6) {
-            paramName = 'plate_number';
-            paramValue = plate;
-            autoFillUserFromPlate(plate);
-        }
-
-        if (!paramName) return;
-
-        const formData = new FormData();
-        formData.append(paramName, paramValue);
-        formData.append('officer_id', officerId);
-
-        fetch('fetch_violation_history.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(r => r.json())
-        .then(data => {
-            violationHistoryBody.innerHTML = '';
-            let latestPlate = null;
-
-            if (data.success && data.violations?.length > 0) {
-                const sorted = [...data.violations].sort((a, b) => new Date(b.issued_date) - new Date(a.issued_date));
-                latestPlate = sorted[0].plate_number;
-
-                data.violations.forEach(v => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${escapeHtml(v.plate_number || 'N/A')}</td>
-                        <td>${v.has_license == 1 ? escapeHtml(v.license_number || 'N/A') : 'No License'}</td>
-                        <td>${escapeHtml(v.violation_type || 'N/A')}</td>
-                        <td>${escapeHtml(v.base_offense || 'N/A')}</td>
-                        <td>₱${parseFloat(v.fine_amount || 0).toFixed(2)}</td>
-                        <td>${new Date(v.issued_date || '').toLocaleString() || 'N/A'}</td>
-                        <td><span class="badge bg-${v.status === 'Resolved' ? 'success' : (v.status === 'Pending' ? 'warning text-dark' : 'secondary')}">${escapeHtml(v.status || 'N/A')}</span></td>
-                    `;
-                    violationHistoryBody.appendChild(row);
-                });
-
-                // Fallback plate fill from history
-                if (hasLicense && license.length === 12 && latestPlate) {
-                    const currentPlate = plateNumberInput.value.replace(/[^A-Z0-9]/g, '');
-                    if (currentPlate.length < 7 || currentPlate !== latestPlate) {
-                        plateNumberInput.value = latestPlate;
-                        plateNumberInput.dispatchEvent(new Event('input'));
-                        plateNumberInput.dispatchEvent(new Event('blur'));
-                    }
-                }
-            } else {
-                const type = hasLicense ? 'license' : 'plate';
-                violationHistoryBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No violations for this ${type}.</td></tr>`;
-            }
-            populateAvailableTypes({violations: data.violations || []});
-        })
-        .catch(() => {
-            violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading history</td></tr>';
-            toastr.error('Failed to load history.');
-        });
-    }, 500);
-
-    // Listeners
-    plateNumberInput.addEventListener('input', refreshHistory);
-    licenseNumberInput.addEventListener('input', function() {
-        const license = this.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
-        if (license.length === 12 && hasLicenseCheckbox.checked) {
-            autoFillUserFromLicense(license);
-        }
-        refreshHistory();
-    });
-    hasLicenseCheckbox.addEventListener('change', function () {
-        toggleLicenseRequired();
-        refreshHistory();
-    });
-
-    function toggleLicenseRequired() {
-        if (hasLicenseCheckbox.checked) {
-            licenseNumberInput.setAttribute('required', 'required');
-        } else {
-            licenseNumberInput.removeAttribute('required');
-        }
-    }
-
-function shouldHideViolation(violationName, isAlreadyUsed) {
-    if (isAlreadyUsed) return false; // NEVER hide if already issued before
-    if (!violationName) return false;
-
-    const lower = violationName.toLowerCase();
-    return lower.includes('1st') || lower.includes('2nd') || lower.includes('3rd');
-}   
-
-    // POPULATE TYPES
-// POPULATE TYPES – SHOW **ALL** VIOLATION TYPES EVERY TIME
-// POPULATE TYPES – SMART HIDE: 1st/2nd/3rd only if already issued, 3rd repeatable, no skipping
-function populateAvailableTypes(data) {
-    violationTypeBody.innerHTML = '';
-
-    const usedIds = new Set(
-        (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
-    );
-
-    // Map: base_offense → highest level issued (1,2,3)
-    const highestLevelByBase = {};
-    (data.violations || []).forEach(v => {
-        const type = originalTypes.find(t => t.id == v.violation_type_id);
-        if (!type) return;
-        const name = type.violation_type || '';
-        const match = name.match(/(1st|2nd|3rd)/i);
-        if (!match) return;
-        const levelStr = match[0].toLowerCase();
-        const level = { '1st': 1, '2nd': 2, '3rd': 3 }[levelStr];
-        const base = type.base_offense || 'unknown';
-        if (!highestLevelByBase[base] || level > highestLevelByBase[base]) {
-            highestLevelByBase[base] = level;
-        }
-    });
-
-    const typesToShow = new Set();
-
-    originalTypes.forEach(type => {
-        const name = type.violation_type || '';
-        const base = type.base_offense || 'unknown';
-        const idStr = type.id.toString();
-
-        // Always show non-sequenced
-        if (!/(1st|2nd|3rd).*offense/i.test(name)) {
-            typesToShow.add(type);
+        // Only refresh if valid input AND different from last
+        if (!currentKey || currentKey === lastValidKey || isLoading) {
             return;
         }
 
-        const match = name.match(/(1st|2nd|3rd)/i);
-        if (!match) return;
-        const levelStr = match[0].toLowerCase();
-        const level = { '1st': 1, '2nd': 2, '3rd': 3 }[levelStr];
-        const highest = highestLevelByBase[base] || 0;
+        lastValidKey = currentKey;
+        isLoading = true;
 
-        const isAlreadyIssued = usedIds.has(idStr);
+        // Show loading
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center"><small>Loading violation types...</small></td></tr>';
+        violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center"><small>Loading history...</small></td></tr>';
 
-        // Logic:
-        // - Show 1st if not issued OR if it's the first
-        // - Show 2nd only if 1st was issued
-        // - Show 3rd only if 2nd was issued
-        // - Once 3rd is issued → always show it again
-        if (isAlreadyIssued) {
-            if (level === 3) {
-                typesToShow.add(type); // 3rd is repeatable
-            }
-            // Do not show 1st or 2nd if already issued
-        } else {
-            // Not issued yet → show only if it's the next expected
-            if (highest === 0 && level === 1) {
-                typesToShow.add(type); // first offense
-            } else if (highest === 1 && level === 2) {
-                typesToShow.add(type); // after 1st
-            } else if (highest >= 2 && level === 3) {
-                typesToShow.add(type); // after 2nd (or repeat)
-            }
+        const formData = new FormData();
+        if (plateValid) {
+            formData.append('plate_number', plateRaw);
+            autoFillUserFromPlate(plateRaw);
+        } else if (licenseValid) {
+            formData.append('license_number', licenseRaw);
+            autoFillUserFromLicense(licenseRaw);
         }
-    });
+        formData.append('officer_id', officerId);
 
-    // Sort alphabetically
-    const sorted = Array.from(typesToShow).sort((a, b) =>
-        a.violation_type.localeCompare(b.violation_type)
-    );
+        fetch('fetch_violation_history.php', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                isLoading = false;
 
-    if (sorted.length === 0) {
-        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
-        return;
-    }
+                // Update history
+                violationHistoryBody.innerHTML = '';
+                if (data.success && data.violations?.length > 0) {
+                    const sorted = [...data.violations].sort((a, b) => new Date(b.issued_date) - new Date(a.issued_date));
+                    sorted.forEach(v => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${escapeHtml(v.plate_number || 'N/A')}</td>
+                            <td>${v.has_license == 1 ? escapeHtml(v.license_number || 'N/A') : 'No License'}</td>
+                            <td>${escapeHtml(v.violation_type || 'N/A')}</td>
+                            <td>${escapeHtml(v.base_offense || 'N/A')}</td>
+                            <td>₱${parseFloat(v.fine_amount || 0).toFixed(2)}</td>
+                            <td>${new Date(v.issued_date || '').toLocaleString() || 'N/A'}</td>
+                            <td><span class="badge bg-${v.status === 'Resolved' ? 'success' : (v.status === 'Pending' ? 'warning text-dark' : 'secondary')}">${escapeHtml(v.status || 'N/A')}</span></td>
+                        `;
+                        violationHistoryBody.appendChild(row);
+                    });
+                } else {
+                    violationHistoryBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No violation history found.</td></tr>';
+                }
 
-    sorted.forEach(type => {
-        const isSelected = currentlySelectedRow === type.id.toString();
-        const row = document.createElement('tr');
-        row.className = isSelected ? 'table-success' : '';
-        row.innerHTML = `
-            <td>
-                <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                    ${isSelected ? 'Selected' : 'Select'}
-                </button>
-            </td>
-            <td>${escapeHtml(type.violation_type)}</td>
-            <td>${escapeHtml(type.base_offense || 'N/A')}</td>
-            <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
-        `;
-        violationTypeBody.appendChild(row);
-    });
+                populateAvailableTypes(data);
+            })
+            .catch(() => {
+                isLoading = false;
+                violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>';
+                toastr.error('Failed to load violation data.');
+            });
+    }, 600);
 
-    // Re-attach select buttons
-    document.querySelectorAll('.select-violation').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const id = this.dataset.id;
+    // POPULATE TYPES (with preserved selection)
+    function populateAvailableTypes(data) {
+        violationTypeBody.innerHTML = '';
 
-            if (currentlySelectedRow) {
-                const prevRow = violationTypeBody.querySelector('tr.table-success');
-                if (prevRow) prevRow.classList.remove('table-success');
-                const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
-                if (prevBtn) {
-                    prevBtn.classList.replace('btn-success', 'btn-outline-primary');
-                    prevBtn.textContent = 'Select';
+        const usedIds = new Set((data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean));
+        const highestLevelByBase = {};
+
+        (data.violations || []).forEach(v => {
+            const type = originalTypes.find(t => t.id == v.violation_type_id);
+            if (!type) return;
+            const match = type.violation_type.match(/(1st|2nd|3rd)/i);
+            if (!match) return;
+            const level = { '1st': 1, '2nd': 2, '3rd': 3 }[match[0].toLowerCase()];
+            const base = type.base_offense || 'unknown';
+            if (!highestLevelByBase[base] || level > highestLevelByBase[base]) {
+                highestLevelByBase[base] = level;
+            }
+        });
+
+        const typesToShow = new Set();
+        originalTypes.forEach(type => {
+            const name = type.violation_type || '';
+            const base = type.base_offense || 'unknown';
+            const idStr = type.id.toString();
+            const match = name.match(/(1st|2nd|3rd)/i);
+            const level = match ? { '1st': 1, '2nd': 2, '3rd': 3 }[match[0].toLowerCase()] : null;
+            const highest = highestLevelByBase[base] || 0;
+            const isIssued = usedIds.has(idStr);
+
+            if (!match || level === null) {
+                typesToShow.add(type);
+            } else if (isIssued && level === 3) {
+                typesToShow.add(type);
+            } else if (!isIssued) {
+                if ((highest === 0 && level === 1) || (highest === 1 && level === 2) || (highest >= 2 && level === 3)) {
+                    typesToShow.add(type);
                 }
             }
-
-            currentlySelectedRow = id;
-            selectedViolationTypeId.value = id;
-            this.closest('tr').classList.add('table-success');
-            this.classList.replace('btn-outline-primary', 'btn-success');
-            this.textContent = 'Selected';
-
-            const t = originalTypes.find(x => x.id.toString() === id);
-            selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
-            selectedViolationDisplay.classList.remove('d-none');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-            toastr.success(`Selected: ${t.violation_type}`);
         });
-    });
-}
+
+        const sorted = Array.from(typesToShow).sort((a, b) => a.violation_type.localeCompare(b.violation_type));
+
+        if (sorted.length === 0) {
+            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
+            return;
+        }
+
+        sorted.forEach(type => {
+            const isSelected = currentlySelectedRow === type.id.toString();
+            const row = document.createElement('tr');
+            row.className = isSelected ? 'table-success' : '';
+            row.innerHTML = `
+                <td>
+                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                        ${isSelected ? 'Selected' : 'Select'}
+                    </button>
+                </td>
+                <td>${escapeHtml(type.violation_type)}</td>
+                <td>${escapeHtml(type.base_offense || 'N/A')}</td>
+                <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+            `;
+            violationTypeBody.appendChild(row);
+        });
+
+        // Re-attach buttons + preserve selection
+        document.querySelectorAll('.select-violation').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                if (currentlySelectedRow) {
+                    const prevRow = violationTypeBody.querySelector('tr.table-success');
+                    if (prevRow) prevRow.classList.remove('table-success');
+                    const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                    if (prevBtn) {
+                        prevBtn.classList.replace('btn-success', 'btn-outline-primary');
+                        prevBtn.textContent = 'Select';
+                    }
+                }
+                currentlySelectedRow = id;
+                selectedViolationTypeId.value = id;
+                this.closest('tr').classList.add('table-success');
+                this.classList.replace('btn-outline-primary', 'btn-success');
+                this.textContent = 'Selected';
+
+                const t = originalTypes.find(x => x.id.toString() === id);
+                selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
+                selectedViolationDisplay.classList.remove('d-none');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                toastr.success(`Selected: ${t.violation_type}`);
+            });
+        });
+    }
+
     // OCR
     document.getElementById('plate_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -1714,7 +1611,7 @@ function populateAvailableTypes(data) {
             });
     }
 
-    // FORM SUBMIT
+    // FORM SUBMIT (unchanged)
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const hidden = document.getElementById('selected_violation_type_id');
@@ -1740,11 +1637,6 @@ function populateAvailableTypes(data) {
                 if (v.length !== 11 || !v.startsWith('09')) { f.classList.add('is-invalid'); valid = false; }
                 else f.classList.add('is-valid');
             }
-            if (k === 'plate_number') {
-                const v = f.value.replace(/[^A-Z0-9]/g, '');
-                if (v.length !== 7 || !/^[A-Z]{3}[0-9]{4}$/.test(v)) { f.classList.add('is-invalid'); valid = false; }
-                else f.classList.add('is-valid');
-            }
         });
 
         if (hasLicenseCheckbox.checked) {
@@ -1767,6 +1659,11 @@ function populateAvailableTypes(data) {
             valid = false;
         }
 
+        if (!valid) {
+            hidden.name = 'selected_violation_type_id';
+            Swal.fire({ title: 'Validation Error!', text: 'Fix highlighted fields.', icon: 'error' });
+            return;
+        }
 
         const type = originalTypes.find(t => t.id.toString() === hidden.value);
         const fine = type ? parseFloat(type.fine_amount).toFixed(2) : '0.00';
@@ -1817,7 +1714,7 @@ function populateAvailableTypes(data) {
         });
     });
 
-    // DELETE
+    // DELETE (unchanged)
     document.querySelectorAll('.delete-violation-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
@@ -1843,13 +1740,26 @@ function populateAvailableTypes(data) {
         });
     });
 
+    // Listeners - only trigger on valid input
+    plateNumberInput.addEventListener('input', smartRefresh);
+    licenseNumberInput.addEventListener('input', smartRefresh);
+    hasLicenseCheckbox.addEventListener('change', function() {
+        toggleLicenseRequired();
+        smartRefresh();
+    });
+
+    function toggleLicenseRequired() {
+        if (hasLicenseCheckbox.checked) {
+            licenseNumberInput.setAttribute('required', 'required');
+        } else {
+            licenseNumberInput.removeAttribute('required');
+        }
+    }
+
     // INIT
     toggleLicenseRequired();
     clearHistoryAndResetTables();
 });
-
-
-
 </script>
 
 <script>
