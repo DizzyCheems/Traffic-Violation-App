@@ -875,7 +875,6 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                                                         <div class="invalid-feedback">Please enter a valid plate number.</div>
                                                                     </div>
                                                                 </div>
-
                                                                 <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="plate_image_<?php echo $violation['id']; ?>" class="form-label">Plate Image (Optional)</label>
@@ -1680,88 +1679,101 @@ function getNextAvailableOffense(baseOffense, usedViolationIds) {
 function populateAvailableTypes(data) {
     violationTypeBody.innerHTML = '';
 
-    const usedViolationTypeIds = new Set(
+    const usedIds = new Set(
         (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
     );
 
-    // Group history by base_offense
-    const usedByBase = {};
+    // Group issued violations by base_offense
+    const issuedByBase = {};
     (data.violations || []).forEach(v => {
         const base = v.base_offense || 'unknown';
-        if (!usedByBase[base]) usedByBase[base] = new Set();
-        usedByBase[base].add(v.violation_type_id);
+        if (!issuedByBase[base]) issuedByBase[base] = [];
+        issuedByBase[base].push(v.violation_type_id);
     });
 
-    const availableTypes = new Set();
+    const available = new Set();
 
-    // 1. Add all NON-sequenced violations (safe ones)
+    // 1. Always show non-sequenced violations
     originalTypes.forEach(type => {
-        const name = type.violation_type.toLowerCase();
-        const isSequenced = /1st|2nd|3rd/.test(name);
-        if (!isSequenced) {
-            availableTypes.add(type);
+        if (!/(1st|2nd|3rd)/i.test(type.violation_type)) {
+            available.add(type);
         }
     });
 
-    // 2. Add the CORRECT next sequenced offense for each base
-    Object.keys(usedByBase).forEach(base => {
-        const nextOffense = getNextAvailableOffense(base, usedViolationTypeIds);
-        if (nextOffense) {
-            availableTypes.add(nextOffense);
+    // 2. For each base_offense that has history → show ONLY the next offense
+    Object.keys(issuedByBase).forEach(base => {
+        const typesInThisBase = originalTypes
+            .filter(t => t.base_offense === base)
+            .sort((a, b) => {
+                const getLevel = t => {
+                    const m = t.violation_type.match(/(1st|2nd|3rd)/i);
+                    return m ? { '1st': 1, '2nd': 2, '3rd': 3 }[m[0].toLowerCase()] || 0 : 0;
+                };
+                return getLevel(a) - getLevel(b);
+            });
+
+        let nextToShow = null;
+        for (let i = 0; i < typesInThisBase.length; i++) {
+            const current = typesInThisBase[i];
+            const isIssued = usedIds.has(current.id.toString());
+            if (!isIssued) {
+                nextToShow = current;
+                break;
+            }
         }
+        // If all 3 are issued → show the 3rd again (allow repeat 3rd)
+        if (!nextToShow && typesInThisBase.length > 0) {
+            nextToShow = typesInThisBase[typesInThisBase.length - 1];
+        }
+        if (nextToShow) available.add(nextToShow);
     });
 
-    // 3. For first-time offenders: show all 1st Offenses
-    if (data.violations?.length === 0) {
+    // 3. FIRST-TIME OFFENDER? → Show ALL 1st Offenses
+    if (!data.violations || data.violations.length === 0) {
         originalTypes.forEach(type => {
-            if (type.violation_type.toLowerCase().includes('1st offense')) {
-                availableTypes.add(type);
+            if (/1st Offense/i.test(type.violation_type)) {
+                available.add(type);
             }
         });
     }
 
-    // Render
-    if (availableTypes.size > 0) {
-        const sorted = Array.from(availableTypes).sort((a, b) => 
-            a.violation_type.localeCompare(b.violation_type)
-        );
-
-        sorted.forEach(type => {
-            const isSelected = currentlySelectedRow === type.id.toString();
-            const row = document.createElement('tr');
-            row.className = isSelected ? 'table-success' : '';
-
-            row.innerHTML = `
-                <td>
-                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                        ${isSelected ? 'Selected' : 'Select'}
-                    </button>
-                </td>
-                <td>${escapeHtml(type.violation_type)}</td>
-                <td>${escapeHtml(type.base_offense || 'N/A')}</td>
-                <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
-            `;
-            violationTypeBody.appendChild(row);
-        });
+    // Render sorted list
+    if (available.size > 0) {
+        Array.from(available)
+            .sort((a, b) => a.violation_type.localeCompare(b.violation_type))
+            .forEach(type => {
+                const isSelected = currentlySelectedRow === type.id.toString();
+                const row = document.createElement('tr');
+                row.className = isSelected ? 'table-success' : '';
+                row.innerHTML = `
+                    <td>
+                        <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                            ${isSelected ? 'Selected' : 'Select'}
+                        </button>
+                    </td>
+                    <td>${escapeHtml(type.violation_type)}</td>
+                    <td>${escapeHtml(type.base_offense || 'N/A')}</td>
+                    <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+                `;
+                violationTypeBody.appendChild(row);
+            });
     } else {
         violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violation types available</td></tr>';
     }
 
-    // Re-attach click events
+    // Re-attach select buttons
     document.querySelectorAll('.select-violation').forEach(btn => {
         btn.addEventListener('click', function () {
             const id = this.dataset.id;
-
             if (currentlySelectedRow) {
-                const prevRow = violationTypeBody.querySelector(`tr.table-success`);
-                if (prevRow) prevRow.classList.remove('table-success');
+                const prev = violationTypeBody.querySelector('tr.table-success');
+                if (prev) prev.classList.remove('table-success');
                 const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
                 if (prevBtn) {
                     prevBtn.classList.replace('btn-success', 'btn-outline-primary');
                     prevBtn.textContent = 'Select';
                 }
             }
-
             currentlySelectedRow = id;
             selectedViolationTypeId.value = id;
             this.closest('tr').classList.add('table-success');
@@ -1773,7 +1785,6 @@ function populateAvailableTypes(data) {
             selectedViolationDisplay.classList.remove('d-none');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-
             toastr.success(`Selected: ${t.violation_type}`);
         });
     });
