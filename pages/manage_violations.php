@@ -875,6 +875,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                                                         <div class="invalid-feedback">Please enter a valid plate number.</div>
                                                                     </div>
                                                                 </div>
+
                                                                 <div class="row">
                                                                     <div class="col-md-6 mb-3">
                                                                         <label for="plate_image_<?php echo $violation['id']; ?>" class="form-label">Plate Image (Optional)</label>
