@@ -1767,11 +1767,6 @@ function populateAvailableTypes(data) {
             valid = false;
         }
 
-        if (!valid) {
-            hidden.name = 'selected_violation_type_id';
-            Swal.fire({ title: 'Validation Error!', text: 'Fix highlighted fields.', icon: 'error' });
-            return;
-        }
 
         const type = originalTypes.find(t => t.id.toString() === hidden.value);
         const fine = type ? parseFloat(type.fine_amount).toFixed(2) : '0.00';
