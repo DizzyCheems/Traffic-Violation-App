@@ -1545,7 +1545,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-function shouldHideViolation(violationName) {
+function shouldHideViolation(violationName, isAlreadyUsed) {
+    if (isAlreadyUsed) return false; // Never hide if already issued
     if (!violationName) return false;
     const lower = violationName.toLowerCase();
     return lower.includes('1st') || lower.includes('2nd') || lower.includes('3rd');
@@ -1554,23 +1555,32 @@ function shouldHideViolation(violationName) {
     // POPULATE TYPES
 function populateAvailableTypes(data) {
     violationTypeBody.innerHTML = '';
-    const used = new Set(data.violations?.map(v => v.violation_type_id.toString()) || []);
+    
+    // Get IDs of violations already issued to this plate/license
+    const usedViolationTypeIds = new Set(
+        (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
+    );
 
-    // Filter out already-used violations AND those that contain 1st/2nd/3rd
+    // Filter: show only types that are NOT used
+    // BUT hide those with 1st/2nd/3rd UNLESS they are already used (then show them)
     const available = originalTypes.filter(t => {
-        const isUsed = used.has(t.id.toString());
-        const hideBecauseOfOffense = shouldHideViolation(t.violation_type);
-        return !isUsed && !hideBecauseOfOffense;
+        const typeIdStr = t.id.toString();
+        const isUsed = usedViolationTypeIds.has(typeIdStr);
+        const shouldHide = shouldHideViolation(t.violation_type, isUsed);
+
+        return !shouldHide; // Only include if not hidden
     });
 
     if (available.length > 0) {
         available.forEach(type => {
             const row = document.createElement('tr');
-            row.className = currentlySelectedRow === type.id.toString() ? 'table-success' : '';
+            const isSelected = currentlySelectedRow === type.id.toString();
+            row.className = isSelected ? 'table-success' : '';
+            
             row.innerHTML = `
                 <td>
-                    <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                        ${currentlySelectedRow === type.id.toString() ? 'Selected' : 'Select'}
+                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                        ${isSelected ? 'Selected' : 'Select'}
                     </button>
                 </td>
                 <td>${escapeHtml(type.violation_type)}</td>
@@ -1580,24 +1590,29 @@ function populateAvailableTypes(data) {
             violationTypeBody.appendChild(row);
         });
 
-        // ---- button click handler (unchanged) ----
+        // Re-attach click handlers
         document.querySelectorAll('.select-violation').forEach(btn => {
             btn.addEventListener('click', function () {
                 const id = this.dataset.id;
+
+                // Deselect previous
                 if (currentlySelectedRow) {
-                    const prev = violationTypeBody.querySelector(`tr.table-success`);
-                    if (prev) prev.classList.remove('table-success');
+                    const prevRow = violationTypeBody.querySelector(`tr.table-success`);
+                    if (prevRow) prevRow.classList.remove('table-success');
                     const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
                     if (prevBtn) {
                         prevBtn.classList.replace('btn-success', 'btn-outline-primary');
                         prevBtn.textContent = 'Select';
                     }
                 }
+
+                // Select new
                 currentlySelectedRow = id;
                 selectedViolationTypeId.value = id;
                 this.closest('tr').classList.add('table-success');
                 this.classList.replace('btn-outline-primary', 'btn-success');
                 this.textContent = 'Selected';
+
                 const t = originalTypes.find(x => x.id.toString() === id);
                 selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
                 selectedViolationDisplay.classList.remove('d-none');
@@ -1610,6 +1625,7 @@ function populateAvailableTypes(data) {
         violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional types available</td></tr>';
     }
 }
+
     // OCR
     document.getElementById('plate_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
