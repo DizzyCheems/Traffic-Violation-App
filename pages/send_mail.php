@@ -13,7 +13,7 @@ function sendViolationEmail($pdo, $violation_id) {
         // Fetch the specific violation
         $stmt = $pdo->prepare("
             SELECT v.id, v.violator_name, v.plate_number, v.reason, v.violation_type_id, v.user_id, 
-                   v.has_license, v.license_number, v.email_sent, v.issued_date, t.violation_type, t.fine_amount, v.email 
+                   v.has_license, v.license_number, v.email_sent, v.issued_date, t.violation_type, t.fine_amount, u.email 
             FROM violations v 
             JOIN types t ON v.violation_type_id = t.id 
             LEFT JOIN users u ON v.user_id = u.id 
