@@ -1636,6 +1636,148 @@ function populateAvailableTypes(data) {
         });
     });
 }
+
+// NEW: Group violations by base offense to detect sequence
+function getNextAvailableOffense(baseOffense, usedViolationIds) {
+    // Find all types that belong to this base offense (e.g., "One Way - Ord 96-01")
+    const sequence = originalTypes
+        .filter(t => t.base_offense === baseOffense)
+        .sort((a, b) => {
+            // Sort by offense level: 1st < 2nd < 3rd
+            const order = { '1st': 1, '2nd': 2, '3rd': 3 };
+            const aLevel = a.violation_type.match(/(1st|2nd|3rd)/i)?.[0]?.toLowerCase() || '';
+            const bLevel = b.violation_type.match(/(1st|2nd|3rd)/i)?.[0]?.toLowerCase() || '';
+            return (order[aLevel] || 0) - (order[bLevel] || 0);
+        });
+
+    if (sequence.length === 0) return null;
+
+    // Find the highest offense already issued
+    let highestLevel = 0;
+    sequence.forEach(type => {
+        if (usedViolationIds.has(type.id.toString())) {
+            const levelMatch = type.violation_type.match(/(1st|2nd|3rd)/i);
+            if (levelMatch) {
+                const level = levelMatch[0].toLowerCase();
+                const order = { '1st': 1, '2nd': 2, '3rd': 3 };
+                highestLevel = Math.max(highestLevel, order[level]);
+            }
+        }
+    });
+
+    // Return the next offense in sequence
+    const nextLevel = highestLevel + 1;
+    const levelNames = { 1: '1st', 2: '2nd', 3: '3rd' };
+    const nextLevelName = levelNames[nextLevel];
+
+    return sequence.find(t => 
+        t.violation_type.toLowerCase().includes(nextLevelName + ' offense') ||
+        t.violation_type.toLowerCase().includes(nextLevelName)
+    ) || null;
+}
+
+function populateAvailableTypes(data) {
+    violationTypeBody.innerHTML = '';
+
+    const usedViolationTypeIds = new Set(
+        (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
+    );
+
+    // Group history by base_offense
+    const usedByBase = {};
+    (data.violations || []).forEach(v => {
+        const base = v.base_offense || 'unknown';
+        if (!usedByBase[base]) usedByBase[base] = new Set();
+        usedByBase[base].add(v.violation_type_id);
+    });
+
+    const availableTypes = new Set();
+
+    // 1. Add all NON-sequenced violations (safe ones)
+    originalTypes.forEach(type => {
+        const name = type.violation_type.toLowerCase();
+        const isSequenced = /1st|2nd|3rd/.test(name);
+        if (!isSequenced) {
+            availableTypes.add(type);
+        }
+    });
+
+    // 2. Add the CORRECT next sequenced offense for each base
+    Object.keys(usedByBase).forEach(base => {
+        const nextOffense = getNextAvailableOffense(base, usedViolationTypeIds);
+        if (nextOffense) {
+            availableTypes.add(nextOffense);
+        }
+    });
+
+    // 3. For first-time offenders: show all 1st Offenses
+    if (data.violations?.length === 0) {
+        originalTypes.forEach(type => {
+            if (type.violation_type.toLowerCase().includes('1st offense')) {
+                availableTypes.add(type);
+            }
+        });
+    }
+
+    // Render
+    if (availableTypes.size > 0) {
+        const sorted = Array.from(availableTypes).sort((a, b) => 
+            a.violation_type.localeCompare(b.violation_type)
+        );
+
+        sorted.forEach(type => {
+            const isSelected = currentlySelectedRow === type.id.toString();
+            const row = document.createElement('tr');
+            row.className = isSelected ? 'table-success' : '';
+
+            row.innerHTML = `
+                <td>
+                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                        ${isSelected ? 'Selected' : 'Select'}
+                    </button>
+                </td>
+                <td>${escapeHtml(type.violation_type)}</td>
+                <td>${escapeHtml(type.base_offense || 'N/A')}</td>
+                <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+            `;
+            violationTypeBody.appendChild(row);
+        });
+    } else {
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violation types available</td></tr>';
+    }
+
+    // Re-attach click events
+    document.querySelectorAll('.select-violation').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.dataset.id;
+
+            if (currentlySelectedRow) {
+                const prevRow = violationTypeBody.querySelector(`tr.table-success`);
+                if (prevRow) prevRow.classList.remove('table-success');
+                const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                if (prevBtn) {
+                    prevBtn.classList.replace('btn-success', 'btn-outline-primary');
+                    prevBtn.textContent = 'Select';
+                }
+            }
+
+            currentlySelectedRow = id;
+            selectedViolationTypeId.value = id;
+            this.closest('tr').classList.add('table-success');
+            this.classList.replace('btn-outline-primary', 'btn-success');
+            this.textContent = 'Selected';
+
+            const t = originalTypes.find(x => x.id.toString() === id);
+            selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
+            selectedViolationDisplay.classList.remove('d-none');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+
+            toastr.success(`Selected: ${t.violation_type}`);
+        });
+    });
+}
+
     // OCR
     document.getElementById('plate_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
