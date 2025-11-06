@@ -1007,13 +1007,16 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                         <div id="ocr_status" class="form-text"></div>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="plate_number" id="plate_number" required placeholder="ABC-1234" maxlength="8">
-                                        <div class="invalid-feedback">Please enter a valid plate number (e.g., ABC-1234).</div>
-                                        <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>
-                                    </div>
-
+<div class="col-md-6 mb-3">
+    <label for="plate_number" class="form-label">License Plate <small class="text-muted">(optional)</small></label>
+    <input type="text" 
+           class="form-control" 
+           name="plate_number" 
+           id="plate_number" 
+           placeholder="ABC1234 or ABC123" 
+           maxlength="7">
+    <small class="form-text text-muted">Leave blank if no plate • 6 or 7 characters only</small>
+</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 mb-3">
