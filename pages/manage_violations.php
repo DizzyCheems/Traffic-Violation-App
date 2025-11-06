@@ -1545,59 +1545,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+function shouldHideViolation(violationName) {
+    if (!violationName) return false;
+    const lower = violationName.toLowerCase();
+    return lower.includes('1st') || lower.includes('2nd') || lower.includes('3rd');
+}
+
     // POPULATE TYPES
-    function populateAvailableTypes(data) {
-        violationTypeBody.innerHTML = '';
-        const used = new Set(data.violations?.map(v => v.violation_type_id.toString()) || []);
-        const available = originalTypes.filter(t => !used.has(t.id.toString()));
+function populateAvailableTypes(data) {
+    violationTypeBody.innerHTML = '';
+    const used = new Set(data.violations?.map(v => v.violation_type_id.toString()) || []);
 
-        if (available.length > 0) {
-            available.forEach(type => {
-                const row = document.createElement('tr');
-                row.className = currentlySelectedRow === type.id.toString() ? 'table-success' : '';
-                row.innerHTML = `
-                    <td>
-                        <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                            ${currentlySelectedRow === type.id.toString() ? 'Selected' : 'Select'}
-                        </button>
-                    </td>
-                    <td>${escapeHtml(type.violation_type)}</td>
-                    <td>${escapeHtml(type.base_offense || 'N/A')}</td>
-                    <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
-                `;
-                violationTypeBody.appendChild(row);
-            });
+    // Filter out already-used violations AND those that contain 1st/2nd/3rd
+    const available = originalTypes.filter(t => {
+        const isUsed = used.has(t.id.toString());
+        const hideBecauseOfOffense = shouldHideViolation(t.violation_type);
+        return !isUsed && !hideBecauseOfOffense;
+    });
 
-            document.querySelectorAll('.select-violation').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    if (currentlySelectedRow) {
-                        const prev = violationTypeBody.querySelector(`tr.table-success`);
-                        if (prev) prev.classList.remove('table-success');
-                        const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
-                        if (prevBtn) {
-                            prevBtn.classList.replace('btn-success', 'btn-outline-primary');
-                            prevBtn.textContent = 'Select';
-                        }
+    if (available.length > 0) {
+        available.forEach(type => {
+            const row = document.createElement('tr');
+            row.className = currentlySelectedRow === type.id.toString() ? 'table-success' : '';
+            row.innerHTML = `
+                <td>
+                    <button type="button" class="btn btn-sm ${currentlySelectedRow === type.id.toString() ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                        ${currentlySelectedRow === type.id.toString() ? 'Selected' : 'Select'}
+                    </button>
+                </td>
+                <td>${escapeHtml(type.violation_type)}</td>
+                <td>${escapeHtml(type.base_offense || 'N/A')}</td>
+                <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+            `;
+            violationTypeBody.appendChild(row);
+        });
+
+        // ---- button click handler (unchanged) ----
+        document.querySelectorAll('.select-violation').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                if (currentlySelectedRow) {
+                    const prev = violationTypeBody.querySelector(`tr.table-success`);
+                    if (prev) prev.classList.remove('table-success');
+                    const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                    if (prevBtn) {
+                        prevBtn.classList.replace('btn-success', 'btn-outline-primary');
+                        prevBtn.textContent = 'Select';
                     }
-                    currentlySelectedRow = id;
-                    selectedViolationTypeId.value = id;
-                    this.closest('tr').classList.add('table-success');
-                    this.classList.replace('btn-outline-primary', 'btn-success');
-                    this.textContent = 'Selected';
-                    const t = originalTypes.find(x => x.id.toString() === id);
-                    selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
-                    selectedViolationDisplay.classList.remove('d-none');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                    toastr.success(`Selected: ${t.violation_type}`);
-                });
+                }
+                currentlySelectedRow = id;
+                selectedViolationTypeId.value = id;
+                this.closest('tr').classList.add('table-success');
+                this.classList.replace('btn-outline-primary', 'btn-success');
+                this.textContent = 'Selected';
+                const t = originalTypes.find(x => x.id.toString() === id);
+                selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
+                selectedViolationDisplay.classList.remove('d-none');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                toastr.success(`Selected: ${t.violation_type}`);
             });
-        } else {
-            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional types available</td></tr>';
-        }
+        });
+    } else {
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional types available</td></tr>';
     }
-
+}
     // OCR
     document.getElementById('plate_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
