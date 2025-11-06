@@ -1275,8 +1275,8 @@ document.addEventListener('DOMContentLoaded', function() {
         email.addEventListener('blur', validateEmail);
 
         plateNumberInput.addEventListener('input', formatPlateNumber);
-        plateNumberInput.addEventListener('blur', validatePlateNumber);
-        plateNumberInput.addEventListener('focus', clearFormatOnFocus);
+//        plateNumberInput.addEventListener('blur', validatePlateNumber);
+  //      plateNumberInput.addEventListener('focus', clearFormatOnFocus);
 
         licenseNumberInput.addEventListener('input', formatLicenseNumber);
         licenseNumberInput.addEventListener('blur', validateLicenseNumber);
@@ -1321,19 +1321,12 @@ function formatPlateNumber(e) {
     e.target.value = v;
 }
 
-function validatePlateNumber(e) {
-    const v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    let ok = false;
-
-    if (v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v)) {
-        ok = true; // Format: AAA0000
-    } else if (v.length === 6 && /^[A-Z]{3}[0-9]{3}$/.test(v)) {
-        ok = true; // Format: AAA000
+    function validatePlateNumber(e) {
+        const v = e.target.value.replace(/[^A-Z0-9]/g, '');
+        const ok = v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v);
+        e.target.classList.toggle('is-valid', ok);
+        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
-
-    e.target.classList.toggle('is-valid', ok);
-    e.target.classList.toggle('is-invalid', !ok && v.length > 0);
-}
 
     function formatLicenseNumber(e) {
         let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -1560,37 +1553,36 @@ function validatePlateNumber(e) {
     }
 
 function shouldHideViolation(violationName, isAlreadyUsed) {
-    if (isAlreadyUsed) return false; // Never hide if already issued
+    if (isAlreadyUsed) return false; // NEVER hide if already issued before
     if (!violationName) return false;
+
     const lower = violationName.toLowerCase();
     return lower.includes('1st') || lower.includes('2nd') || lower.includes('3rd');
-}
+}   
 
     // POPULATE TYPES
 function populateAvailableTypes(data) {
     violationTypeBody.innerHTML = '';
-    
+
     // Get IDs of violations already issued to this plate/license
     const usedViolationTypeIds = new Set(
         (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
     );
 
-    // Filter: show only types that are NOT used
-    // BUT hide those with 1st/2nd/3rd UNLESS they are already used (then show them)
-    const available = originalTypes.filter(t => {
-        const typeIdStr = t.id.toString();
+    // Build list of available types
+    const rows = [];
+
+    originalTypes.forEach(type => {
+        const typeIdStr = type.id.toString();
         const isUsed = usedViolationTypeIds.has(typeIdStr);
-        const shouldHide = shouldHideViolation(t.violation_type, isUsed);
+        const shouldHide = shouldHideViolation(type.violation_type, isUsed);
 
-        return !shouldHide; // Only include if not hidden
-    });
-
-    if (available.length > 0) {
-        available.forEach(type => {
+        // ONLY include if NOT hidden
+        if (!shouldHide) {
+            const isSelected = currentlySelectedRow === typeIdStr;
             const row = document.createElement('tr');
-            const isSelected = currentlySelectedRow === type.id.toString();
             row.className = isSelected ? 'table-success' : '';
-            
+
             row.innerHTML = `
                 <td>
                     <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
@@ -1601,45 +1593,49 @@ function populateAvailableTypes(data) {
                 <td>${escapeHtml(type.base_offense || 'N/A')}</td>
                 <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
             `;
-            violationTypeBody.appendChild(row);
-        });
+            rows.push(row);
+        }
+    });
 
-        // Re-attach click handlers
-        document.querySelectorAll('.select-violation').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const id = this.dataset.id;
-
-                // Deselect previous
-                if (currentlySelectedRow) {
-                    const prevRow = violationTypeBody.querySelector(`tr.table-success`);
-                    if (prevRow) prevRow.classList.remove('table-success');
-                    const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
-                    if (prevBtn) {
-                        prevBtn.classList.replace('btn-success', 'btn-outline-primary');
-                        prevBtn.textContent = 'Select';
-                    }
-                }
-
-                // Select new
-                currentlySelectedRow = id;
-                selectedViolationTypeId.value = id;
-                this.closest('tr').classList.add('table-success');
-                this.classList.replace('btn-outline-primary', 'btn-success');
-                this.textContent = 'Selected';
-
-                const t = originalTypes.find(x => x.id.toString() === id);
-                selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
-                selectedViolationDisplay.classList.remove('d-none');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                toastr.success(`Selected: ${t.violation_type}`);
-            });
-        });
+    if (rows.length > 0) {
+        rows.forEach(row => violationTypeBody.appendChild(row));
     } else {
-        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional types available</td></tr>';
+        violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No additional violation types available</td></tr>';
     }
-}
 
+    // Re-attach click handlers
+    document.querySelectorAll('.select-violation').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const id = this.dataset.id;
+
+            // Deselect previous
+            if (currentlySelectedRow) {
+                const prevRow = violationTypeBody.querySelector(`tr.table-success`);
+                if (prevRow) prevRow.classList.remove('table-success');
+                const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                if (prevBtn) {
+                    prevBtn.classList.replace('btn-success', 'btn-outline-primary');
+                    prevBtn.textContent = 'Select';
+                }
+            }
+
+            // Select new
+            currentlySelectedRow = id;
+            selectedViolationTypeId.value = id;
+            this.closest('tr').classList.add('table-success');
+            this.classList.replace('btn-outline-primary', 'btn-success');
+            this.textContent = 'Selected';
+
+            const t = originalTypes.find(x => x.id.toString() === id);
+            selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
+            selectedViolationDisplay.classList.remove('d-none');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+
+            toastr.success(`Selected: ${t.violation_type}`);
+        });
+    });
+}
     // OCR
     document.getElementById('plate_image').addEventListener('change', function(e) {
         const file = e.target.files[0];
