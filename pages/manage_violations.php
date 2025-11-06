@@ -1006,12 +1006,14 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                         <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
                                         <div id="ocr_status" class="form-text"></div>
                                     </div>
+
                                     <div class="col-md-6 mb-3">
                                         <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="plate_number" id="plate_number" required placeholder="ABC-1234" maxlength="8">
                                         <div class="invalid-feedback">Please enter a valid plate number (e.g., ABC-1234).</div>
                                         <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>
                                     </div>
+
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 mb-3">
@@ -1309,21 +1311,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateEmail(e) { validateEmailOnInput(e); }
 
 function formatPlateNumber(e) {
-    let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    
-    if (v.length >= 6) {
-        v = v.substring(0, 7); // Cap at 7
-        if (v.length !== 6 && v.length !== 7) {
-            v = v.substring(0, 6); // Force to 6 if not 7
+        let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+        // Allow 6-character (motor) OR 7-character plates
+        if (v.length > 7) v = v.substring(0, 7);
+
+        // Insert hyphen only for 7-character plates
+        if (v.length === 7) {
+            v = v.substring(0, 3) + '-' + v.substring(3);
         }
+
+        e.target.value = v;
     }
     
-    e.target.value = v;
-}
 
-    function validatePlateNumber(e) {
+function validatePlateNumber(e) {
         const v = e.target.value.replace(/[^A-Z0-9]/g, '');
-        const ok = v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v);
+        const ok = (v.length === 6) || (v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v));
         e.target.classList.toggle('is-valid', ok);
         e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
@@ -1470,7 +1474,7 @@ function formatPlateNumber(e) {
             paramName = 'license_number';
             paramValue = license;
             // DO NOT call autoFillUserFromLicense() here — input event will trigger it
-        } else if (plate.length === 7) {
+        } else if (plate.length === 7 || plate.length === 6) {
             paramName = 'plate_number';
             paramValue = plate;
             autoFillUserFromPlate(plate);
