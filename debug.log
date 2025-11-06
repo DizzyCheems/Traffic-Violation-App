@@ -15137,3 +15137,359 @@ Query result: Array
     [email] => joshuaedwardtupasmorante@gmail.com
 )
 
+Login.php accessed: 2025-11-06 07:37:31
+Login.php accessed: 2025-11-06 07:37:47
+Login.php accessed: 2025-11-06 07:37:47
+Login.php accessed: 2025-11-06 07:37:53
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=kgjji6siaio0aukjkhrgv8m1sm, expires_at=2025-11-06 08:37:53, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+DB Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'v.violator_email' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='1', violation_type_id='115', plate_image='../Uploads/plate_690c43832fd64_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 15
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => 1
+    [5] => 115
+    [6] => 1
+    [7] => NXX12C342342
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-11-06T07:42
+    [12] => Pending
+    [13] => 
+    [14] => 15
+    [15] => ../Uploads/plate_690c43832fd64_1760879076_68f4e1e4734c7.png
+    [16] => 
+    [17] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent to spiralsmoke903@gmail.com (Violation ID: 208)
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='', plate_number='NBC1234', reason='Overloading', violation_type_id='134', plate_image='../Uploads/plate_690c454f4528c_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 16
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => NBC1234
+    [4] => Overloading
+    [5] => 134
+    [6] => 1
+    [7] => NXX12C342342
+    [8] => 0
+    [9] => 0
+    [10] => 
+    [11] => 2025-11-06T07:50
+    [12] => Pending
+    [13] => 
+    [14] => 16
+    [15] => ../Uploads/plate_690c454f4528c_1760879076_68f4e1e4734c7.png
+    [16] => 
+    [17] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='joshuaedwardtupasmorante@gmail.com', plate_number='NBC1234', reason='fh', violation_type_id='13', plate_image='../Uploads/plate_690c464dc0ee9_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 17
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => joshuaedwardtupasmorante@gmail.com
+    [4] => NBC1234
+    [5] => fh
+    [6] => 13
+    [7] => 1
+    [8] => NXX12C342342
+    [9] => 0
+    [10] => 0
+    [11] => 
+    [12] => 2025-11-06T07:54
+    [13] => Pending
+    [14] => 
+    [15] => 17
+    [16] => ../Uploads/plate_690c464dc0ee9_1760879076_68f4e1e4734c7.png
+    [17] => 
+    [18] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NBC1234'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [license_number] => NXX12C342342
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+get_user_by_license.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for license_number: 'NXX12C342342'
+Query result: Array
+(
+    [user_id] => 163
+    [violator_name] => Cheems
+    [has_license] => 1
+    [plate_number] => NBC1234
+    [contact_number] => 0966-258-1355
+    [email] => joshuaedwardtupasmorante@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Cheems', user_id='163', contact_number='0966-258-1355', email='spiralsmoke903@gmail.com', plate_number='NBC1234', reason='one way', violation_type_id='118', plate_image='../Uploads/plate_690c470914e22_1760879076_68f4e1e4734c7.png', impound_pic=''
+Offense Frequency for user_id='163': 18
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 163
+    [2] => Cheems
+    [3] => spiralsmoke903@gmail.com
+    [4] => NBC1234
+    [5] => one way
+    [6] => 118
+    [7] => 1
+    [8] => NXX12C342342
+    [9] => 0
+    [10] => 0
+    [11] => 
+    [12] => 2025-11-06T07:55
+    [13] => Pending
+    [14] => 
+    [15] => 18
+    [16] => ../Uploads/plate_690c470914e22_1760879076_68f4e1e4734c7.png
+    [17] => 
+    [18] => 
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Email sent to spiralsmoke903@gmail.com (Violation ID: 211)

@@ -242,13 +242,13 @@ $violator_pic = !empty($violator_pic_paths) ? implode(',', $violator_pic_paths) 
         // Insert violation
         $stmt = $pdo->prepare("
  INSERT INTO violations (
-        officer_id, user_id, violator_name, plate_number, reason, violation_type_id,
+        officer_id, user_id, violator_name, violator_email, plate_number, reason, violation_type_id,
         has_license, license_number, is_impounded, is_paid, or_number, issued_date,
         status, notes, offense_freq, plate_image, impound_pic, violator_pic, email_sent
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE)
 ");
 $params = [
-    $_SESSION['user_id'], $user_id, $violator_name, $plate_number, $reason, $violation_type_id,
+    $_SESSION['user_id'], $user_id, $violator_name, $email, $plate_number, $reason, $violation_type_id,
     $has_license, $license_number, $is_impounded, $is_paid, $or_number, $issued_date,
     $status, $notes, $offense_freq, $plate_image, $impound_pic, $violator_pic
 ];
