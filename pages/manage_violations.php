@@ -1720,7 +1720,7 @@ function populateAvailableTypes(data) {
         (data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean)
     );
 
-    // Group issued violations by base_offense
+    // Build map: base_offense → array of issued violation_type_ids
     const issuedByBase = {};
     (data.violations || []).forEach(v => {
         const base = v.base_offense || 'unknown';
@@ -1732,49 +1732,48 @@ function populateAvailableTypes(data) {
 
     // 1. Always show non-sequenced violations
     originalTypes.forEach(type => {
-        if (!/(1st|2nd|3rd)/i.test(type.violation_type)) {
+        if (!/(1st|2nd|3rd).*offense/i.test(type.violation_type)) {
             available.add(type);
         }
     });
 
-    // 2. For each base_offense that has history → show ONLY the next offense
+    // 2. For each base_offense group: show ONLY the next logical offense
     Object.keys(issuedByBase).forEach(base => {
-        const typesInThisBase = originalTypes
+        const group = originalTypes
             .filter(t => t.base_offense === base)
             .sort((a, b) => {
-                const getLevel = t => {
-                    const m = t.violation_type.match(/(1st|2nd|3rd)/i);
-                    return m ? { '1st': 1, '2nd': 2, '3rd': 3 }[m[0].toLowerCase()] || 0 : 0;
+                const getLevel = name => {
+                    const m = name.match(/(1st|2nd|3rd)/i);
+                    if (!m) return 0;
+                    return { '1st': 1, '2nd': 2, '3rd': 3 }[m[0].toLowerCase()] || 0;
                 };
-                return getLevel(a) - getLevel(b);
+                return getLevel(a.violation_type) - getLevel(b.violation_type);
             });
 
-        let nextToShow = null;
-        for (let i = 0; i < typesInThisBase.length; i++) {
-            const current = typesInThisBase[i];
-            const isIssued = usedIds.has(current.id.toString());
-            if (!isIssued) {
-                nextToShow = current;
+        let next = null;
+        for (const type of group) {
+            if (!usedIds.has(type.id.toString())) {
+                next = type;
                 break;
             }
         }
-        // If all 3 are issued → show the 3rd again (allow repeat 3rd)
-        if (!nextToShow && typesInThisBase.length > 0) {
-            nextToShow = typesInThisBase[typesInThisBase.length - 1];
+        // If all are issued → allow repeat of highest (3rd)
+        if (!next && group.length > 0) {
+            next = group[group.length - 1];
         }
-        if (nextToShow) available.add(nextToShow);
+        if (next) available.add(next);
     });
 
-    // 3. FIRST-TIME OFFENDER? → Show ALL 1st Offenses
+    // 3. FIRST-TIME OFFENDER → show ALL 1st Offenses
     if (!data.violations || data.violations.length === 0) {
         originalTypes.forEach(type => {
-            if (/1st Offense/i.test(type.violation_type)) {
+            if (/(1st).*offense/i.test(type.violation_type)) {
                 available.add(type);
             }
         });
     }
 
-    // Render sorted list
+    // Render in alphabetical order
     if (available.size > 0) {
         Array.from(available)
             .sort((a, b) => a.violation_type.localeCompare(b.violation_type))
@@ -1798,19 +1797,23 @@ function populateAvailableTypes(data) {
         violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No violation types available</td></tr>';
     }
 
-    // Re-attach select buttons
+    // Re-attach event listeners
     document.querySelectorAll('.select-violation').forEach(btn => {
         btn.addEventListener('click', function () {
             const id = this.dataset.id;
+
+            // Deselect previous
             if (currentlySelectedRow) {
-                const prev = violationTypeBody.querySelector('tr.table-success');
-                if (prev) prev.classList.remove('table-success');
+                const prevRow = violationTypeBody.querySelector('tr.table-success');
+                if (prevRow) prevRow.classList.remove('table-success');
                 const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
                 if (prevBtn) {
                     prevBtn.classList.replace('btn-success', 'btn-outline-primary');
                     prevBtn.textContent = 'Select';
                 }
             }
+
+            // Select new
             currentlySelectedRow = id;
             selectedViolationTypeId.value = id;
             this.closest('tr').classList.add('table-success');
