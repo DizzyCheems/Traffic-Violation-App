@@ -1143,3 +1143,7 @@ ADD COLUMN impound_pic text NULL;
 
 ALTER TABLE violations   
 ADD COLUMN violator_pic text NULL;
+
+
+<!--- NOV 6--->
+ALTER TABLE violations ADD COLUMN violator_email VARCHAR(255) NULL AFTER license_number;
