@@ -1321,12 +1321,19 @@ function formatPlateNumber(e) {
     e.target.value = v;
 }
 
-    function validatePlateNumber(e) {
-        const v = e.target.value.replace(/[^A-Z0-9]/g, '');
-        const ok = v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v);
-        e.target.classList.toggle('is-valid', ok);
-        e.target.classList.toggle('is-invalid', !ok && v.length > 0);
+function validatePlateNumber(e) {
+    const v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    let ok = false;
+
+    if (v.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(v)) {
+        ok = true; // Format: AAA0000
+    } else if (v.length === 6 && /^[A-Z]{3}[0-9]{3}$/.test(v)) {
+        ok = true; // Format: AAA000
     }
+
+    e.target.classList.toggle('is-valid', ok);
+    e.target.classList.toggle('is-invalid', !ok && v.length > 0);
+}
 
     function formatLicenseNumber(e) {
         let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
