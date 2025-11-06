@@ -1010,8 +1010,8 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                     <div class="col-md-6 mb-3">
                                         <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="plate_number" id="plate_number" required placeholder="ABC-1234" maxlength="8">
-                                        <div class="invalid-feedback">Please enter a valid plate number (e.g., ABC-1234).</div>
-                                        <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>
+<!--                                        <div class="invalid-feedback">Please enter a valid plate number (e.g., ABC-1234).</div>-->`
+<!--                                        <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>-->
                                     </div>
 
                                 </div>
