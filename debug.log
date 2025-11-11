@@ -15533,3 +15533,248 @@ get_user_by_plate.php accessed. Session: Array
 
 Fetching data for plate_number: 'YYE123'
 Query result: 
+Login.php accessed: 2025-11-08 15:52:12
+Login.php accessed: 2025-11-08 15:52:27
+Login.php accessed: 2025-11-08 15:53:25
+Login.php accessed: 2025-11-08 15:53:31
+Login attempt: username='admin'
+Login error: SQLSTATE[HY000]: General error: 2006 MySQL server has gone away
+Login.php accessed: 2025-11-08 15:53:38
+Login.php accessed: 2025-11-08 15:53:42
+Login.php accessed: 2025-11-08 15:53:46
+Login.php accessed: 2025-11-08 15:54:03
+Login.php accessed: 2025-11-08 15:54:19
+Login.php accessed: 2025-11-08 15:54:28
+Login.php accessed: 2025-11-08 15:55:48
+Login.php accessed: 2025-11-08 15:55:52
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=otoeh3fhgh1b5tbahp0plm63f7, expires_at=2025-11-08 16:55:52, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'DBA4658'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'AAA6789'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'AAA678'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NME640'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'NME640'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'AAA678'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'M588KD'
+Query result: 
+Login.php accessed: 2025-11-10 06:00:53
+Login.php accessed: 2025-11-10 06:00:57
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=059vjmuoh8tloacer6tddm45ub, expires_at=2025-11-10 07:00:57, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Login.php accessed: 2025-11-10 08:43:00
+Login.php accessed: 2025-11-10 08:43:04
+Login attempt: username='officer'
+Session recorded: user_id=5, session_token=2b3lj1d7ar3rqnpr9pa7sf8eqh, expires_at=2025-11-10 09:43:04, is_valid=1
+Login successful for user_id: 5, role: officer
+Session Data: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+

@@ -1008,7 +1008,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="plate_number" class="form-label">License Plate <span class="text-danger">*</span></label>
+                                        <label for="plate_number" class="form-label">Plate Number <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="plate_number" id="plate_number" required placeholder="ABC-1234" maxlength="8">
 <!--                                        <div class="invalid-feedback">Please enter a valid plate number (e.g., ABC-1234).</div>-->`
 <!--                                        <small class="form-text text-muted">Format: XXX-XXXX (3 letters + 4 numbers)</small>-->
@@ -1589,28 +1589,137 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // OCR
-    document.getElementById('plate_image').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) performOCR(file, 'plate_number');
-    });
+// ---------------------------------------------------
+//  OCR – MAXIMUM ACCURACY for Philippine Plates
+// ---------------------------------------------------
+document.getElementById('plate_image').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) performOCR(file, 'plate_number');
+});
 
-    function performOCR(file, inputId) {
-        const status = document.getElementById('ocr_status');
-        status.textContent = 'Processing...';
-        Tesseract.recognize(file, 'eng', { logger: m => console.log(m) })
-            .then(({ data: { text } }) => {
-                const cleaned = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                const input = document.getElementById(inputId);
-                input.value = cleaned;
-                status.textContent = `Detected: ${cleaned}`;
-                input.dispatchEvent(new Event('input'));
-            })
-            .catch(err => {
-                status.textContent = 'OCR Failed';
-                toastr.error('OCR error: ' + err.message);
-            });
+function performOCR(file, inputId) {
+    const status = document.getElementById('ocr_status');
+    status.textContent = 'Analyzing plate...';
+
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    img.onload = function () {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        // === 1. PRE-PROCESS: High-contrast black & white ===
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            const bw = gray > 135 ? 255 : 0;  // Tuned for reflective plates
+            data[i] = data[i + 1] = data[i + 2] = bw;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        // === 2. UPSCALE 2× (helps Tesseract on small text) ===
+        const upscaled = document.createElement('canvas');
+        const uctx = upscaled.getContext('2d');
+        const scale = 2;
+        upscaled.width = canvas.width * scale;
+        upscaled.height = canvas.height * scale;
+        uctx.imageSmoothingEnabled = false;
+        uctx.drawImage(canvas, 0, 0, upscaled.width, upscaled.height);
+
+        // === 3. RUN TESSERACT ===
+        Tesseract.recognize(
+            upscaled.toDataURL(),
+            'eng',
+            {
+                logger: m => console.log(m),
+                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+                tessedit_pageseg_mode: '7',  // Single text line
+                // Optional: Use LSTM engine
+                // tessedit_ocr_engine_mode: '1'
+            }
+        )
+        .then(({ data: { text } }) => {
+            const raw = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            console.log('OCR Raw:', raw);
+
+            // === 4. TRY DIRECT PATTERN MATCH ===
+            const patterns = [
+                /\d{3}[A-Z]{3,4}/,          // 123ABC
+                /[A-Z]\d{3}[A-Z]{2,3}/,     // M588KD
+                /[A-Z]{2}\d{3}[A-Z]{2}/,    // AB123CD
+                /[A-Z]{3}\d{3}/,            // ABC123
+                /[A-Z]{4}\d{3}/             // ABCD123
+            ];
+
+            let plate = findPlate(raw, patterns);
+
+            // === 5. FALLBACK: CORRECT OCR ERRORS ===
+            if (!plate && raw.length >= 5) {
+                const corrected = raw
+                    .replace(/N/g, 'M')
+                    .replace(/S/g, '5')
+                    .replace(/O/g, '0')
+                    .replace(/B/g, '8')
+                    .replace(/I/g, '1')
+                    .replace(/G/g, '6')
+                    .replace(/Z/g, '2')
+                    .replace(/T/g, '7');
+
+                plate = findPlate(corrected, patterns);
+            }
+
+            // === 6. FINAL FALLBACK: 6-7 char substring ===
+            if (!plate && raw.length >= 6 && raw.length <= 10) {
+                for (let i = 0; i <= raw.length - 6; i++) {
+                    const sub = raw.substring(i, i + 6);
+                    if (patterns.some(p => p.test(sub))) {
+                        plate = sub;
+                        break;
+                    }
+                    const sub7 = raw.substring(i, i + 7);
+                    if (i <= raw.length - 7 && patterns.some(p => p.test(sub7))) {
+                        plate = sub7;
+                        break;
+                    }
+                }
+            }
+
+            // === 7. RESULT ===
+            const input = document.getElementById(inputId);
+            input.value = plate || '';
+            status.textContent = plate
+                ? `Detected: ${plate}`
+                : 'No plate found';
+
+            input.dispatchEvent(new Event('input'));
+            input.dispatchEvent(new Event('blur'));
+        })
+        .catch(err => {
+            status.textContent = 'OCR failed';
+            console.error(err);
+            toastr.error('OCR failed. Try a clearer image.');
+        });
+    };
+
+    img.onerror = () => {
+        status.textContent = 'Image load error';
+        toastr.error('Failed to load image');
+    };
+
+    img.src = URL.createObjectURL(file);
+}
+
+// Helper: find first matching plate
+function findPlate(text, patterns) {
+    for (const p of patterns) {
+        const m = text.match(p);
+        if (m) return m[0];
     }
-
+    return null;
+}
     // FORM SUBMIT (unchanged)
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1683,7 +1792,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `,
             icon: 'question',
-            showCancelButton: true,
+            showCancelButton: true, 
             confirmButtonText: 'Yes, create!',
             cancelButtonText: 'Cancel'
         }).then(res => {
