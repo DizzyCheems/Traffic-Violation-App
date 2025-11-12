@@ -967,7 +967,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                     </div>
                 </div>
 
-<!-- Create Violation Modal -->
+ <!-- Create Violation Modal -->
 <div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -1008,12 +1008,29 @@ if ($violatorPic && trim($violatorPic) !== '') {
 
                         <!-- ==== RIGHT COLUMN ==== -->
                         <div class="col-md-8">
-                            <!-- Plate Image + Plate Number -->
+                            <!-- Plate Image + OCR Selection + Plate Number -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="plate_image" class="form-label">Upload Plate Number</label>
                                     <input type="file" class="form-control" name="plate_image" id="plate_image" accept="image/*">
-                                    <div id="ocr_status" class="form-text"></div>
+                                    <div id="ocr_status" class="form-text mt-2"></div>
+
+                                    <!-- OCR Preview + Selection Box -->
+                                    <div id="ocrPreviewContainer" class="mt-3 position-relative d-none">
+                                        <canvas id="ocrCanvas" class="border" style="max-width:100%;"></canvas>
+                                        <div id="ocrSelectionBox"
+                                             class="position-absolute border border-primary"
+                                             style="background:rgba(0,123,255,0.15);pointer-events:none;display:none;"></div>
+
+                                        <div class="mt-2 d-flex gap-2">
+                                            <button type="button" id="ocrScanBtn" class="btn btn-success btn-sm" disabled>
+                                                Scan Selected Area
+                                            </button>
+                                            <button type="button" id="ocrResetBtn" class="btn btn-outline-secondary btn-sm">
+                                                Reset Box
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
@@ -1136,7 +1153,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                 <div class="col-md-6 mb-3">
                                     <label for="issued_date" class="form-label">Issued Date</label>
                                     <input type="datetime-local" class="form-control" name="issued_date" id="issued_date"
-                                           value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                           value="<?php echo date(')」Y-m-d\TH:i'); ?>">
                                 </div>
 
                                 <div class="col-md-6 mb-3">
@@ -1240,18 +1257,31 @@ document.addEventListener('DOMContentLoaded', function () {
         impoundInput      : document.getElementById('impound_pic'),
 
         violatorPicInput  : document.getElementById('violator_pic'),
-        violatorPicPreview: document.querySelector('#violator_pic_container .preview')
+        violatorPicPreview: document.querySelector('#violator_pic_container .preview'),
+
+        // OCR Elements
+        ocrStatus         : document.getElementById('ocr_status'),
+        ocrContainer      : document.getElementById('ocrPreviewContainer'),
+        ocrCanvas         : document.getElementById('ocrCanvas'),
+        ocrBox            : document.getElementById('ocrSelectionBox'),
+        ocrScanBtn        : document.getElementById('ocrScanBtn'),
+        ocrResetBtn       : document.getElementById('ocrResetBtn')
     };
 
     let currentlySelectedRow = null;
     let lastValidKey = '';
     let isLoading = false;
 
+    // OCR Selection state
+    let imgObj = null;
+    let startX = 0, startY = 0;
+    let isDragging = false;
+    let selection = null;
+
     /* ------------------------------------------------------------------ */
     /*  UTILITIES                                                         */
     /* ------------------------------------------------------------------ */
     const escapeHtml = (txt) => txt ? (new DOMParser().parseFromString(txt, 'text/html').body.textContent) : 'N/A';
-
     const debounce = (fn, wait) => {
         let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), wait); };
     };
@@ -1297,12 +1327,8 @@ document.addEventListener('DOMContentLoaded', function () {
         e.target.classList.toggle('is-invalid', !ok && v);
     };
 
-    const clearFormatOnFocus = (e) => {
-        if (e.target.value.includes('-')) e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '');
-    };
-
     /* ------------------------------------------------------------------ */
-    /*  LICENSE REQUIRED TOGGLE                                            */
+    /*  LICENSE & IMPOUND TOGGLES                                         */
     /* ------------------------------------------------------------------ */
     const toggleLicense = () => {
         if (els.hasLicense.checked) {
@@ -1317,9 +1343,6 @@ document.addEventListener('DOMContentLoaded', function () {
     els.hasLicense.addEventListener('change', toggleLicense);
     toggleLicense();
 
-    /* ------------------------------------------------------------------ */
-    /*  IMPOUND PICTURE TOGGLE                                            */
-    /* ------------------------------------------------------------------ */
     els.isImpounded.addEventListener('change', () => {
         els.impoundContainer.style.display = els.isImpounded.checked ? 'block' : 'none';
         if (!els.isImpounded.checked) els.impoundInput.value = '';
@@ -1421,7 +1444,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const key        = plateOk ? plateRaw : (licOk ? licenseRaw : '');
 
         if (!key || key===lastValidKey || isLoading) return;
-        lastValidKey = key; is_loading = true;
+        lastValidKey = key; isLoading = true;
 
         els.violationTypes.innerHTML   = '<tr><td colspan="4" class="text-center"><small>Loading violation types...</small></td></tr>';
         els.violationHistory.innerHTML = '<tr><td colspan="7" class="text-center"><small>Loading history...</small></td></tr>';
@@ -1446,7 +1469,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 600);
 
     /* ------------------------------------------------------------------ */
-    /*  RENDER HISTORY                                                    */
+    /*  RENDER HISTORY & TYPES                                            */
     /* ------------------------------------------------------------------ */
     const renderHistory = (data) => {
         els.violationHistory.innerHTML = '';
@@ -1472,9 +1495,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    /* ------------------------------------------------------------------ */
-    /*  RENDER AVAILABLE TYPES                                            */
-    /* ------------------------------------------------------------------ */
     const renderAvailableTypes = (data) => {
         els.violationTypes.innerHTML = '';
         const usedIds = new Set((data.violations||[]).map(v=>v.violation_type_id?.toString()).filter(Boolean));
@@ -1528,18 +1548,15 @@ document.addEventListener('DOMContentLoaded', function () {
             els.violationTypes.appendChild(row);
         });
 
-        /* ---- SELECT BUTTONS ---- */
         document.querySelectorAll('.select-violation').forEach(btn => {
             btn.addEventListener('click', function () {
                 const id = this.dataset.id;
-                // deselect previous
                 if (currentlySelectedRow) {
                     const prevRow = els.violationTypes.querySelector('tr.table-success');
                     if (prevRow) prevRow.classList.remove('table-success');
                     const prevBtn = els.violationTypes.querySelector(`button[data-id="${currentlySelectedRow}"]`);
                     if (prevBtn) { prevBtn.classList.replace('btn-success','btn-outline-primary'); prevBtn.textContent='Select'; }
                 }
-                // select current
                 currentlySelectedRow = id;
                 els.selectedTypeId.value = id;
                 this.closest('tr').classList.add('table-success');
@@ -1557,78 +1574,146 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     /* ------------------------------------------------------------------ */
-    /*  OCR – PLATE IMAGE                                                 */
+    /*  OCR – USER MUST DRAW BOX BEFORE SCANNING                          */
     /* ------------------------------------------------------------------ */
     els.plateImg.addEventListener('change', e => {
         const file = e.target.files[0];
-        if (file) performOCR(file, 'plate_number');
+        if (!file) return;
+
+        els.ocrStatus.textContent = 'Loading image...';
+        els.ocrContainer.classList.add('d-none');
+        selection = null;
+        els.ocrScanBtn.disabled = true;
+        els.ocrBox.style.display = 'none';
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+            imgObj = new Image();
+            imgObj.onload = () => {
+                const ctx = els.ocrCanvas.getContext('2d');
+                const maxW = 500;
+                const ratio = Math.min(1, maxW / imgObj.width);
+                els.ocrCanvas.width  = imgObj.width  * ratio;
+                els.ocrCanvas.height = imgObj.height * ratio;
+                ctx.drawImage(imgObj, 0, 0, els.ocrCanvas.width, els.ocrCanvas.height);
+
+                els.ocrContainer.classList.remove('d-none');
+                els.ocrStatus.textContent = 'Draw a box around the plate text, then click “Scan Selected Area”.';
+            };
+            imgObj.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 
-    const performOCR = (file, targetId) => {
-        const status = document.getElementById('ocr_status');
-        status.textContent = 'Analyzing plate...';
+    // Mouse drag to draw selection box
+    els.ocrCanvas.addEventListener('mousedown', e => {
+        if (!imgObj) return;
+        const rect = els.ocrCanvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+        isDragging = true;
+        selection = null;
+        els.ocrBox.style.display = 'none';
+    });
+    els.ocrCanvas.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        const rect = els.ocrCanvas.getBoundingClientRect();
+        const curX = e.clientX - rect.left;
+        const curY = e.clientY - rect.top;
 
-        const img = new Image();
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const x = Math.min(startX, curX);
+        const y = Math.min(startY, curY);
+        const w = Math.abs(curX - startX);
+        const h = Math.abs(curY - startY);
 
-        img.onload = () => {
-            canvas.width = img.width; canvas.height = img.height;
-            ctx.drawImage(img,0,0);
+        els.ocrBox.style.left   = `${x}px`;
+        els.ocrBox.style.top    = `${y}px`;
+        els.ocrBox.style.width  = `${w}px`;
+        els.ocrBox.style.height = `${h}px`;
+        els.ocrBox.style.display = 'block';
 
-            // B&W high contrast
-            const id = ctx.getImageData(0,0,canvas.width,canvas.height);
-            const d = id.data;
-            for (let i=0;i<d.length;i+=4) {
-                const gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-                const bw = gray>135?255:0;
-                d[i]=d[i+1]=d[i+2]=bw;
-            }
-            ctx.putImageData(id,0,0);
+        selection = {x, y, w, h};
+    });
+    window.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            els.ocrScanBtn.disabled = !selection;
+        }
+    });
 
-            // upscale 2×
-            const up = document.createElement('canvas');
-            const uc = up.getContext('2d');
-            const scale = 2;
-            up.width = canvas.width*scale; up.height = canvas.height*scale;
-            uc.imageSmoothingEnabled = false;
-            uc.drawImage(canvas,0,0,up.width,up.height);
+    // Reset box
+    els.ocrResetBtn.addEventListener('click', () => {
+        selection = null;
+        els.ocrBox.style.display = 'none';
+        els.ocrScanBtn.disabled = true;
+        els.ocrStatus.textContent = 'Draw a new box and click “Scan Selected Area”.';
+    });
 
-            Tesseract.recognize(up.toDataURL(),'eng',{
-                tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-                tessedit_pageseg_mode:'7'
-            })
-            .then(({data:{text}}) => {
-                const raw = text.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
-                const patterns = [/\d{3}[A-Z]{3,4}/,/[A-Z]\d{3}[A-Z]{2,3}/,/[A-Z]{2}\d{3}[A-Z]{2}/,/[A-Z]{3}\d{3}/,/[A-Z]{4}\d{3}/];
-                let plate = patterns.reduce((p,pat)=>p||text.match(pat)?.[0],null);
+    // Scan selected area
+    els.ocrScanBtn.addEventListener('click', () => {
+        if (!selection || !imgObj) return;
 
-                if (!plate && raw.length>=5) {
-                    const corr = raw.replace(/N/g,'M').replace(/S/g,'5').replace(/O/g,'0')
-                                    .replace(/B/g,'8').replace(/I/g,'1').replace(/G/g,'6')
-                                    .replace(/Z/g,'2').replace(/T/g,'7');
-                    plate = patterns.reduce((p,pat)=>p||corr.match(pat)?.[0],null);
-                }
-                if (!plate && raw.length>=6 && raw.length<=10) {
-                    for (let i=0;i<=raw.length-6;i++) {
-                        const sub = raw.substring(i,i+6);
-                        if (patterns.some(p=>p.test(sub))) { plate=sub; break; }
-                        const sub7 = raw.substring(i,i+7);
-                        if (i<=raw.length-7 && patterns.some(p=>p.test(sub7))) { plate=sub7; break; }
-                    }
-                }
+        els.ocrStatus.textContent = 'Processing selected area…';
+        els.ocrScanBtn.disabled = true;
 
-                const input = document.getElementById(targetId);
-                input.value = plate||'';
-                status.textContent = plate ? `Detected: ${plate}` : 'No plate found';
-                input.dispatchEvent(new Event('input'));
-                input.dispatchEvent(new Event('blur'));
-            })
-            .catch(err=>{ status.textContent='OCR failed'; console.error(err); toastr.error('OCR failed.'); });
+        const scale = els.ocrCanvas.width / imgObj.width;
+        const crop = {
+            x: selection.x / scale,
+            y: selection.y / scale,
+            w: selection.w / scale,
+            h: selection.h / scale
         };
-        img.onerror = ()=>{ status.textContent='Image load error'; toastr.error('Failed to load image'); };
-        img.src = URL.createObjectURL(file);
-    };
+
+        const temp = document.createElement('canvas');
+        const tctx = temp.getContext('2d');
+        temp.width = crop.w; temp.height = crop.h;
+        tctx.drawImage(imgObj, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
+
+        const imgData = tctx.getImageData(0, 0, temp.width, temp.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+            const bw = gray > 135 ? 255 : 0;
+            data[i] = data[i+1] = data[i+2] = bw;
+        }
+        tctx.putImageData(imgData, 0, 0);
+
+        const up = document.createElement('canvas');
+        const uc = up.getContext('2d');
+        const upscale = 2;
+        up.width = temp.width * upscale; up.height = temp.height * upscale;
+        uc.imageSmoothingEnabled = false;
+        uc.drawImage(temp, 0, 0, up.width, up.height);
+
+        Tesseract.recognize(up.toDataURL(), 'eng', {
+            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+            tessedit_pageseg_mode: '7'
+        })
+        .then(({data:{text}}) => {
+            const raw = text.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+            const patterns = [/\d{3}[A-Z]{3,4}/,/[A-Z]\d{3}[A-Z]{2,3}/,/[A-Z]{2}\d{3}[A-Z]{2}/,/[A-Z]{3}\d{3}/,/[A-Z]{4}\d{3}/];
+            let plate = patterns.reduce((p,pat)=>p||raw.match(pat)?.[0],null);
+
+            if (!plate && raw.length>=5) {
+                const corr = raw.replace(/N/g,'M').replace(/S/g,'5').replace(/O/g,'0')
+                                .replace(/B/g,'8').replace(/I/g,'1').replace(/G/g,'6')
+                                .replace(/Z/g,'2').replace(/T/g,'7');
+                plate = patterns.reduce((p,pat)=>p||corr.match(pat)?.[0],null);
+            }
+
+            els.plateNumber.value = plate || '';
+            els.ocrStatus.textContent = plate ? `Detected: ${plate}` : 'No plate found in selection';
+            els.plateNumber.dispatchEvent(new Event('input'));
+            els.plateNumber.dispatchEvent(new Event('blur'));
+            els.ocrScanBtn.disabled = false;
+        })
+        .catch(err => {
+            console.error(err);
+            els.ocrStatus.textContent = 'OCR failed';
+            toastr.error('OCR failed – try a clearer selection.');
+            els.ocrScanBtn.disabled = false;
+        });
+    });
 
     /* ------------------------------------------------------------------ */
     /*  FORM SUBMISSION                                                   */
@@ -1649,11 +1734,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const email = document.getElementById('email');
         let valid = true;
 
-        // reset
         Object.values(fields).forEach(f=>f.classList.remove('is-invalid','is-valid'));
         email.classList.remove('is-invalid','is-valid');
 
-        // required
         Object.entries(fields).forEach(([k,f])=>{
             if (!f.value.trim()) { f.classList.add('is-invalid'); valid=false; return; }
             if (k==='contact_number') {
@@ -1663,7 +1746,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // license (if checked)
         if (els.hasLicense.checked) {
             const lic = els.licenseNumber.value.replace(/[^A-Z0-9]/g,'');
             const ok = lic.length===12 && /^[A-Z]{3}[0-9]{2}[A-Z][0-9]{6}$/.test(lic);
@@ -1672,7 +1754,6 @@ document.addEventListener('DOMContentLoaded', function () {
             valid = valid && ok;
         }
 
-        // email (optional)
         if (email.value.trim()) {
             const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(email.value.trim());
             email.classList.toggle('is-invalid',!ok);
@@ -1680,7 +1761,6 @@ document.addEventListener('DOMContentLoaded', function () {
             valid = valid && ok;
         }
 
-        // impound picture
         if (els.isImpounded.checked && !els.impoundInput.files.length) {
             els.impoundInput.classList.add('is-invalid');
             valid = false;
