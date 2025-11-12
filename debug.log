@@ -15865,3 +15865,39 @@ get_user_by_plate.php accessed. Session: Array
 
 Fetching data for plate_number: 'CBN865'
 Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CBN865'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: '123ABC'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'AAA678'
+Query result: 
