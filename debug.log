@@ -16641,3 +16641,17 @@ Query result: Array
     [email] => spiralsmoke903@gmail.com
 )
 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CBN8658'
+Query result: 

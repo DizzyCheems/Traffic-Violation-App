@@ -992,7 +992,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                             <div class="mb-3">
                                 <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="contact_number" id="contact_number" required placeholder="09XX-XXX-XXXX">
-                                <div class="invalid-feedback">Please enter a valid contact number (e.g., 0917-123-4567).</div>
+                                <div class="invalid-feedback">Please enter a valid contact number.</div>
                                 <small class="form-text text-muted">Format: 09XX-XXX-XXXX</small>
                             </div>
 
@@ -1003,7 +1003,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                             </div>
                         </div>
 
-                        <!-- RIGHT COLUMN: Plate, Images, Reason, Violations -->
+                        <!-- RIGHT COLUMN -->
                         <div class="col-md-8">
                             <!-- Plate Number + Upload -->
                             <div class="row">
@@ -1048,11 +1048,11 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                 </div>
                             </div>
 
-                            <!-- Available Violation Types -->
+                            <!-- Available Violation Types with Pagination -->
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <h6>Available Violation Types</h6>
-                                    <div class="table-responsive" style="max-height: 200px;">
+                                    <div id="violationTypeContainer">
                                         <table class="table table-bordered table-sm">
                                             <thead class="table-light">
                                                 <tr>
@@ -1066,11 +1066,16 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                                 <tr><td colspan="4" class="text-center text-muted">Enter plate to load</td></tr>
                                             </tbody>
                                         </table>
+                                        <nav aria-label="Violation types">
+                                            <ul class="pagination pagination-sm justify-content-center" id="violationTypePagination">
+                                                <!-- Filled by JS -->
+                                            </ul>
+                                        </nav>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Violation History -->
+                            <!-- Violation History (Scrollable) -->
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <h6>Violation History</h6>
@@ -1187,12 +1192,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        positionClass: 'toast-top-right',
-        timeOut: 5000
-    };
+    toastr.options = { closeButton: true, progressBar: true, positionClass: 'toast-top-right', timeOut: 5000 };
 
     // DOM Elements
     const officerId = <?php echo json_encode($_SESSION['user_id']); ?>;
@@ -1201,6 +1201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasLicenseCheckbox = document.getElementById('has_license');
     const violationHistoryBody = document.getElementById('violationHistoryBody');
     const violationTypeBody = document.getElementById('violationTypeBody');
+    const violationTypePagination = document.getElementById('violationTypePagination');
     const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
     const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
     const selectedViolationText = document.getElementById('selectedViolationText');
@@ -1213,7 +1214,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastValidKey = '';
     let isLoading = false;
 
-    // === IMAGE PREVIEW + REMOVE FUNCTION ===
+    // Pagination state
+    let currentPage = 1;
+    const itemsPerPage = 8;
+    let availableTypes = [];
+
+    // === IMAGE PREVIEW + REMOVE ===
     function createPreview(file, container, fileInput, index = null) {
         const wrapper = document.createElement('div');
         wrapper.className = 'position-relative me-2 mb-2';
@@ -1244,28 +1250,24 @@ document.addEventListener('DOMContentLoaded', function() {
         container.appendChild(wrapper);
     }
 
-    // Plate Image Preview
-    document.getElementById('plate_image').addEventListener('change', function(e) {
+    document.getElementById('plate_image').addEventListener('change', e => {
         const preview = document.getElementById('plate_image_preview');
         preview.innerHTML = '';
         if (e.target.files[0]) createPreview(e.target.files[0], preview, e.target);
     });
 
-    // Violator Pictures Preview
-    document.getElementById('violator_pic').addEventListener('change', function(e) {
+    document.getElementById('violator_pic').addEventListener('change', e => {
         const preview = document.getElementById('violator_pic_preview');
         preview.innerHTML = '';
         Array.from(e.target.files).forEach((file, i) => createPreview(file, preview, e.target, i));
     });
 
-    // Impound Image Preview
-    document.getElementById('impound_pic').addEventListener('change', function(e) {
+    document.getElementById('impound_pic').addEventListener('change', e => {
         const preview = document.getElementById('impound_pic_preview');
         preview.innerHTML = '';
         if (e.target.files[0]) createPreview(e.target.files[0], preview, e.target);
     });
 
-    // Impound Toggle
     isImpoundedCheckbox.addEventListener('change', function() {
         impoundPicContainer.style.display = this.checked ? 'block' : 'none';
         if (!this.checked) {
@@ -1351,7 +1353,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.target.classList.toggle('is-invalid', !ok && v.length > 0);
     }
 
-    // === AUTO-FILL FROM PLATE / LICENSE ===
+    // === AUTO-FILL ===
     function autoFillUserFromPlate(plateNumber) {
         const formData = new FormData();
         formData.append('plate_number', plateNumber);
@@ -1486,10 +1488,100 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }, 600);
 
+    // === PAGINATION FOR VIOLATION TYPES ===
+    function renderViolationTypesPage(page = 1) {
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = availableTypes.slice(start, end);
+
+        violationTypeBody.innerHTML = '';
+        if (pageItems.length === 0) {
+            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
+            violationTypePagination.innerHTML = '';
+            return;
+        }
+
+        pageItems.forEach(type => {
+            const isSelected = currentlySelectedRow === type.id.toString();
+            const row = document.createElement('tr');
+            row.className = isSelected ? 'table-success' : '';
+            row.innerHTML = `
+                <td>
+                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
+                        ${isSelected ? 'Selected' : 'Select'}
+                    </button>
+                </td>
+                <td>${escapeHtml(type.violation_type)}</td>
+                <td>${escapeHtml(type.base_offense || 'N/A')}</td>
+                <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
+            `;
+            violationTypeBody.appendChild(row);
+        });
+
+        // Re-attach select buttons
+        document.querySelectorAll('.select-violation').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                if (currentlySelectedRow) {
+                    const prevRow = violationTypeBody.querySelector('tr.table-success');
+                    if (prevRow) prevRow.classList.remove('table-success');
+                    const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
+                    if (prevBtn) {
+                        prevBtn.classList.replace('btn-success', 'btn-outline-primary');
+                        prevBtn.textContent = 'Select';
+                    }
+                }
+                currentlySelectedRow = id;
+                selectedViolationTypeId.value = id;
+                this.closest('tr').classList.add('table-success');
+                this.classList.replace('btn-outline-primary', 'btn-success');
+                this.textContent = 'Selected';
+
+                const t = originalTypes.find(x => x.id.toString() === id);
+                selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
+                selectedViolationDisplay.classList.remove('d-none');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
+                toastr.success(`Selected: ${t.violation_type}`);
+            });
+        });
+
+        // Render Pagination
+        const totalPages = Math.ceil(availableTypes.length / itemsPerPage);
+        violationTypePagination.innerHTML = '';
+
+        const createPageItem = (text, pageNum, disabled = false, active = false) => {
+            const li = document.createElement('li');
+            li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = text;
+            if (!disabled) {
+                a.addEventListener('click', e => {
+                    e.preventDefault();
+                    currentPage = pageNum;
+                    renderViolationTypesPage(currentPage);
+                });
+            }
+            li.appendChild(a);
+            return li;
+        };
+
+        // Previous
+        violationTypePagination.appendChild(createPageItem('Previous', currentPage - 1, currentPage === 1));
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            violationTypePagination.appendChild(createPageItem(i, i, false, i === currentPage));
+        }
+
+        // Next
+        violationTypePagination.appendChild(createPageItem('Next', currentPage + 1, currentPage === totalPages));
+    }
+
     // === POPULATE VIOLATION TYPES ===
     function populateAvailableTypes(data) {
-        violationTypeBody.innerHTML = '';
-
         const usedIds = new Set((data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean));
         const highestLevelByBase = {};
 
@@ -1526,59 +1618,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        const sorted = Array.from(typesToShow).sort((a, b) => a.violation_type.localeCompare(b.violation_type));
-
-        if (sorted.length === 0) {
-            violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
-            return;
-        }
-
-        sorted.forEach(type => {
-            const isSelected = currentlySelectedRow === type.id.toString();
-            const row = document.createElement('tr');
-            row.className = isSelected ? 'table-success' : '';
-            row.innerHTML = `
-                <td>
-                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} select-violation" data-id="${type.id}">
-                        ${isSelected ? 'Selected' : 'Select'}
-                    </button>
-                </td>
-                <td>${escapeHtml(type.violation_type)}</td>
-                <td>${escapeHtml(type.base_offense || 'N/A')}</td>
-                <td>₱${parseFloat(type.fine_amount || 0).toFixed(2)}</td>
-            `;
-            violationTypeBody.appendChild(row);
-        });
-
-        document.querySelectorAll('.select-violation').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const id = this.dataset.id;
-                if (currentlySelectedRow) {
-                    const prevRow = violationTypeBody.querySelector('tr.table-success');
-                    if (prevRow) prevRow.classList.remove('table-success');
-                    const prevBtn = violationTypeBody.querySelector(`button[data-id="${currentlySelectedRow}"]`);
-                    if (prevBtn) {
-                        prevBtn.classList.replace('btn-success', 'btn-outline-primary');
-                        prevBtn.textContent = 'Select';
-                    }
-                }
-                currentlySelectedRow = id;
-                selectedViolationTypeId.value = id;
-                this.closest('tr').classList.add('table-success');
-                this.classList.replace('btn-outline-primary', 'btn-success');
-                this.textContent = 'Selected';
-
-                const t = originalTypes.find(x => x.id.toString() === id);
-                selectedViolationText.textContent = `${t.violation_type} (${t.base_offense || 'N/A'}) - ₱${parseFloat(t.fine_amount).toFixed(2)}`;
-                selectedViolationDisplay.classList.remove('d-none');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Create Violation';
-                toastr.success(`Selected: ${t.violation_type}`);
-            });
-        });
+        availableTypes = Array.from(typesToShow).sort((a, b) => a.violation_type.localeCompare(b.violation_type));
+        currentPage = 1;
+        renderViolationTypesPage(currentPage);
     }
 
-    // === FORM SUBMIT ===
+    // === FORM SUBMIT (unchanged) ===
     document.getElementById('createViolationForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const hidden = document.getElementById('selected_violation_type_id');
@@ -1704,7 +1749,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // === INIT ===
     initializeInputFormatters();
     toggleLicenseRequired();
-    // clearHistoryAndResetTables(); // Optional: uncomment if you want blank on open
 });
 </script>
 
