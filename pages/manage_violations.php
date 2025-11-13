@@ -966,6 +966,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                         </div>
                     </div>
                 </div>
+                
 <!-- Create Violation Modal -->
 <div class="modal fade" id="createViolationModal" tabindex="-1" aria-labelledby="createViolationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -1033,7 +1034,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="reason" id="reason" required>
+                                    <input type="text" class="form-control" name="reason" id="reason">
                                     <div class="invalid-feedback">Please enter reason.</div>
                                 </div>
                             </div>
@@ -1048,29 +1049,24 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                 </div>
                             </div>
 
-                            <!-- Available Violation Types with Pagination -->
+                            <!-- Available Violation Types (12 rows visible, then scroll) -->
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <h6>Available Violation Types</h6>
-                                    <div id="violationTypeContainer">
-                                        <table class="table table-bordered table-sm">
-                                            <thead class="table-light">
+                                    <div class="violation-table-container">
+                                        <table class="table table-bordered table-sm table-hover mb-0">
+                                            <thead class="table-light sticky-top">
                                                 <tr>
-                                                    <th>Select</th>
+                                                    <th style="width: 80px;">Select</th>
                                                     <th>Violation Type</th>
                                                     <th>Base Offense</th>
-                                                    <th>Fine</th>
+                                                    <th style="width: 100px;">Fine</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="violationTypeBody">
                                                 <tr><td colspan="4" class="text-center text-muted">Enter plate to load</td></tr>
                                             </tbody>
                                         </table>
-                                        <nav aria-label="Violation types">
-                                            <ul class="pagination pagination-sm justify-content-center" id="violationTypePagination">
-                                                <!-- Filled by JS -->
-                                            </ul>
-                                        </nav>
                                     </div>
                                 </div>
                             </div>
@@ -1080,7 +1076,7 @@ if ($violatorPic && trim($violatorPic) !== '') {
                                 <div class="col-md-12 mb-3">
                                     <h6>Violation History</h6>
                                     <div class="table-responsive" style="max-height: 200px;">
-                                        <table class="table table-bordered table-sm">
+                                        <table class="table table-bordered table-sm mb-0">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Plate</th>
@@ -1201,7 +1197,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasLicenseCheckbox = document.getElementById('has_license');
     const violationHistoryBody = document.getElementById('violationHistoryBody');
     const violationTypeBody = document.getElementById('violationTypeBody');
-    const violationTypePagination = document.getElementById('violationTypePagination');
     const selectedViolationTypeId = document.getElementById('selected_violation_type_id');
     const selectedViolationDisplay = document.getElementById('selectedViolationDisplay');
     const selectedViolationText = document.getElementById('selectedViolationText');
@@ -1213,11 +1208,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentlySelectedRow = null;
     let lastValidKey = '';
     let isLoading = false;
-
-    // Pagination state
-    let currentPage = 1;
-    const itemsPerPage = 8;
-    let availableTypes = [];
 
     // === IMAGE PREVIEW + REMOVE ===
     function createPreview(file, container, fileInput, index = null) {
@@ -1488,20 +1478,54 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }, 600);
 
-    // === PAGINATION FOR VIOLATION TYPES ===
-    function renderViolationTypesPage(page = 1) {
-        const start = (page - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const pageItems = availableTypes.slice(start, end);
-
+    // === POPULATE VIOLATION TYPES (No Pagination, Just Scroll) ===
+    function populateAvailableTypes(data) {
         violationTypeBody.innerHTML = '';
-        if (pageItems.length === 0) {
+
+        const usedIds = new Set((data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean));
+        const highestLevelByBase = {};
+
+        (data.violations || []).forEach(v => {
+            const type = originalTypes.find(t => t.id == v.violation_type_id);
+            if (!type) return;
+            const match = type.violation_type.match(/(1st|2nd|3rd)/i);
+            if (!match) return;
+            const level = { '1st': 1, '2nd': 2, '3rd': 3 }[match[0].toLowerCase()];
+            const base = type.base_offense || 'unknown';
+            if (!highestLevelByBase[base] || level > highestLevelByBase[base]) {
+                highestLevelByBase[base] = level;
+            }
+        });
+
+        const typesToShow = new Set();
+        originalTypes.forEach(type => {
+            const name = type.violation_type || '';
+            const base = type.base_offense || 'unknown';
+            const idStr = type.id.toString();
+            const match = name.match(/(1st|2nd|3rd)/i);
+            const level = match ? { '1st': 1, '2nd': 2, '3rd': 3 }[match[0].toLowerCase()] : null;
+            const highest = highestLevelByBase[base] || 0;
+            const isIssued = usedIds.has(idStr);
+
+            if (!match || level === null) {
+                typesToShow.add(type);
+            } else if (isIssued && level === 3) {
+                typesToShow.add(type);
+            } else if (!isIssued) {
+                if ((highest === 0 && level === 1) || (highest === 1 && level === 2) || (highest >= 2 && level === 3)) {
+                    typesToShow.add(type);
+                }
+            }
+        });
+
+        const sorted = Array.from(typesToShow).sort((a, b) => a.violation_type.localeCompare(b.violation_type));
+
+        if (sorted.length === 0) {
             violationTypeBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No available violation types</td></tr>';
-            violationTypePagination.innerHTML = '';
             return;
         }
 
-        pageItems.forEach(type => {
+        sorted.forEach(type => {
             const isSelected = currentlySelectedRow === type.id.toString();
             const row = document.createElement('tr');
             row.className = isSelected ? 'table-success' : '';
@@ -1545,82 +1569,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 toastr.success(`Selected: ${t.violation_type}`);
             });
         });
-
-        // Render Pagination
-        const totalPages = Math.ceil(availableTypes.length / itemsPerPage);
-        violationTypePagination.innerHTML = '';
-
-        const createPageItem = (text, pageNum, disabled = false, active = false) => {
-            const li = document.createElement('li');
-            li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
-            const a = document.createElement('a');
-            a.className = 'page-link';
-            a.href = '#';
-            a.textContent = text;
-            if (!disabled) {
-                a.addEventListener('click', e => {
-                    e.preventDefault();
-                    currentPage = pageNum;
-                    renderViolationTypesPage(currentPage);
-                });
-            }
-            li.appendChild(a);
-            return li;
-        };
-
-        // Previous
-        violationTypePagination.appendChild(createPageItem('Previous', currentPage - 1, currentPage === 1));
-
-        // Page numbers
-        for (let i = 1; i <= totalPages; i++) {
-            violationTypePagination.appendChild(createPageItem(i, i, false, i === currentPage));
-        }
-
-        // Next
-        violationTypePagination.appendChild(createPageItem('Next', currentPage + 1, currentPage === totalPages));
-    }
-
-    // === POPULATE VIOLATION TYPES ===
-    function populateAvailableTypes(data) {
-        const usedIds = new Set((data.violations || []).map(v => v.violation_type_id?.toString()).filter(Boolean));
-        const highestLevelByBase = {};
-
-        (data.violations || []).forEach(v => {
-            const type = originalTypes.find(t => t.id == v.violation_type_id);
-            if (!type) return;
-            const match = type.violation_type.match(/(1st|2nd|3rd)/i);
-            if (!match) return;
-            const level = { '1st': 1, '2nd': 2, '3rd': 3 }[match[0].toLowerCase()];
-            const base = type.base_offense || 'unknown';
-            if (!highestLevelByBase[base] || level > highestLevelByBase[base]) {
-                highestLevelByBase[base] = level;
-            }
-        });
-
-        const typesToShow = new Set();
-        originalTypes.forEach(type => {
-            const name = type.violation_type || '';
-            const base = type.base_offense || 'unknown';
-            const idStr = type.id.toString();
-            const match = name.match(/(1st|2nd|3rd)/i);
-            const level = match ? { '1st': 1, '2nd': 2, '3rd': 3 }[match[0].toLowerCase()] : null;
-            const highest = highestLevelByBase[base] || 0;
-            const isIssued = usedIds.has(idStr);
-
-            if (!match || level === null) {
-                typesToShow.add(type);
-            } else if (isIssued && level === 3) {
-                typesToShow.add(type);
-            } else if (!isIssued) {
-                if ((highest === 0 && level === 1) || (highest === 1 && level === 2) || (highest >= 2 && level === 3)) {
-                    typesToShow.add(type);
-                }
-            }
-        });
-
-        availableTypes = Array.from(typesToShow).sort((a, b) => a.violation_type.localeCompare(b.violation_type));
-        currentPage = 1;
-        renderViolationTypesPage(currentPage);
     }
 
     // === FORM SUBMIT (unchanged) ===

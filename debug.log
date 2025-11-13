@@ -16655,3 +16655,100 @@ get_user_by_plate.php accessed. Session: Array
 
 Fetching data for plate_number: 'CBN8658'
 Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CBN8658'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CBN8658'
+Query result: 
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'CBN8658'
+Query result: 
+get_user_by_plate.php accessed. Session: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Fetching data for plate_number: 'M588KD'
+Query result: Array
+(
+    [user_id] => 164
+    [violator_name] => Josh
+    [has_license] => 1
+    [license_number] => GXX12C345633
+    [contact_number] => 0914-141-2554
+    [email] => spiralsmoke903@gmail.com
+)
+
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
+Create Violation Input: violator_name='Josh', user_id='164', contact_number='0914-141-2554', email='spiralsmoke903@gmail.com', plate_number='M588KD', reason='NO WAY', violation_type_id='119', plate_image='../Uploads/plate_69155225d3b97_194d357e-a591-4214-add3-50e5fb69.jpg', impound_pic=''
+Offense Frequency for user_id='164': 2
+Executing INSERT query with params: Array
+(
+    [0] => 5
+    [1] => 164
+    [2] => Josh
+    [3] => spiralsmoke903@gmail.com
+    [4] => M588KD
+    [5] => NO WAY
+    [6] => 119
+    [7] => 1
+    [8] => GXX12C345633
+    [9] => 0
+    [10] => 0
+    [11] => 
+    [12] => 2025-11-13T04:34
+    [13] => Pending
+    [14] => 
+    [15] => 2
+    [16] => ../Uploads/plate_69155225d3b97_194d357e-a591-4214-add3-50e5fb69.jpg
+    [17] => 
+    [18] => ../Uploads/violator_69155225d3f3c_1761096245_68f83235a60a4.png,../Uploads/violator_69155225d4bef_565095031_122108837457009289_3613363149631942162_n.jpg
+)
+
+Create Violation Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'officer_id' in 'field list'
+Session Data at start: Array
+(
+    [user_id] => 5
+    [role] => officer
+)
+
