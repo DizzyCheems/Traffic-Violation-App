@@ -1,16 +1,14 @@
 <?php
 session_start();
 
-// Check if user is logged in
 if (isset($_SESSION['user_id'])) {
-    if ($_SESSION['role'] === 'admin') {
-        header("Location: /pages/admin_dashboard.php");
-    } else {
-        header("Location: /pages/user_dashboard.php");
-    }
+    $dashboard = ($_SESSION['role'] === 'admin') 
+        ? '/pages/admin_dashboard.php' 
+        : '/pages/user_dashboard.php';
+    header("Location: $dashboard");
     exit;
 } else {
-    // Always redirect to /pages/login using absolute path
+    // This will ALWAYS go to http://your-ip/pages/login
     header("Location: /pages/login");
     exit;
 }
