@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$dbname = 'traffic';
+$dbname = 'tr';
 $username = 'root';
-$password = '';
+$password = '@4CornersPH1';
 
 
 try {
