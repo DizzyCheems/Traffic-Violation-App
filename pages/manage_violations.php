@@ -1144,10 +1144,18 @@ if ($violatorPic && trim($violatorPic) !== '') {
 
                             <!-- Date & Status -->
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="issued_date" class="form-label">Issued Date</label>
-                                    <input type="datetime-local" class="form-control" name="issued_date" id="issued_date" value="<?php echo date('Y-m-d\TH:i'); ?>" readonly>
-                                </div>
+
+<div class="col-md-6 mb-3">
+    <label for="issued_date_<?php echo $violation['id']; ?>" class="form-label">Issued Date</label>
+    <input type="datetime-local" 
+           class="form-control" 
+           name="issued_date" 
+           id="issued_date_<?php echo $violation['id']; ?>" 
+           value="<?php echo (new DateTime($violation['issued_date'], new DateTimeZone('UTC')))->format('Y-m-d\TH:i'); ?>" 
+           readonly>
+</div>
+
+
                                 <div class="col-md-6 mb-3">
                                     <label for="status" class="form-label">Status</label>
                                     <select class="form-select" name="status" id="status">

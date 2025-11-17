@@ -47,152 +47,7 @@ if ($plate_number) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <style>
-        .nav-link {
-            transition: all 0.3s ease;
-            border-radius: 5px;
-            padding: 10px 15px;
-            margin: 5px 0;
-        }
-        .nav-link:hover {
-            background-color: #000000;
-            color: #ffffff !important;
-            font-weight: bold;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .nav-link.active {
-            background-color: #007bff;
-            color: #ffffff !important;
-            font-weight: bold;
-        }
-        a[data-bs-toggle="modal"] {
-            transition: all 0.3s ease;
-            border-radius: 5px;
-            padding: 8px 12px;
-            display: inline-block;
-        }
-        a[data-bs-toggle="modal"]:hover {
-            background-color: #000000;
-            color: #ffffff !important;
-            font-weight: bold;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        body {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-        }
-        .card {
-            border: none;
-            border-radius: 8px;
-            background: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
-        }
-        .card-header {
-            background: #4dabf7;
-            color: white;
-            border: none;
-            border-radius: 8px 8px 0 0;
-            padding: 1.25rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .card-body {
-            padding: 1.25rem;
-        }
-        .card-body p {
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-            color: #495057;
-        }
-        .card-body strong {
-            color: #212529;
-            font-weight: 600;
-        }
-        .badge {
-            padding: 0.4em 0.8em;
-            border-radius: 12px;
-            font-weight: 500;
-            font-size: 0.8rem;
-        }
-        .search-card {
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-        }
-        .form-control {
-            border-radius: 5px;
-            border: 1px solid #dee2e6;
-            padding: 0.75rem;
-            transition: all 0.3s ease;
-        }
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            border-radius: 5px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #000000;
-            border-color: #000000;
-            color: #ffffff !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-            border-radius: 5px;
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .alert {
-            border-radius: 5px;
-            border: none;
-        }
-        .display-4 {
-            font-weight: 700;
-        }
-        .lead {
-            font-weight: 400;
-        }
-        @media (max-width: 768px) {
-            .card-header {
-                font-size: 1rem;
-                padding: 1rem;
-            }
-            .card-body {
-                padding: 1rem;
-            }
-            .card-body p {
-                font-size: 0.85rem;
-            }
-        }
-    </style>
+   
 </head>
 <body>
     <div class="container py-4 py-md-5">
@@ -376,3 +231,151 @@ if ($plate_number) {
     </script>
 </body>
 </html>
+
+
+ <style>
+        .nav-link {
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 5px 0;
+        }
+        .nav-link:hover {
+            background-color: #000000;
+            color: #ffffff !important;
+            font-weight: bold;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .nav-link.active {
+            background-color: #007bff;
+            color: #ffffff !important;
+            font-weight: bold;
+        }
+        a[data-bs-toggle="modal"] {
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            padding: 8px 12px;
+            display: inline-block;
+        }
+        a[data-bs-toggle="modal"]:hover {
+            background-color: #000000;
+            color: #ffffff !important;
+            font-weight: bold;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            border: none;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        }
+        .card-header {
+            background: #4dabf7;
+            color: white;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            padding: 1.25rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .card-body {
+            padding: 1.25rem;
+        }
+        .card-body p {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        .card-body strong {
+            color: #212529;
+            font-weight: 600;
+        }
+        .badge {
+            padding: 0.4em 0.8em;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .search-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #000000;
+            border-color: #000000;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .alert {
+            border-radius: 5px;
+            border: none;
+        }
+        .display-4 {
+            font-weight: 700;
+        }
+        .lead {
+            font-weight: 400;
+        }
+        @media (max-width: 768px) {
+            .card-header {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+            .card-body {
+                padding: 1rem;
+            }
+            .card-body p {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
